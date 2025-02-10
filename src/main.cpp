@@ -16,6 +16,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     manageChildrenProcess(&child->Children, delta);
     child->Process(delta);
     if(!child->valid) {
+      delete child;
       (*children)[i] = children->back();
       children->pop_back();
       continue;

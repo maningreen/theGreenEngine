@@ -12,7 +12,9 @@ const int Player::upKey = KEY_W;
 const int Player::downKey = KEY_S;
 const int Player::leftKey = KEY_A;
 const int Player::rightKey = KEY_D;
+
 const int Player::shootKey = KEY_SPACE;
+const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
 const float Player::defaultSpeed = 1000;
 const float Player::defaultFriction = 58;
@@ -53,22 +55,24 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(inputDirection, Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
-  if(IsKeyPressed(shootKey)) {
-    Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
-    float mouseAngle = atan2f(-mousePos.y, mousePos.x);
-    addChild(new Bullet(Position, mouseAngle));
-  }
+  if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
+    SpawnBullet();
+}
+
+void Player::SpawnBullet() {
+  const float offsetAhead = 30;
+  Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
+  float mouseAngle = atan2f(-mousePos.y, mousePos.x);
+  addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(mouseAngle) * offsetAhead, -sinf(mouseAngle) * offsetAhead}), mouseAngle));
 }
 
 void Player::wrapPosition() {
   int width = GetScreenWidth();
   int height = GetScreenHeight();
-
   if(Position.x < 0)
     Position.x += width;
   else if(Position.x > width)
     Position.x -= width;
-
   if(Position.y < 0)
     Position.y += height;
   else if(Position.y > height)

@@ -13,6 +13,7 @@ class Player : public Entity2D {
     static const int leftKey;
     static const int rightKey;
     static const int shootKey;
+    static const int shootKeyMouse;
     static const float defaultSpeed;
     static const float defaultFriction;
 
@@ -25,4 +26,6 @@ class Player : public Entity2D {
     Vector2 getInput(int u, int d, int l, int r);
 
     void wrapPosition();
+
+    void SpawnBullet();
 };
