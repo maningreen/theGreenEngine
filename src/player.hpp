@@ -12,6 +12,7 @@ class Player : public Entity2D {
     static const int downKey;
     static const int leftKey;
     static const int rightKey;
+    static const int shootKey;
     static const float defaultSpeed;
     static const float defaultFriction;
 
