@@ -17,11 +17,15 @@ const int Player::rightKey = KEY_D;
 const int Player::shootKey = KEY_SPACE;
 const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
+const int Player::dashKey = KEY_E;
+float Player::dashTime = .4;
+float Player::dashSpeed = 2500;
+
 const float Player::defaultSpeed = 4000;
 const float Player::defaultFriction = 58;
 
 Vector2 Player::getInput() {
-  return Player::getInput(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey);
+  return !dashing ? Player::getInput(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey) : (Vector2){0, 0};
 }
 
 Vector2 Player::getInput(int u, int d, int l, int r) {
@@ -56,7 +60,20 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(inputDirection, Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
+  printf("%f\n", Vector2Length(Velocity));
   wrapPosition();
+  if(dashing) {
+    timeDashing += delta;
+    Velocity = dashDirection;
+    if(timeDashing > dashTime) {
+      dashing = false;
+      timeDashing = 0;
+    }
+  }
+  if(IsKeyPressed(dashKey) && !dashing) {
+    dashing = true;
+    dashDirection = Vector2LengthSqr(inputDirection) != 0 ? Vector2Scale(inputDirection, dashSpeed / (Speed * delta)) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
+  }
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
 }
@@ -68,7 +85,9 @@ void Player::SpawnBullet() {
   addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(mouseAngle) * offsetAhead, -sinf(mouseAngle) * offsetAhead}), mouseAngle));
 }
 
+//returns true if out of bounds
 void Player::wrapPosition() {
+  bool out = false;
   if(Position.x < -Border::Length)
     Position.x += Border::Length * 2;
   else if(Position.x > Border::Length)
@@ -83,4 +102,7 @@ Player::Player(const std::string& name, Vector2 position) : Entity2D(name, posit
   Velocity = (Vector2){0,0};
   Speed = defaultSpeed;
   Friction = defaultFriction;
+  dashing = false;
+  timeDashing = 0;
+  dashDirection = Vector2Zero();
 }

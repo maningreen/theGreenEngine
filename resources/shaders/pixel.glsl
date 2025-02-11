@@ -13,7 +13,7 @@ uniform vec2 screenDems;
 // Output fragment color
 out vec4 finalColor;
 
-uniform float pixelLength = 7.0;
+uniform float pixelLength = 5.0;
 
 void main()
 {

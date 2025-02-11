@@ -2,6 +2,11 @@
 #include <raylib.h>
 
 class Player : public Entity2D {
+  private:
+    bool dashing;
+    float timeDashing;
+    Vector2 dashDirection;
+
   public:
     Vector2 Velocity;
 
@@ -14,8 +19,12 @@ class Player : public Entity2D {
     static const int rightKey;
     static const int shootKey;
     static const int shootKeyMouse;
+    static const int dashKey;
     static const float defaultSpeed;
     static const float defaultFriction;
+
+    static float dashSpeed;
+    static float dashTime;
 
     virtual void Process(float delta);
     virtual void Render();
