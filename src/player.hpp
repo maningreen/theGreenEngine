@@ -13,6 +13,8 @@ class Player : public Entity2D {
     float Speed;
     float Friction;
 
+    float Rotation;
+
     static const int upKey;
     static const int downKey;
     static const int leftKey;

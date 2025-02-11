@@ -7,30 +7,33 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
+#include <iostream>
 
 #define baseScreenScalar 1000
 #define initialScreenDimensions (Vector2){baseScreenScalar * 16/9, baseScreenScalar / (16 / 9)}
 
 void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   int i = 0;
-  for(Entity* child : *children) {
-    manageChildrenProcess(&child->Children, delta);
-    child->Process(delta);
-    if(!child->valid) {
-      delete child;
-      (*children)[i] = children->back();
-      children->pop_back();
+  for(std::vector<Entity*>::iterator it = children->begin(); it != children->end(); it++) {
+    (*children)[i]->Process(delta);
+    manageChildrenProcess(&(*children)[i]->Children, delta);
+    if(!(*children)[i]->valid) {
+      children->erase(it);
+      it--;
       continue;
     }
     i++;
   }
 }
 
-void manageChildrenRendering(std::vector<Entity*>* children) {
+int manageChildrenRendering(std::vector<Entity*>* children) {
+  int c = 0;
   for(Entity* child : *children) {
-    manageChildrenRendering(&child->Children);
+    c += manageChildrenRendering(&child->Children);
     child->Render();
+    c++;
   }
+  return c;
 }
 
 void Init(std::vector<Entity*>* entities) {
@@ -73,7 +76,7 @@ int main() {
 
     PreRendering(&entities);
 
-    manageChildrenRendering(&entities);
+    printf("%d\n", manageChildrenRendering(&entities));
 
     PostRendering(&entities);
 

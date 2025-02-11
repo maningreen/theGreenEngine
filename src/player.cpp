@@ -3,6 +3,7 @@
 #include "core.h"
 #include "border.hpp"
 #include "bullet.hpp"
+#include "afterimage.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <raylib.h>
@@ -35,20 +36,18 @@ Vector2 Player::getInput(int u, int d, int l, int r) {
 
 void Player::Render() {
   //get the mouse position (in cartesian)
-  Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
-  float mouseAngle = atan2f(-mousePos.y, mousePos.x);
   //draw our triangle
   const float distance = 50;
   DrawTriangle(
       Position,
-      Vector2Add(Position, (Vector2){cosf(mouseAngle + 4 * M_PI / 3) * distance, -sinf(mouseAngle + 4 * M_PI / 3) * distance}),
-      Vector2Add(Position, (Vector2){cosf(mouseAngle) * distance, -sinf(mouseAngle) * distance}),
+      Vector2Add(Position, (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance, -sinf(Rotation + 4 * M_PI / 3) * distance}),
+      Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
         YELLOW
       );
   DrawTriangle(
       Position,
-      Vector2Add(Position, (Vector2){cosf(mouseAngle) * distance, -sinf(mouseAngle) * distance}),
-      Vector2Add(Position, (Vector2){cosf(mouseAngle + 2 * M_PI / 3) * distance, -sinf(mouseAngle + 2 * M_PI / 3) * distance}),
+      Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
+      Vector2Add(Position, (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance, -sinf(Rotation + 2 * M_PI / 3) * distance}),
         YELLOW
       );
 
@@ -60,29 +59,30 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(inputDirection, Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
-  printf("%f\n", Vector2Length(Velocity));
   wrapPosition();
   if(dashing) {
     timeDashing += delta;
     Velocity = dashDirection;
+    if(fmodf(timeDashing, .1) < 1.0f / 60.0f)
+      addChild(new Afterimage(Position, Rotation));
     if(timeDashing > dashTime) {
       dashing = false;
       timeDashing = 0;
     }
   }
-  if(IsKeyPressed(dashKey) && !dashing) {
+  if(IsKeyPressed(dashKey)) {
     dashing = true;
     dashDirection = Vector2LengthSqr(inputDirection) != 0 ? Vector2Scale(inputDirection, dashSpeed / (Speed * delta)) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
   }
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
+  Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
+  Rotation = atan2f(-mousePos.y, mousePos.x);
 }
 
 void Player::SpawnBullet() {
   const float offsetAhead = 30;
-  Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
-  float mouseAngle = atan2f(-mousePos.y, mousePos.x);
-  addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(mouseAngle) * offsetAhead, -sinf(mouseAngle) * offsetAhead}), mouseAngle));
+  addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation));
 }
 
 //returns true if out of bounds
