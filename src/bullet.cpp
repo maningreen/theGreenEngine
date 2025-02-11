@@ -1,5 +1,6 @@
 #include "bullet.hpp"
 #include "entity.hpp"
+#include "border.hpp"
 #include <raylib.h>
 #include <raymath.h>
 
@@ -19,6 +20,14 @@ void Bullet::Process(float delta) {
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Lifetime += delta;
   valid = valid && Lifetime < MaxLifetime;
+  if(Position.x >= Border::Length)
+    Position.x -= Border::Length * 2;
+  else if(Position.x <= -Border::Length)
+    Position.x += Border::Length * 2;
+  if(Position.y >= Border::Length)
+    Position.y -= Border::Length * 2;
+  else if(Position.y <= -Border::Length)
+    Position.y += Border::Length * 2;
 }
 
 void Bullet::Render() {

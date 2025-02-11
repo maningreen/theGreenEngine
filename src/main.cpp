@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "core.h"
 #include "postprocessing.hpp"
+#include "border.hpp"
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
@@ -36,6 +37,7 @@ void Init(std::vector<Entity*>* entities) {
   Engine::addEntity(entities, new PostProcessingData());
   Engine::addEntity(entities, new Player("Player", (Vector2){0, 0}));
   (*entities)[0]->addChild(new CameraEntity("Camera", &((Player*)(*entities)[1])->Position));
+  Engine::addEntity(entities, new Border());
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

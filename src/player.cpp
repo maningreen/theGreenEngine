@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "entity.hpp"
 #include "core.h"
+#include "border.hpp"
 #include "bullet.hpp"
 #include <cmath>
 #include <cstdlib>
@@ -55,6 +56,7 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(inputDirection, Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
+  wrapPosition();
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
 }
@@ -67,16 +69,14 @@ void Player::SpawnBullet() {
 }
 
 void Player::wrapPosition() {
-  int width = GetScreenWidth();
-  int height = GetScreenHeight();
-  if(Position.x < 0)
-    Position.x += width;
-  else if(Position.x > width)
-    Position.x -= width;
-  if(Position.y < 0)
-    Position.y += height;
-  else if(Position.y > height)
-    Position.y -= height;
+  if(Position.x < -Border::Length)
+    Position.x += Border::Length * 2;
+  else if(Position.x > Border::Length)
+    Position.x -= Border::Length * 2;
+  if(Position.y < -Border::Length)
+    Position.y += Border::Length * 2;
+  else if(Position.y > Border::Length)
+    Position.y -= Border::Length * 2;
 }
 
 Player::Player(const std::string& name, Vector2 position) : Entity2D(name, position) {

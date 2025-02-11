@@ -17,11 +17,11 @@ uniform float pixelLength = 7.0;
 
 void main()
 {
-    vec2 scaledPos = fragTexCoord * screenDems;
+    vec2 pos = fragTexCoord * screenDems;
 
-    vec2 roundedPos = vec2(floor(scaledPos.x / pixelLength) * pixelLength, floor(scaledPos.y / pixelLength) * pixelLength);
+    pos = vec2(floor(pos.x / pixelLength) * pixelLength, floor(pos.y / pixelLength) * pixelLength);
 
-    vec2 normalizedPos = roundedPos / screenDems;
+    pos = pos / screenDems;
 
-    finalColor = texture(texture0, normalizedPos);
+    finalColor = texture(texture0, pos);
 }
