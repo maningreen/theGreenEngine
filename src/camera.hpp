@@ -22,6 +22,7 @@ class CameraEntity : public Entity {
     CameraEntity(std::string name, Vector2* target);
 
     static float Smoothing;
+    static float DefaultZoom;
 };
 
 #endif

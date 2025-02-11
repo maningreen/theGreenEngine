@@ -5,6 +5,7 @@
 #include <string>
 
 float CameraEntity::Smoothing = 10;
+float CameraEntity::DefaultZoom = .9;
 
 #define mouseLean .3
 
@@ -29,7 +30,7 @@ void CameraEntity::Render() {
 
 CameraEntity::CameraEntity(std::string name, Vector2* target) : Entity(name) {
   Follow = target;
-  Camera = {{0, 0}, {0, 0}, 0, 1};
+  Camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
   Jitterness = 0;
   ShakeVector = (Vector2){0, 0};
   Target = (Vector2){0, 0};

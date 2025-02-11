@@ -16,7 +16,7 @@ const int Player::rightKey = KEY_D;
 const int Player::shootKey = KEY_SPACE;
 const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
-const float Player::defaultSpeed = 1000;
+const float Player::defaultSpeed = 4000;
 const float Player::defaultFriction = 58;
 
 Vector2 Player::getInput() {
