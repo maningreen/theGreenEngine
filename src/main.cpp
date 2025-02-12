@@ -26,14 +26,11 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   }
 }
 
-int manageChildrenRendering(std::vector<Entity*>* children) {
-  int c = 0;
+void manageChildrenRendering(std::vector<Entity*>* children) {
   for(Entity* child : *children) {
-    c += manageChildrenRendering(&child->Children);
+    manageChildrenRendering(&child->Children);
     child->Render();
-    c++;
   }
-  return c;
 }
 
 void Init(std::vector<Entity*>* entities) {
@@ -76,7 +73,7 @@ int main() {
 
     PreRendering(&entities);
 
-    printf("%d\n", manageChildrenRendering(&entities));
+    manageChildrenRendering(&entities);
 
     PostRendering(&entities);
 

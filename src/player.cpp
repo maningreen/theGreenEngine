@@ -9,16 +9,17 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
+#include <iostream>
 
 const int Player::upKey = KEY_W;
 const int Player::downKey = KEY_S;
 const int Player::leftKey = KEY_A;
 const int Player::rightKey = KEY_D;
 
-const int Player::shootKey = KEY_SPACE;
+const int Player::shootKey = 0;
 const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
-const int Player::dashKey = KEY_E;
+const int Player::dashKey = KEY_SPACE;
 float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
 
@@ -31,7 +32,7 @@ Vector2 Player::getInput() {
 
 Vector2 Player::getInput(int u, int d, int l, int r) {
   Vector2 out = (Vector2){(float)IsKeyDown(r) - (float)IsKeyDown(l), (float)IsKeyDown(d) - (float)IsKeyDown(u)};
-  return out;
+  return Vector2Normalize(out);
 }
 
 void Player::Render() {
@@ -55,8 +56,8 @@ void Player::Render() {
 }
 
 void Player::Process(float delta) {
-  Vector2 inputDirection = Vector2Scale(getInput(), Speed * delta);
-  Velocity = Vector2Add(inputDirection, Velocity);
+  Vector2 inputDirection = getInput();
+  Velocity = Vector2Add(Vector2Scale(inputDirection, delta * Speed), Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
   wrapPosition();
@@ -72,7 +73,7 @@ void Player::Process(float delta) {
   }
   if(IsKeyPressed(dashKey)) {
     dashing = true;
-    dashDirection = Vector2LengthSqr(inputDirection) != 0 ? Vector2Scale(inputDirection, dashSpeed / (Speed * delta)) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
+    dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
   }
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
