@@ -1,11 +1,21 @@
+#ifndef player_h
+#define player_h
 #include "entity.hpp"
+#include "bars.hpp"
 #include <raylib.h>
 
 class Player : public Entity2D {
   private:
     bool dashing;
+    bool canDash;
     float timeDashing;
+    float timeSinceDash;
     Vector2 dashDirection;
+
+    Bar* dashBar;
+    Bar* dashCooldownBar;
+
+    void manageBars();
 
   public:
     Vector2 Velocity;
@@ -27,6 +37,9 @@ class Player : public Entity2D {
 
     static float dashSpeed;
     static float dashTime;
+    static float dashControl;
+
+    static float dashCooldown;
 
     virtual void Process(float delta);
     virtual void Render();
@@ -40,3 +53,5 @@ class Player : public Entity2D {
 
     void SpawnBullet();
 };
+
+#endif

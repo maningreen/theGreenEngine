@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "core.h"
 #include "postprocessing.hpp"
+#include "bars.hpp"
 #include "border.hpp"
 #include <raylib.h>
 #include <raymath.h>
@@ -18,7 +19,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     (*children)[i]->Process(delta);
     manageChildrenProcess(&(*children)[i]->Children, delta);
     if(!(*children)[i]->valid) {
-      children->erase(it);
+      Engine::popEntityFromChildren(children, i, it);
       it--;
       continue;
     }

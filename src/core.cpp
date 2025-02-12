@@ -30,3 +30,12 @@ bool Engine::entityHasTag(Entity* entity, std::string tag) {
       return true;
   return false;
 }
+
+void Engine::popEntityFromChildren(std::vector<Entity*>* children, int index, std::vector<Entity*>::iterator child) {
+  if((*children)[index]->Children.size() != 0) {
+    for(int i = 0; i < (*children)[index]->Children.size(); i++) {
+      Engine::popEntityFromChildren(&(*children)[i]->Children, i, children->begin());
+    }
+  }
+  children->erase(child);
+}
