@@ -1,7 +1,9 @@
 #ifndef player_h
 #define player_h
+
 #include "entity.hpp"
 #include "bars.hpp"
+#include "camera.hpp"
 #include <raylib.h>
 
 class Player : public Entity2D {
@@ -15,7 +17,11 @@ class Player : public Entity2D {
     Bar* dashBar;
     Bar* dashCooldownBar;
 
+    CameraEntity* cam;
+
     void manageBars();
+
+    void manageRotation();
 
   public:
     Vector2 Velocity;
@@ -44,10 +50,12 @@ class Player : public Entity2D {
     virtual void Process(float delta);
     virtual void Render();
 
-    Player(const std::string& name, Vector2 position);
+    Player(const std::string& name, Vector2 position, CameraEntity* cam);
 
     Vector2 getInput();
     Vector2 getInput(int u, int d, int l, int r);
+
+    void setCam(CameraEntity* cam);
 
     void wrapPosition();
 

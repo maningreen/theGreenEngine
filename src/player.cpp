@@ -1,4 +1,5 @@
 #include "player.hpp"
+#include "camera.hpp"
 #include "entity.hpp"
 #include "core.h"
 #include "border.hpp"
@@ -96,8 +97,7 @@ void Player::Process(float delta) {
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
   manageBars();
-  Vector2 mousePos = Vector2Subtract(GetMousePosition(), (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f});
-  Rotation = atan2f(-mousePos.y, mousePos.x);
+  manageRotation();
 }
 
 void Player::SpawnBullet() {
@@ -129,7 +129,14 @@ void Player::manageBars() {
   dashBar->TargetProgress = timeDashing / dashTime;
 }
 
-Player::Player(const std::string& name, Vector2 position) : Entity2D(name, position) {
+void Player::manageRotation() {
+  Vector2 mousePos = Vector2Scale(Vector2Subtract(GetMousePosition(), cam->Camera.offset), 1.0f / cam->Camera.zoom);
+  //then we also have to globalize the mouse position good thing we have a cam field
+  mousePos = Vector2Add(mousePos, cam->Camera.target);
+  Rotation = atan2f(-(mousePos.y - Position.y), mousePos.x - Position.x); // then it's as simple as b - a
+}
+
+Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) : Entity2D(name, position), cam(camera) {
   Velocity = (Vector2){0,0};
   Speed = defaultSpeed;
   Friction = defaultFriction;
@@ -141,4 +148,8 @@ Player::Player(const std::string& name, Vector2 position) : Entity2D(name, posit
   timeSinceDash = 0;
   dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, false);
   addChild(dashBar);
+}
+
+void Player::setCam(CameraEntity* camra) {
+  cam = camra;
 }

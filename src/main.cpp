@@ -36,8 +36,9 @@ void manageChildrenRendering(std::vector<Entity*>* children) {
 
 void Init(std::vector<Entity*>* entities) {
   Engine::addEntity(entities, new PostProcessingData());
-  Engine::addEntity(entities, new Player("Player", (Vector2){0, 0}));
+  Engine::addEntity(entities, new Player("Player", (Vector2){0, 0}, nullptr));
   (*entities)[0]->addChild(new CameraEntity("Camera", &((Player*)(*entities)[1])->Position));
+  ((Player*)(*entities)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(entities, "Camera"));
   Engine::addEntity(entities, new Border());
 }
 
