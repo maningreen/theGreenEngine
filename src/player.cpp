@@ -6,6 +6,7 @@
 #include "bullet.hpp"
 #include "afterimage.hpp"
 #include "bars.hpp"
+#include  "particle.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <raylib.h>
@@ -27,7 +28,7 @@ const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 const int Player::dashKey = KEY_SPACE;
 float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
-float Player::dashControl = .5;
+float Player::dashControl = 2;
 
 const float Player::defaultSpeed = 4000;
 const float Player::defaultFriction = 58;
@@ -71,6 +72,8 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(Vector2Scale(inputDirection, delta * Speed), Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
+  if(dashing || Vector2LengthSqr(inputDirection))
+    addChild(new Particle(Position, Vector2Scale(Velocity, -1)));
   wrapPosition();
   timeSinceDash += delta;
   if(dashing) {
@@ -79,7 +82,7 @@ void Player::Process(float delta) {
     //that funny is changing the dashDirection.
     //based on the playerInput.
     if(Vector2LengthSqr(inputDirection) != 0)
-      dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed / dashControl))), dashSpeed);
+      dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
     if(fmodf(timeSinceDash, .1) < 1.0f / 60.0f)
       addChild(new Afterimage(Position, Rotation));
     if(timeSinceDash > dashTime)
@@ -101,7 +104,6 @@ void Player::SpawnBullet() {
   addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation));
 }
 
-//returns true if out of bounds
 void Player::wrapPosition() {
   bool out = false;
   if(Position.x < -Border::Length)
