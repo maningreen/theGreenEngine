@@ -7,6 +7,7 @@
 class Particle : public Entity2D {
   void wrapPosition();
   float lifetime;
+  float maxLifetime;
 
   public:
     float Rotation;
@@ -20,11 +21,12 @@ class Particle : public Entity2D {
 
     float GetLifetime();
 
-    //sets the rotation randomly and the rotational velocity between the given bounds:thumbsup:
-    Particle(Vector2 position, Vector2 velocity, float maxRotVel, float minRotVel);
     //sets the rotation randomly and the rotational velocity randomly :)
     Particle(Vector2 position, Vector2 velocity);
     ~Particle();
+
+    static float MinLifetime;
+    static float MaxLifetime;
 };
 
 #endif
