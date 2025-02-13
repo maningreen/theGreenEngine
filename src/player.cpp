@@ -35,6 +35,8 @@ const float Player::defaultFriction = 58;
 
 float Player::dashCooldown = .7;
 
+float Player::particleSpawnTime = 1.0f / 15.0f;
+
 const float distance = 50;
 
 #define barDimensions (Vector2){10, 100}
@@ -68,12 +70,14 @@ void Player::Render() {
 }
 
 void Player::Process(float delta) {
+  lifetime += delta;
   Vector2 inputDirection = getInput();
   Velocity = Vector2Add(Vector2Scale(inputDirection, delta * Speed), Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
   if(dashing || Vector2LengthSqr(inputDirection))
-    addChild(new Particle(Position, Vector2Scale(Velocity, -1)));
+    if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
+      addChild(new Particle(Position, Vector2Scale(Velocity, -1)));
   wrapPosition();
   timeSinceDash += delta;
   if(dashing) {
@@ -156,4 +160,8 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
 
 void Player::setCam(CameraEntity* camra) {
   cam = camra;
+}
+
+float Player::getLifetime() {
+  return lifetime;
 }

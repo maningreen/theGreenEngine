@@ -13,6 +13,8 @@ class Player : public Entity2D {
     float timeSinceDash;
     Vector2 dashDirection;
 
+    float lifetime;
+
     Bar* dashBar;
     Bar* dashCooldownBar;
 
@@ -48,6 +50,8 @@ class Player : public Entity2D {
 
     static float dashCooldown;
 
+    static float particleSpawnTime;
+
     virtual void Process(float delta);
     virtual void Render();
 
@@ -61,6 +65,8 @@ class Player : public Entity2D {
     void wrapPosition();
 
     void SpawnBullet();
+
+    float getLifetime();
 };
 
 #endif

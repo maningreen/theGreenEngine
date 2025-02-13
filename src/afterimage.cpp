@@ -3,7 +3,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
-float Afterimage::FadePower = 16;
+float Afterimage::FadePower = 5;
 
 Afterimage::Afterimage(Vector2 pos, float angle) : Entity2D("Afterimage", pos), Rotation(angle) {
   Opacity = 255;
