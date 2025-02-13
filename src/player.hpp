@@ -10,7 +10,6 @@ class Player : public Entity2D {
   private:
     bool dashing;
     bool canDash;
-    float timeDashing;
     float timeSinceDash;
     Vector2 dashDirection;
 
@@ -20,6 +19,8 @@ class Player : public Entity2D {
     CameraEntity* cam;
 
     void manageBars();
+
+    void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
 
     void manageRotation();
 

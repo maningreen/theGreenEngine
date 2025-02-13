@@ -10,7 +10,7 @@ void Bar::Render() {
     return;
   //STEP UNO calculate the portion that's gonna be drawn OH WAIT THATS OUR PROGRESS
   //step dos we split the Dimensions field up to be in portions (1 - t) and t
-  Vector2 dimensionsFull = (Vector2){Dimensions.x * (!ShrinkY ? Progress : 1), Dimensions.y * (!ShrinkY ? 1 : Progress)};
+  Vector2 dimensionsFull = (Vector2){Dimensions.x * (ShrinkY ? 1 : Progress), Dimensions.y * (ShrinkY ? Progress : 1)};
   Vector2 dimensionsNotFull = (Vector2){Dimensions.x - (!ShrinkY ? dimensionsFull.x : 0), Dimensions.y - (ShrinkY ? dimensionsFull.y : 0)};
   //then we calculate our not full offset
   Vector2 notFullOffset = (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
@@ -28,7 +28,6 @@ Bar::Bar(Vector2 pos, Vector2 dimens, Color colour, Color backCol, bool growVert
   TargetProgress = 1;
   Smooth = true;
   ShouldRender = true;
-  ShrinkY = false;
 }
 
 Bar::~Bar() {}

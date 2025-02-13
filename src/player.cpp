@@ -36,7 +36,7 @@ float Player::dashCooldown = .7;
 
 const float distance = 50;
 
-#define barDimensions (Vector2){100, 10}
+#define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {
   return Player::getInput(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey);
@@ -74,20 +74,16 @@ void Player::Process(float delta) {
   wrapPosition();
   timeSinceDash += delta;
   if(dashing) {
-    timeDashing += delta;
     Velocity = dashDirection;
     //i wanna do something funny.
     //that funny is changing the dashDirection.
     //based on the playerInput.
-    if(Vector2LengthSqr(inputDirection) != 0) {
+    if(Vector2LengthSqr(inputDirection) != 0)
       dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed / dashControl))), dashSpeed);
-    }
-    if(fmodf(timeDashing, .1) < 1.0f / 60.0f)
+    if(fmodf(timeSinceDash, .1) < 1.0f / 60.0f)
       addChild(new Afterimage(Position, Rotation));
-    if(timeDashing > dashTime) {
+    if(timeSinceDash > dashTime)
       dashing = false;
-      timeDashing = 0;
-    }
   }
   if(IsKeyPressed(dashKey) && !dashing && timeSinceDash >= dashCooldown) {
     dashing = true;
@@ -119,14 +115,21 @@ void Player::wrapPosition() {
 }
 
 void Player::manageBars() {
-  Vector2 offset = Vector2Add(Position, (Vector2){-barDimensions.x / 2.0f, distance + barDimensions.y});
-  dashCooldownBar->Position = offset;
-  dashCooldownBar->TargetProgress = min(timeSinceDash / dashCooldown, 1);
-  dashCooldownBar->ShouldRender = dashCooldownBar->TargetProgress != 1;
-  offset = Vector2Add(offset, (Vector2){0, barDimensions.y * 2});
-  dashBar->Position = offset;
-  dashBar->ShouldRender = dashing;
-  dashBar->TargetProgress = timeDashing / dashTime;
+  manageBar(dashCooldownBar, 1, timeSinceDash / dashCooldown, timeSinceDash <= dashCooldown);
+  manageBar(dashBar, 3, timeSinceDash / dashTime, timeSinceDash <= dashTime);
+}
+
+void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
+  //so basically, math :thumbsup:
+  //bool for verticle b->growVert
+  float offsetX = /*this one is either constant or index dependant depending on growVert*/ !b->ShrinkY ?
+    -b->Dimensions.x / 2.0f : distance + b->Dimensions.x * index;
+  float offsetY = /*just the opposite of ^*/ b->ShrinkY ?
+    -b->Dimensions.y / 2.0f : distance + b->Dimensions.y * index;
+  Vector2 finalPosition = {Position.x + offsetX, Position.y + offsetY};
+  b->Position = finalPosition;
+  b->ShouldRender = shouldRender;
+  b->Progress = p;
 }
 
 void Player::manageRotation() {
@@ -141,12 +144,11 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   Speed = defaultSpeed;
   Friction = defaultFriction;
   dashing = false;
-  timeDashing = 0;
   dashDirection = Vector2Zero();
-  dashCooldownBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, false);
+  dashCooldownBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashCooldownBar);
   timeSinceDash = 0;
-  dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, false);
+  dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashBar);
 }
 
