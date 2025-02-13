@@ -17,15 +17,15 @@
 #define max(a, b) (a < b ? b : a)
 #define min(a, b) (a < b ? a : b)
 
-const int Player::upKey = KEY_W;
-const int Player::downKey = KEY_S;
-const int Player::leftKey = KEY_A;
-const int Player::rightKey = KEY_D;
+int Player::upKey = KEY_W;
+int Player::downKey = KEY_S;
+int Player::leftKey = KEY_A;
+int Player::rightKey = KEY_D;
 
-const int Player::shootKey = 0;
-const int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
+int Player::shootKey = 0;
+int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
-const int Player::dashKey = KEY_SPACE;
+int Player::dashKey = KEY_SPACE;
 float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
 float Player::dashControl = 2;

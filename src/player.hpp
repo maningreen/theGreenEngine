@@ -32,13 +32,13 @@ class Player : public Entity2D {
 
     float Rotation;
 
-    static const int upKey;
-    static const int downKey;
-    static const int leftKey;
-    static const int rightKey;
-    static const int shootKey;
-    static const int shootKeyMouse;
-    static const int dashKey;
+    static int upKey;
+    static int downKey;
+    static int leftKey;
+    static int rightKey;
+    static int shootKey;
+    static int shootKeyMouse;
+    static int dashKey;
     static const float defaultSpeed;
     static const float defaultFriction;
 
