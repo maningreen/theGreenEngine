@@ -35,7 +35,7 @@ const float Player::defaultFriction = 58;
 
 float Player::dashCooldown = .7;
 
-float Player::particleSpawnTime = 1.0f / 15.0f;
+float Player::particleSpawnTime = 1.0f / 10.0f;
 
 const float distance = 50;
 
@@ -87,7 +87,7 @@ void Player::Process(float delta) {
     //based on the playerInput.
     if(Vector2LengthSqr(inputDirection) != 0)
       dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
-    if(fmodf(timeSinceDash, .1) < 1.0f / 60.0f)
+    if(fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
       addChild(new Afterimage(Position, Rotation));
     if(timeSinceDash > dashTime)
       dashing = false;

@@ -1,3 +1,4 @@
+#include "asteroid.hpp"
 #include "entity.hpp"
 #include "player.hpp"
 #include "camera.hpp"
@@ -40,6 +41,7 @@ void Init(std::vector<Entity*>* entities) {
   (*entities)[0]->addChild(new CameraEntity("Camera", &((Player*)(*entities)[1])->Position));
   ((Player*)(*entities)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(entities, "Camera"));
   Engine::addEntity(entities, new Border());
+  Engine::addEntity(entities, new Asteroid());
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

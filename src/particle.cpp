@@ -39,7 +39,7 @@ Particle::Particle(Vector2 pos, Vector2 vel) : Entity2D("Particle", pos), Veloci
   RotationalVelocity = 360.0f * (float)rand() / (float)RAND_MAX; //TODO random vel
   Length = (20 * (float)rand() / (float)RAND_MAX) - 10 + 20;
   lifetime = 0;
-  Colour = YELLOW;
+  Colour = (Color){YELLOW.r, YELLOW.g, YELLOW.b, 150};
   maxLifetime = ((MaxLifetime - MinLifetime) * (float)rand() / (float)RAND_MAX) + MinLifetime;
 }
 
