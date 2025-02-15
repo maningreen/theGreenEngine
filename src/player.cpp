@@ -77,7 +77,7 @@ void Player::Process(float delta) {
   Velocity = Vector2Scale(Velocity, delta * Friction);
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
-      addChild(new Particle(Position, Vector2Scale(Velocity, -1)));
+      addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
   wrapPosition();
   timeSinceDash += delta;
   if(dashing) {
@@ -105,7 +105,8 @@ void Player::Process(float delta) {
 
 void Player::SpawnBullet() {
   const float offsetAhead = 30;
-  addChild(new Bullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation));
+  Bullet* bul = new Bullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
+  addChild(bul);
 }
 
 void Player::wrapPosition() {
@@ -157,6 +158,8 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashBar);
 }
+
+void Player::Init() {};
 
 void Player::setCam(CameraEntity* camra) {
   cam = camra;

@@ -1,4 +1,3 @@
-#include "asteroid.hpp"
 #include "entity.hpp"
 #include "player.hpp"
 #include "camera.hpp"
@@ -6,6 +5,7 @@
 #include "postprocessing.hpp"
 #include "bars.hpp"
 #include "border.hpp"
+#include "enemy.hpp"
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
@@ -35,13 +35,13 @@ void manageChildrenRendering(std::vector<Entity*>* children) {
   }
 }
 
-void Init(std::vector<Entity*>* entities) {
-  Engine::addEntity(entities, new PostProcessingData());
-  Engine::addEntity(entities, new Player("Player", (Vector2){0, 0}, nullptr));
-  (*entities)[0]->addChild(new CameraEntity("Camera", &((Player*)(*entities)[1])->Position));
-  ((Player*)(*entities)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(entities, "Camera"));
-  Engine::addEntity(entities, new Border());
-  Engine::addEntity(entities, new Asteroid());
+void Init(Entity* root) {
+  root->addChild(new PostProcessingData());
+  root->addChild(new Player("Player", (Vector2){0, 0}, nullptr));
+  root->Children[0]->addChild(new CameraEntity("Camera", &((Player*)(root->Children)[1])->Position));
+  ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
+  root->addChild(new Border());
+  root->addChild(new Enemy((Player*)(root->Children)[1], (Vector2){0, 0}));
 }
 
 void PreRendering(std::vector<Entity*>* entities) {
@@ -60,26 +60,26 @@ void PostRendering(std::vector<Entity*>* entities) {
 }
 
 int main() {
-  std::vector<Entity*> entities;
+  Entity* Root = new Entity("Root", nullptr);
 
   SetTargetFPS(60);
 
-  InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game engine");
+  InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-  Init(&entities);
+  Init(Root);
 
   float delta = 1.0f / 60.0f;
   while(!WindowShouldClose()) {
 
-    manageChildrenProcess(&entities, delta);
+    manageChildrenProcess(&Root->Children, delta);
 
     BeginDrawing();
 
-    PreRendering(&entities);
+    PreRendering(&Root->Children);
 
-    manageChildrenRendering(&entities);
+    manageChildrenRendering(&Root->Children);
 
-    PostRendering(&entities);
+    PostRendering(&Root->Children);
 
     EndDrawing();
   }

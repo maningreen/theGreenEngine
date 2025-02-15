@@ -52,8 +52,9 @@ class Player : public Entity2D {
 
     static float particleSpawnTime;
 
-    virtual void Process(float delta);
-    virtual void Render();
+    void Process(float delta) override;
+    void Render() override;
+    void Init() override;
 
     Player(const std::string& name, Vector2 position, CameraEntity* cam);
 

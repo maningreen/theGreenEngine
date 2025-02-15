@@ -1,25 +1,68 @@
 #include "bullet.hpp"
+#include "enemy.hpp"
 #include "entity.hpp"
 #include "border.hpp"
+#include "core.h"
+#include <cmath>
+#include <cstdlib>
 #include <raylib.h>
 #include <raymath.h>
+#include <iostream>
+#include <vector>
+
+#define max(a, b) (b < a ? a : b)
 
 float Bullet::DefaultSpeed = 3040;
 float Bullet::MaxLifetime = 1;
 Vector2 Bullet::bulletDimensions = (Vector2){30, 15};
 Colour Bullet::DefaultColour = YELLOW;
 
+bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle) {
+  //...
+  //oh god here we go
+  //step one figure out the center
+  Vector2 diff = Vector2Subtract(center, rectPos);
+
+  Vector2 angleVec = (Vector2){cosf(angle), sinf(angle)};
+  //then we transform the circle to local space
+  Vector2 localPos = (Vector2){diff.x * angleVec.x - diff.y * angleVec.y, diff.x * angleVec.y + diff.y * angleVec.x};
+
+  Vector2 dems = Vector2Scale(dimensions, .5f);
+  
+  Vector2 finalPos = (Vector2){
+    fmaxf(-dems.x, fminf(localPos.x, dems.x)),
+      fmaxf(-dems.y, fminf(localPos.y, dems.y))
+  };
+  return Vector2Distance(finalPos, rectPos) <= radius;
+}
+
 Bullet::Bullet(Vector2 position, float angle) : Entity2D("Bullet", position), Angle(angle) {
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
   Lifetime = 0;
 }
 
+void Bullet::Init() {
+  for(Entity* en : Engine::getAllChildrenWithTag(getRoot(),"Enemy"))
+    enemies.push_back((Enemy*)en);
+}
+
 Bullet::~Bullet() {}
 
 void Bullet::Process(float delta) {
-  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
+  //check if colliding with enemy
+  for(int i = 0; i < 10; i++) {
+    for(Enemy* en : enemies)
+      if(CheckCollisionCircleRecEx(en->Position, en->Radius, Position, bulletDimensions, Angle * M_PI / 180.0f))
+        en->valid = false;
+    Position = Vector2Add(Position, Vector2Scale(Velocity, delta / 10));
+  }
+
   Lifetime += delta;
   valid = valid && Lifetime < MaxLifetime;
+  wrapPosition();
+}
+
+void Bullet::wrapPosition() {
   if(Position.x >= Border::Length)
     Position.x -= Border::Length * 2;
   else if(Position.x <= -Border::Length)

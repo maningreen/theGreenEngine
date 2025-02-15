@@ -44,7 +44,6 @@ Particle::Particle(Vector2 pos, Vector2 vel) : Entity2D("Particle", pos), Veloci
 }
 
 void Particle::wrapPosition() {
-  bool out = false;
   if(Position.x < -Border::Length)
     Position.x += Border::Length * 2;
   else if(Position.x > Border::Length)
