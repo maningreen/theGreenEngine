@@ -16,11 +16,15 @@
 
 void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   int i = 0;
-  for(std::vector<Entity*>::iterator it = children->begin(); it != children->end(); it++) {
+  for(std::vector<Entity*>::iterator it = children->begin(); it != children->end() && !children->empty(); it++) {
     (*children)[i]->Process(delta);
     manageChildrenProcess(&(*children)[i]->Children, delta);
     if(!(*children)[i]->valid) {
-      Engine::popEntityFromChildren(children, i, it);
+      std::cout << "Deinitializing children and entity\n";
+      Engine::deInitEntity((*children)[i]);
+      std::cout << "Erasing child\n";
+      children->erase(it);
+      std::cout << "Continuing\n";
       it--;
       continue;
     }

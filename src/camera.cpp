@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include "entity.hpp"
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -26,6 +27,10 @@ void CameraEntity::Process(float delta) {
 void CameraEntity::Render() {
   BeginMode2D(Camera);
   ClearBackground(BLACK);
+}
+
+CameraEntity::~CameraEntity() {
+  std::cout << "Camera deinitialized\n";
 }
 
 CameraEntity::CameraEntity(std::string name, Vector2* target) : Entity(name) {

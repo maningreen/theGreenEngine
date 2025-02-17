@@ -2,32 +2,44 @@
 #include "border.hpp"
 #include "entity.hpp"
 #include "core.h"
+#include "bullet.hpp"
+#include "bars.hpp"
 #include <raylib.h>
 #include <raymath.h>
+#include <vector>
 
 float Enemy::Radius = 30;
 float Enemy::Speed = 4000;
 Color Enemy::Colour = RED;
 
+float Enemy::MaxHealth = 10;
+
+#define barDimensions (Vector2){Enemy::Radius, 10}
+
 Enemy::Enemy(Player* pl, Vector2 pos) : Entity2D("Enemy", pos), plr(pl) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
+  addChild(new Bar(Vector2Zero(), barDimensions, RED, GRAY, false));
   addTag("Enemy");
+  Bullet::Enemies.push_back(this);
 }
 
-Enemy::~Enemy() {}
+Enemy::~Enemy() {
+  Bullet::Enemies.clear();
+}
 
 void Enemy::Init() {
   plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
 }
 
 void Enemy::Process(float delta) {
-  Vector2 vectorToPlayer = getShortestVectorToPlayer();
-  float dist = Vector2Length(vectorToPlayer);
-  Vector2 addedVel = Vector2Scale(vectorToPlayer, Speed <= dist ? Speed / dist : 1);
-  Velocity = Vector2Add(Velocity, Vector2Scale(addedVel, delta));
+  Velocity = getNextVelocity(delta);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   WrapPosition();
+}
+
+Vector2 Enemy::getNextVelocity(float delta) {
+  return Vector2Zero();
 }
 
 void Enemy::Render() {
@@ -35,7 +47,6 @@ void Enemy::Render() {
   //hear me out:
   //circle
   DrawCircleV(Position, Radius, Colour);
-  DrawLineEx(Position, Vector2Add(Position, getShortestVectorToPlayer()), 10, WHITE);
 }
 
 Vector2 Enemy::GetNextTargetPosition() {
@@ -64,4 +75,19 @@ Vector2 Enemy::getShortestVectorToPlayer() {
   else if(vectorToPlayer.y <= -Border::Length)
     vectorToPlayer.y += Border::Length * 2.0f;
   return vectorToPlayer;
+}
+
+float Enemy::getHealth() {
+  return health;
+}
+
+void Enemy::applyDamage(float damage) {
+  health -= damage;
+}
+
+bool Enemy::isAlive() {
+  return health > 0;
+}
+
+void Enemy::manageBar() {
 }

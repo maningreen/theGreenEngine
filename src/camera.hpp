@@ -20,6 +20,7 @@ class CameraEntity : public Entity {
     void Render();
 
     CameraEntity(std::string name, Vector2* target);
+    ~CameraEntity();
 
     static float Smoothing;
     static float DefaultZoom;

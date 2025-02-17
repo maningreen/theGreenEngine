@@ -2,6 +2,7 @@
 #include "core.h"
 #include <string>
 #include <vector>
+#include <iostream>
 
 int Engine::getEntityIndex(std::vector<Entity*> entities, Entity* entity) {
   int i = 0;
@@ -62,10 +63,10 @@ bool Engine::entityHasTag(Entity* entity, std::string tag) {
   return false;
 }
 
-void Engine::popEntityFromChildren(std::vector<Entity*>* children, int index, std::vector<Entity*>::iterator child) {
-  if((*children)[index]->Children.size() != 0) {
-    for(int i = 0; i < (*children)[index]->Children.size(); i++)
-      Engine::popEntityFromChildren(&(*children)[i]->Children, i, children->begin());
+void Engine::deInitEntity(Entity* en) {
+  while(!en->Children.empty()) {
+    delete en->Children.back();
+    en->Children.pop_back();
   }
-  children->erase(child);
+  delete en;
 }

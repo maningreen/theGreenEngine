@@ -9,8 +9,6 @@
 typedef Color Colour;
 
 class Bullet : public Entity2D {
-  std::vector<Enemy*> enemies;
-
   public:
     Vector2 Velocity;
     float Angle;
@@ -30,6 +28,9 @@ class Bullet : public Entity2D {
     static float MaxLifetime;
     static Vector2 bulletDimensions;
     static Colour DefaultColour;
+
+    static std::vector<Enemy*> Enemies;
+
 };
 
 #endif
