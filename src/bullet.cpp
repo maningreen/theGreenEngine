@@ -11,6 +11,7 @@
 #include <vector>
 
 #define max(a, b) (b < a ? a : b)
+#define stepCount 20
 
 float Bullet::DefaultSpeed = 3040;
 float Bullet::MaxLifetime = 1;
@@ -23,7 +24,7 @@ bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Ve
   //step one figure out the center
   Vector2 diff = Vector2Subtract(center, rectPos);
 
-  Vector2 angleVec = (Vector2){cosf(angle), sinf(angle)};
+  Vector2 angleVec = (Vector2){cosf(-angle), sinf(-angle)};
   //then we transform the circle to local space
   Vector2 localPos = (Vector2){diff.x * angleVec.x - diff.y * angleVec.y, diff.x * angleVec.y + diff.y * angleVec.x};
 
@@ -33,7 +34,7 @@ bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Ve
     fmaxf(-dems.x, fminf(localPos.x, dems.x)),
       fmaxf(-dems.y, fminf(localPos.y, dems.y))
   };
-  return Vector2Distance(finalPos, rectPos) <= radius;
+  return Vector2Distance(finalPos, localPos) <= radius;
 }
 
 Bullet::Bullet(Vector2 position, float angle) : Entity2D("Bullet", position), Angle(angle) {
@@ -50,16 +51,16 @@ Bullet::~Bullet() {}
 
 void Bullet::Process(float delta) {
   //check if colliding with enemy
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < stepCount; i++) {
     for(Enemy* en : enemies)
       if(CheckCollisionCircleRecEx(en->Position, en->Radius, Position, bulletDimensions, Angle * M_PI / 180.0f))
         en->valid = false;
-    Position = Vector2Add(Position, Vector2Scale(Velocity, delta / 10));
+    Position = Vector2Add(Position, Vector2Scale(Velocity, delta / stepCount));
+    wrapPosition();
   }
 
   Lifetime += delta;
   valid = valid && Lifetime < MaxLifetime;
-  wrapPosition();
 }
 
 void Bullet::wrapPosition() {

@@ -39,3 +39,20 @@ Entity* Entity::getRoot() {
     climb = climb->Parent;
   return climb;
 }
+
+bool Entity::removeTag(std::string tag) {
+  for(int i = 0; i < Tags.size(); i++)
+    if(Tags[i] == tag) {
+      Tags[i] = Tags.back();
+      Tags.pop_back();
+      return true;
+    }
+  return false;
+}
+
+bool Entity::hasTag(std::string tag) {
+  for(int i = 0; i < Tags.size(); i++)
+    if(Tags[i] == tag)
+      return true;
+  return false;
+}

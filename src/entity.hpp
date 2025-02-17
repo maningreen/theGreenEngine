@@ -6,6 +6,9 @@
 #include <vector>
 
 class Entity {
+  private:
+    Entity* Parent;
+
   public:
     std::string Name;
     std::vector<Entity*> Children;
@@ -19,8 +22,8 @@ class Entity {
     void addChild(Entity* child);
 
     void addTag(std::string tag);
-
-    Entity* Parent;
+    bool removeTag(std::string tag);
+    bool hasTag(std::string tag);
 
     Entity* getParent();
     Entity* getRoot();

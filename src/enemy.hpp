@@ -14,6 +14,9 @@ class Enemy : public Entity2D {
 
     void Process(float delta) override;
     void Render() override;
+    void Init() override;
+
+    Vector2 getShortestVectorToPlayer();
 
     Vector2 GetNextTargetPosition();
     void WrapPosition();
