@@ -3,10 +3,10 @@
 #include "entity.hpp"
 #include "core.h"
 #include "border.hpp"
-#include "bullet.hpp"
+#include "playerBullet.hpp"
 #include "afterimage.hpp"
 #include "bars.hpp"
-#include  "particle.hpp"
+#include "particle.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <raylib.h>
@@ -105,7 +105,7 @@ void Player::Process(float delta) {
 
 void Player::SpawnBullet() {
   const float offsetAhead = 30;
-  Bullet* bul = new Bullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
+  Bullet* bul = new PlayerBullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
   addChild(bul);
 }
 

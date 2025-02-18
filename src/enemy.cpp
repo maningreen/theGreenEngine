@@ -2,7 +2,7 @@
 #include "border.hpp"
 #include "entity.hpp"
 #include "core.h"
-#include "bullet.hpp"
+#include "playerBullet.hpp"
 #include "bars.hpp"
 #include <raylib.h>
 #include <raymath.h>
@@ -23,12 +23,14 @@ Enemy::Enemy(Player* pl, Vector2 pos) : Entity2D("Enemy", pos), plr(pl) {
   healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
   addChild(healthBar);
   addTag("Enemy");
-  Bullet::Enemies.push_back(this);
+  PlayerBullet::enemies.push_back(this);
   health = MaxHealth;
 }
 
 Enemy::~Enemy() {
-  Bullet::Enemies.clear();
+  for(int i = 0; i < PlayerBullet::enemies.size(); i++)
+    if(PlayerBullet::enemies[i] == this) //the most beautiful nesting you'll ever see
+      PlayerBullet::enemies.erase(PlayerBullet::enemies.begin() + i);
 }
 
 void Enemy::Init() {
@@ -103,4 +105,8 @@ void Enemy::manageBar() {
 void Enemy::manageHeath() {
   if(health <= 0)
     valid = false;
+}
+
+Player* Enemy::getPlayer() {
+  return plr;
 }

@@ -38,6 +38,8 @@ class Enemy : public Entity2D {
 
     bool isAlive();
 
+    Player* getPlayer();
+
     Enemy(Player* pl, Vector2 position);
     ~Enemy();
 

@@ -17,9 +17,9 @@ class Bullet : public Entity2D {
     void Process(float delta) override;
     void Render() override;
     void Init() override;
-
-
     void wrapPosition();
+
+    virtual bool ManageCollision();
 
     Bullet(Vector2 position, float angle);
     ~Bullet();
@@ -30,9 +30,6 @@ class Bullet : public Entity2D {
     static Colour DefaultColour;
 
     static float Damage;
-
-    static std::vector<Enemy*> Enemies;
-
 };
 
 #endif
