@@ -29,6 +29,8 @@ class Bullet : public Entity2D {
     static Vector2 bulletDimensions;
     static Colour DefaultColour;
 
+    static float Damage;
+
     static std::vector<Enemy*> Enemies;
 
 };

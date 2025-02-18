@@ -15,6 +15,8 @@ class Enemy : public Entity2D {
     Bar* healthBar;
 
     void manageBar();
+
+    void manageHeath();
   public:
     Vector2 Velocity;
     Vector2 TargetPos;

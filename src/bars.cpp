@@ -2,6 +2,7 @@
 #include "entity.hpp"
 #include <raylib.h>
 #include <raymath.h>
+#include <iostream>
 
 float Bar::SmoothingSpeed = 15;
 
@@ -19,7 +20,10 @@ void Bar::Render() {
 }
 
 void Bar::Process(float delta) {
-  Progress += (TargetProgress - Progress) * SmoothingSpeed * delta;
+  if(Smooth)
+    Progress += (TargetProgress - Progress) * SmoothingSpeed * delta;
+  else
+    Progress = TargetProgress;
 }
 
 Bar::Bar(Vector2 pos, Vector2 dimens, Color colour, Color backCol, bool growVert) : Entity2D("Bar", pos),

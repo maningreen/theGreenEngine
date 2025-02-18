@@ -18,6 +18,8 @@ float Bullet::MaxLifetime = 1;
 Vector2 Bullet::bulletDimensions = (Vector2){30, 15};
 Colour Bullet::DefaultColour = YELLOW;
 
+float Bullet::Damage = 1;
+
 std::vector<Enemy*> Bullet::Enemies;
 
 bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle) {
@@ -54,7 +56,7 @@ void Bullet::Process(float delta) {
         if(!en->valid)
           continue;
         if(CheckCollisionCircleRecEx(en->Position, en->Radius, Position, bulletDimensions, Angle * M_PI / 180.0f)) {
-          en->valid = false;
+          en->applyDamage(Damage);
           valid = false;
           break;
         }

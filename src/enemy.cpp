@@ -7,6 +7,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
+#include <iostream>
 
 float Enemy::Radius = 30;
 float Enemy::Speed = 4000;
@@ -14,14 +15,16 @@ Color Enemy::Colour = RED;
 
 float Enemy::MaxHealth = 10;
 
-#define barDimensions (Vector2){Enemy::Radius, 10}
+#define barDimensions (Vector2){Enemy::Radius * 2, 10}
 
 Enemy::Enemy(Player* pl, Vector2 pos) : Entity2D("Enemy", pos), plr(pl) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
-  addChild(new Bar(Vector2Zero(), barDimensions, RED, GRAY, false));
+  healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
+  addChild(healthBar);
   addTag("Enemy");
   Bullet::Enemies.push_back(this);
+  health = MaxHealth;
 }
 
 Enemy::~Enemy() {
@@ -35,6 +38,8 @@ void Enemy::Init() {
 void Enemy::Process(float delta) {
   Velocity = getNextVelocity(delta);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
+  manageBar();
+  manageHeath();
   WrapPosition();
 }
 
@@ -90,4 +95,12 @@ bool Enemy::isAlive() {
 }
 
 void Enemy::manageBar() {
+  healthBar->ShouldRender = health != MaxHealth;
+  healthBar->TargetProgress = health / MaxHealth;
+  healthBar->Position = Vector2Add(Position, (Vector2){-barDimensions.x / 2.0f, Radius * 1.5f});
+}
+
+void Enemy::manageHeath() {
+  if(health <= 0)
+    valid = false;
 }

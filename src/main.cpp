@@ -20,11 +20,8 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     (*children)[i]->Process(delta);
     manageChildrenProcess(&(*children)[i]->Children, delta);
     if(!(*children)[i]->valid) {
-      std::cout << "Deinitializing children and entity\n";
       Engine::deInitEntity((*children)[i]);
-      std::cout << "Erasing child\n";
       children->erase(it);
-      std::cout << "Continuing\n";
       it--;
       continue;
     }
