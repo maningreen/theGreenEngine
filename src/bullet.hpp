@@ -8,6 +8,8 @@
 
 typedef Color Colour;
 
+bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
+
 class Bullet : public Entity2D {
   public:
     Vector2 Velocity;

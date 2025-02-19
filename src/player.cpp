@@ -7,6 +7,7 @@
 #include "afterimage.hpp"
 #include "bars.hpp"
 #include "particle.hpp"
+#include "enemyBullet.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <raylib.h>
@@ -156,6 +157,7 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   addChild(dashCooldownBar);
   timeSinceDash = 0;
   dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
+  EnemyBullet::Plr = this;
   addChild(dashBar);
 }
 
