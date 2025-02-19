@@ -57,6 +57,7 @@ class Player : public Entity2D {
     void Init() override;
 
     Player(const std::string& name, Vector2 position, CameraEntity* cam);
+    ~Player();
 
     Vector2 getInput();
     Vector2 getInput(int u, int d, int l, int r);

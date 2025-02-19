@@ -161,6 +161,10 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   addChild(dashBar);
 }
 
+Player::~Player() {
+  EnemyBullet::Plr = nullptr;
+}
+
 void Player::Init() {};
 
 void Player::setCam(CameraEntity* camra) {
@@ -169,4 +173,3 @@ void Player::setCam(CameraEntity* camra) {
 
 float Player::getLifetime() {
   return lifetime;
-}
