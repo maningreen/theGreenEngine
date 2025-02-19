@@ -9,7 +9,7 @@ float Spiraler::SpinLength = 10;
 float Spiraler::SpinSpeed = 10;
 float Spiraler::DefaultRadius = 50;
 
-Spiraler::Spiraler() : Enemy(Vector2Zero()) {
+Spiraler::Spiraler() : Enemy(Vector2Zero()), isSpinning(true) {
   Radius = DefaultRadius;
 }
 

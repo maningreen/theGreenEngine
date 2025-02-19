@@ -7,10 +7,10 @@ class Spiraler : public Enemy {
   //check this shit out :sunglasses:
   //this is the first enemy made :D
   //(that isn't just the no ai one)
-  private:
+  public:
     Vector2 targetPosition;
     float spinTime;
-  public:
+    bool isSpinning;
 
     void Process(float delta) override; //yeah that's a good idea
     void Render() override;
