@@ -6,6 +6,7 @@
 #include "bars.hpp"
 #include "border.hpp"
 #include "enemy.hpp"
+#include "spiral.hpp"
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
@@ -42,7 +43,7 @@ void Init(Entity* root) {
   root->Children[0]->addChild(new CameraEntity("Camera", &((Player*)(root->Children)[1])->Position));
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
-  root->addChild(new Enemy((Player*)(root->Children)[1], (Vector2){0, 0}));
+  root->addChild(new Spiraler());
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

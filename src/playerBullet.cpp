@@ -27,7 +27,7 @@ bool PlayerBullet::ManageCollision() {
   //here we have to fucking kill ourselves i love this i love this i love this
   for(Enemy* en : enemies)
     if(CheckCollisionCircleRecEx(en->Position, en->Radius, Position, bulletDimensions, Angle * M_PI / 180.0f)) {
-      en->valid = false;
+      en->applyDamage(Damage);
       return true;
     }
   return false;

@@ -9,17 +9,18 @@
 #include <vector>
 #include <iostream>
 
-float Enemy::Radius = 30;
+float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
 Color Enemy::Colour = RED;
 
 float Enemy::MaxHealth = 10;
 
-#define barDimensions (Vector2){Enemy::Radius * 2, 10}
+#define barDimensions (Vector2){Radius * 2, 10}
 
-Enemy::Enemy(Player* pl, Vector2 pos) : Entity2D("Enemy", pos), plr(pl) {
+Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
+  Radius = DefaultRadius;
   healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
   addChild(healthBar);
   addTag("Enemy");
@@ -34,7 +35,7 @@ Enemy::~Enemy() {
 }
 
 void Enemy::Init() {
-  plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
+  setPlayer();
 }
 
 void Enemy::Process(float delta) {
@@ -53,7 +54,7 @@ void Enemy::Render() {
   //hmm what do we want for our enemies???
   //hear me out:
   //circle
-  DrawCircleV(Position, Radius, Colour);
+  DrawCircleV(Position, Radius, Colour); //WHOOOOOO
 }
 
 Vector2 Enemy::GetNextTargetPosition() {
@@ -84,10 +85,6 @@ Vector2 Enemy::getShortestVectorToPlayer() {
   return vectorToPlayer;
 }
 
-float Enemy::getHealth() {
-  return health;
-}
-
 void Enemy::applyDamage(float damage) {
   health -= damage;
 }
@@ -97,16 +94,18 @@ bool Enemy::isAlive() {
 }
 
 void Enemy::manageBar() {
-  healthBar->ShouldRender = health != MaxHealth;
+  healthBar->ShouldRender = true;
   healthBar->TargetProgress = health / MaxHealth;
   healthBar->Position = Vector2Add(Position, (Vector2){-barDimensions.x / 2.0f, Radius * 1.5f});
-}
-
+  *(float*)(&healthBar->Dimensions + (healthBar->ShrinkY ? sizeof(float) : 0)) = Radius * 2; //i'm not fucking sorry for this
+}                                                                                            //it's beautiful and i love it
+                                                                                             //it just if it grows y it sets the y
+                                                                                             //otherwise it'll set the x
 void Enemy::manageHeath() {
   if(health <= 0)
     valid = false;
 }
 
-Player* Enemy::getPlayer() {
-  return plr;
+void Enemy::setPlayer() {
+  plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
 }

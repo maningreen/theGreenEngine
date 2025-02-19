@@ -29,9 +29,7 @@ void CameraEntity::Render() {
   ClearBackground(BLACK);
 }
 
-CameraEntity::~CameraEntity() {
-  std::cout << "Camera deinitialized\n";
-}
+CameraEntity::~CameraEntity() {}
 
 CameraEntity::CameraEntity(std::string name, Vector2* target) : Entity(name) {
   Follow = target;

@@ -7,19 +7,16 @@
 #include <raylib.h>
 
 class Enemy : public Entity2D {
-  private:
-    Player* plr;
-
-    float health;
-
-    Bar* healthBar;
-
-    void manageBar();
-
-    void manageHeath();
   public:
     Vector2 Velocity;
     Vector2 TargetPos;
+
+    float Radius;
+
+    Player* plr;
+
+    float health;
+    Bar* healthBar;
 
     void Process(float delta) override;
     void Render() override;
@@ -32,18 +29,19 @@ class Enemy : public Entity2D {
     Vector2 GetNextTargetPosition();
     void WrapPosition();
 
-    float getHealth();
-
     void applyDamage(float damage);
 
     bool isAlive();
 
-    Player* getPlayer();
+    void setPlayer();
 
-    Enemy(Player* pl, Vector2 position);
+    void manageBar();
+    void manageHeath();
+
+    Enemy(Vector2 position);
     ~Enemy();
 
-    static float Radius;
+    static float DefaultRadius;
     static float Speed;
     static Color Colour;
 

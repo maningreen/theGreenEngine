@@ -18,8 +18,11 @@ class Spiraler : public Enemy {
     Vector2 getTargetPosition();
 
     static Color Colour;
+    static float DefaultRadius;
     static float SpinLength;
     static float SpinSpeed;
+
+    Spiraler();
 };
 
 #endif
