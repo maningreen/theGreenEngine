@@ -173,3 +173,4 @@ void Player::setCam(CameraEntity* camra) {
 
 float Player::getLifetime() {
   return lifetime;
+}
