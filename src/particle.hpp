@@ -2,7 +2,7 @@
 #define particle_h
 
 #include "entity.hpp"
-#include <raylib.h>
+#include "include.h"
 
 class Particle : public Entity2D {
   void wrapPosition();

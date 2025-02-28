@@ -5,8 +5,7 @@
 #include "core.h"
 #include <cmath>
 #include <cstdlib>
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <iostream>
 #include <vector>
 

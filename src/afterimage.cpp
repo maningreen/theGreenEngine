@@ -1,7 +1,6 @@
 #include "afterimage.hpp"
 #include "entity.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 
 float Afterimage::FadePower = 5;
 

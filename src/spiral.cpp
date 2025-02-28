@@ -1,7 +1,6 @@
 #include "spiral.hpp"
 #include "enemy.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <iostream>
 
 Color Spiraler::Colour = BLUE;

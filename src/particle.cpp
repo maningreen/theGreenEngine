@@ -2,8 +2,7 @@
 #include "entity.hpp"
 #include "border.hpp"
 #include <cstdlib>
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 
 float Particle::MaxLifetime = 2;
 float Particle::MinLifetime = 1;

@@ -2,8 +2,7 @@
 #include "enemy.hpp"
 #include <cmath>
 #include <vector>
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 
 std::vector<Enemy*> PlayerBullet::enemies;
 

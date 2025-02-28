@@ -7,8 +7,7 @@
 #include "border.hpp"
 #include "enemy.hpp"
 #include "spiral.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <vector>
 #include <iostream>
 

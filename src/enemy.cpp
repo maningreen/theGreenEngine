@@ -4,8 +4,7 @@
 #include "core.h"
 #include "playerBullet.hpp"
 #include "bars.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <vector>
 #include <iostream>
 

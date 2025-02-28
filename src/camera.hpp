@@ -1,7 +1,7 @@
 #ifndef camera_hpp
 #define camera_hpp
 
-#include <raylib.h>
+#include "include.h"
 #include <string>
 #include "entity.hpp"
 

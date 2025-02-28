@@ -1,7 +1,6 @@
 #include "bars.hpp"
 #include "entity.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <iostream>
 
 float Bar::SmoothingSpeed = 15;

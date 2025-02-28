@@ -1,7 +1,6 @@
 #include "border.hpp"
 #include "entity.hpp"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 
 float Border::Length = 2000;
 

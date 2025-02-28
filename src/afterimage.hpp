@@ -2,7 +2,7 @@
 #define after_h
 
 #include "entity.hpp"
-#include <raylib.h>
+#include "include.h"
 
 class Afterimage : public Entity2D {
   public:
@@ -16,7 +16,6 @@ class Afterimage : public Entity2D {
 
     Afterimage(Vector2 pos, float angle);
     ~Afterimage();
-
 };
 
 #endif

@@ -1,8 +1,7 @@
 #include "camera.hpp"
 #include "entity.hpp"
 #include <iostream>
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 #include <string>
 
 float CameraEntity::Smoothing = 10;
