@@ -17,8 +17,9 @@ public:
   BarManager(Vector2 *Position, float targetDistance, Bar *childBar);
   ~BarManager();
 
+  void setBarPercentage(float p);
+
   void Process(float delta) override;
-  void Render() override;
 };
 
 #endif
