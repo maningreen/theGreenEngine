@@ -1,5 +1,5 @@
 #include "particle.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "border.hpp"
 #include <cstdlib>
 #include "include.h"

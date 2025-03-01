@@ -2,7 +2,7 @@
 #define barMan_h
 
 #include "bars.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 
 class BarManager : public Entity2D {
 private:

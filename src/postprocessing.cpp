@@ -1,5 +1,5 @@
 #include "postprocessing.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 PostProcessingData::PostProcessingData() : Entity("Data") {

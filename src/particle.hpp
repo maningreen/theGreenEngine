@@ -1,7 +1,7 @@
 #ifndef particle_h
 #define particle_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 class Particle : public Entity2D {

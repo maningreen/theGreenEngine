@@ -1,8 +1,8 @@
 #include "bullet.hpp"
 #include "enemy.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "border.hpp"
-#include "core.h"
+#include "engine/core.h"
 #include <cmath>
 #include <cstdlib>
 #include "include.h"

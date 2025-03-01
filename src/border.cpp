@@ -1,5 +1,5 @@
 #include "border.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 float Border::Length = 2000;

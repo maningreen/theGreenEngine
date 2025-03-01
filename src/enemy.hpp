@@ -1,7 +1,7 @@
 #ifndef enemy_h
 #define enemy_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "player.hpp"
 #include "healthManager.hpp"
 #include "barManager.hpp"

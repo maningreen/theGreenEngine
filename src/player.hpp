@@ -1,7 +1,7 @@
 #ifndef player_h
 #define player_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "bars.hpp"
 #include "camera.hpp"
 #include "include.h"

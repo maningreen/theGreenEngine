@@ -1,7 +1,7 @@
 #ifndef bars_h
 #define bars_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 class Bar : public Entity2D {

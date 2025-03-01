@@ -1,7 +1,7 @@
 #ifndef post_h
 #define post_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 class PostProcessingData : public Entity {

@@ -1,7 +1,7 @@
 #ifndef border_h
 #define border_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 
 class Border : public Entity2D {
   public:

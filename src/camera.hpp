@@ -3,7 +3,7 @@
 
 #include "include.h"
 #include <string>
-#include "entity.hpp"
+#include "engine/entity.hpp"
 
 class CameraEntity : public Entity {
   public:

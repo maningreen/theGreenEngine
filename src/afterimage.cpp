@@ -1,5 +1,5 @@
 #include "afterimage.hpp"
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 float Afterimage::FadePower = 5;

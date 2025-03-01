@@ -9,6 +9,7 @@ Color Spiraler::Colour = BLUE;
 float Spiraler::SpinLength = 10;
 float Spiraler::SpinSpeed = 10;
 float Spiraler::DefaultRadius = 50;
+float Spiraler::spiralSpeed = M_PI / 3.0f;
 
 Spiraler::Spiraler() : Enemy(Vector2Zero()), isSpinning(true) {
   Radius = DefaultRadius;
@@ -21,5 +22,5 @@ void Spiraler::Render() {
 void Spiraler::Process(float delta) {
   manageHealthBar(Radius);
   spinTime += delta;
-  addChild(new EnemyBullet(Position, spinTime * spinTime * 5, Colour));
+  getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed, Colour));
 }

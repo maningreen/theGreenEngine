@@ -21,6 +21,7 @@ class Spiraler : public Enemy {
     static float DefaultRadius;
     static float SpinLength;
     static float SpinSpeed;
+    static float spiralSpeed;
 
     Spiraler();
 };

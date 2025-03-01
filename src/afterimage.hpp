@@ -1,7 +1,7 @@
 #ifndef after_h
 #define after_h
 
-#include "entity.hpp"
+#include "engine/entity.hpp"
 #include "include.h"
 
 class Afterimage : public Entity2D {

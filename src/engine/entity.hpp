@@ -1,7 +1,7 @@
 #ifndef entity_hpp
 #define entity_hpp
 
-#include "include.h"
+#include "../include.h"
 #include <string>
 #include <vector>
 
