@@ -17,6 +17,6 @@ void Spiraler::Render() {
 }
 
 void Spiraler::Process(float delta) {
-  manageBar();
+  manageBar(Radius);
   manageHeath();
 }

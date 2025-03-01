@@ -20,8 +20,9 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
   Radius = DefaultRadius;
-  healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
-  addChild(healthBar);
+  Bar* healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
+  barManager = new BarManager(&Position, Radius * 1.5f, healthBar);
+  addChild(barManager);
   addTag("Enemy");
   PlayerBullet::enemies.push_back(this);
   health = MaxHealth;
@@ -40,7 +41,7 @@ void Enemy::Init() {
 void Enemy::Process(float delta) {
   Velocity = getNextVelocity(delta);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
-  manageBar();
+  manageBar(Radius);
   manageHeath();
   WrapPosition();
 }
@@ -92,11 +93,9 @@ bool Enemy::isAlive() {
   return health > 0;
 }
 
-void Enemy::manageBar() {
-  healthBar->ShouldRender = true;
-  healthBar->TargetProgress = health / MaxHealth;
-  healthBar->Position = Vector2Add(Position, (Vector2){-barDimensions.x / 2.0f, Radius * 1.5f});
-  *(float*)(&healthBar->Dimensions + (healthBar->ShrinkY ? sizeof(float) : 0)) = Radius * 2; //i'm not fucking sorry for this
+void Enemy::manageBar(float r) {
+  barManager->targetDistance = r * 1.5f;
+  barManager->setBarPercentage(health / MaxHealth);
 }                                                                                            //it's beautiful and i love it
                                                                                              //it just if it grows y it sets the y
                                                                                              //otherwise it'll set the x

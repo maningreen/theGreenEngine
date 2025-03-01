@@ -4,6 +4,7 @@
 #include "entity.hpp"
 #include "player.hpp"
 #include "bars.hpp"
+#include "barManager.hpp"
 #include "include.h"
 
 class Enemy : public Entity2D {
@@ -16,7 +17,7 @@ class Enemy : public Entity2D {
     Player* plr;
 
     float health;
-    Bar* healthBar;
+    BarManager* barManager;
 
     void Process(float delta) override;
     void Render() override;
@@ -35,7 +36,7 @@ class Enemy : public Entity2D {
 
     void setPlayer();
 
-    void manageBar();
+    void manageBar(float radius);
     void manageHeath();
 
     Enemy(Vector2 position);
