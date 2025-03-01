@@ -15,3 +15,6 @@ engine: # -c makes it not link
 	g++ -c src/engine/core.cpp -o build/core.o
 	g++ -c src/engine/main.cpp -o build/main.o
 	ar rcs build/libengine.a $(ENGINEOUT)
+
+clean:
+	rm -rf $(BUILDDIR)*
