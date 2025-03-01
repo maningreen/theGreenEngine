@@ -33,7 +33,7 @@ class Enemy : public Entity2D {
 
     void setPlayer();
 
-    void manageBar(float radius);
+    void manageHealthBar(float radius);
 
     Enemy(Vector2 position);
     ~Enemy();

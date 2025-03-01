@@ -5,10 +5,11 @@
 
 Player* EnemyBullet::Plr = nullptr;
 
-EnemyBullet::EnemyBullet(Vector2 position, float angle, Color col) : Bullet(position, angle), Colour(col) {
+EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c) : Bullet(position, angle)  {
   //NOTHING YEAHHHHHHHHHHHHHH WOOOOOOOOOOOOOOOOOO
   //wait
-  //we have to set the colour D: (we already did that)
+  //we have to set the colour D:
+  col = c;
 }
 
 EnemyBullet::~EnemyBullet() {}

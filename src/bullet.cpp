@@ -37,6 +37,7 @@ float Bullet::Damage = 1;
 
 Bullet::Bullet(Vector2 position, float angle) : Entity2D("Bullet", position), Angle(angle) {
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
+  col = DefaultColour;
   Lifetime = 0;
 }
 
@@ -80,5 +81,5 @@ void Bullet::Render() {
   //with center Position
   //IF ONLY THERE WAS A FUNCTION FOR THIS
   //he said with a gleam in his eye
-  DrawRectanglePro((Rectangle){Position.x, Position.y, bulletDimensions.x, bulletDimensions.y}, (Vector2){bulletDimensions.x / 2.0f, bulletDimensions.y / 2.0f}, -Angle * 180 / M_PI, DefaultColour);
+  DrawRectanglePro((Rectangle){Position.x, Position.y, bulletDimensions.x, bulletDimensions.y}, (Vector2){bulletDimensions.x / 2.0f, bulletDimensions.y / 2.0f}, -Angle * 180 / M_PI, col);
 }

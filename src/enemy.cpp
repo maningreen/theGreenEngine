@@ -37,7 +37,7 @@ void Enemy::Init() {
 void Enemy::Process(float delta) {
   Velocity = getNextVelocity(delta);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
-  manageBar(Radius);
+  manageHealthBar(Radius);
   WrapPosition();
 }
 
@@ -80,12 +80,13 @@ Vector2 Enemy::getShortestVectorToPlayer() {
   return vectorToPlayer;
 }
 
-void Enemy::manageBar(float r) {
+void Enemy::manageHealthBar(float r) {
   healthManager->targetDistance = r * 1.5f;
   healthManager->setBarPercentage(healthManager->getHealth() / healthManager->getMaxHealth());
-}                                                                                            //it's beautiful and i love it
-                                                                                             //it just if it grows y it sets the y
-                                                                                             //otherwise it'll set the x
+  if(healthManager->isDead())
+    valid = false;
+}
+
 void Enemy::setPlayer() {
   plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
 }

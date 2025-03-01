@@ -1,6 +1,8 @@
 #include "spiral.hpp"
 #include "enemy.hpp"
 #include "include.h"
+#include "enemyBullet.hpp"
+#include <cmath>
 #include <iostream>
 
 Color Spiraler::Colour = BLUE;
@@ -17,5 +19,7 @@ void Spiraler::Render() {
 }
 
 void Spiraler::Process(float delta) {
-  manageBar(Radius);
+  manageHealthBar(Radius);
+  spinTime += delta;
+  addChild(new EnemyBullet(Position, spinTime * spinTime * 5, Colour));
 }

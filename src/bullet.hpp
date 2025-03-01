@@ -15,6 +15,7 @@ class Bullet : public Entity2D {
     Vector2 Velocity;
     float Angle;
     float Lifetime;
+    Colour col;
 
     void Process(float delta) override;
     void Render() override;
