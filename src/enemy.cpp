@@ -12,20 +12,16 @@ float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
 Color Enemy::Colour = RED;
 
-float Enemy::MaxHealth = 10;
-
 #define barDimensions (Vector2){Radius * 2, 10}
 
 Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
   Radius = DefaultRadius;
-  Bar* healthBar = new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false);
-  barManager = new BarManager(&Position, Radius * 1.5f, healthBar);
-  addChild(barManager);
+  healthManager = new HealthManager(10,BarManager(&Position, Radius * 1.5f, new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
+  addChild(healthManager);
   addTag("Enemy");
   PlayerBullet::enemies.push_back(this);
-  health = MaxHealth;
 }
 
 Enemy::~Enemy() {
@@ -42,7 +38,6 @@ void Enemy::Process(float delta) {
   Velocity = getNextVelocity(delta);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   manageBar(Radius);
-  manageHeath();
   WrapPosition();
 }
 
@@ -85,25 +80,12 @@ Vector2 Enemy::getShortestVectorToPlayer() {
   return vectorToPlayer;
 }
 
-void Enemy::applyDamage(float damage) {
-  health -= damage;
-}
-
-bool Enemy::isAlive() {
-  return health > 0;
-}
-
 void Enemy::manageBar(float r) {
-  barManager->targetDistance = r * 1.5f;
-  barManager->setBarPercentage(health / MaxHealth);
+  healthManager->targetDistance = r * 1.5f;
+  healthManager->setBarPercentage(healthManager->getHealth() / healthManager->getMaxHealth());
 }                                                                                            //it's beautiful and i love it
                                                                                              //it just if it grows y it sets the y
                                                                                              //otherwise it'll set the x
-void Enemy::manageHeath() {
-  if(health <= 0)
-    valid = false;
-}
-
 void Enemy::setPlayer() {
   plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
 }

@@ -3,7 +3,7 @@
 
 #include "entity.hpp"
 #include "player.hpp"
-#include "bars.hpp"
+#include "healthManager.hpp"
 #include "barManager.hpp"
 #include "include.h"
 
@@ -16,8 +16,7 @@ class Enemy : public Entity2D {
 
     Player* plr;
 
-    float health;
-    BarManager* barManager;
+    HealthManager* healthManager;
 
     void Process(float delta) override;
     void Render() override;
@@ -30,14 +29,11 @@ class Enemy : public Entity2D {
     Vector2 GetNextTargetPosition();
     void WrapPosition();
 
-    void applyDamage(float damage);
-
     bool isAlive();
 
     void setPlayer();
 
     void manageBar(float radius);
-    void manageHeath();
 
     Enemy(Vector2 position);
     ~Enemy();
@@ -45,8 +41,6 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
     static Color Colour;
-
-    static float MaxHealth;
 };
 
 #endif

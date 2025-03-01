@@ -13,8 +13,8 @@ public:
   Bar *getBar();
   float targetDistance;
 
-  BarManager(Vector2 Position, float targetDistance, Bar *childBar);
-  BarManager(Vector2 *Position, float targetDistance, Bar *childBar);
+  BarManager(Vector2 Position, float targetDistance, Bar* childBar);
+  BarManager(Vector2 *Position, float targetDistance, Bar* childBar);
   ~BarManager();
 
   void setBarPercentage(float p);

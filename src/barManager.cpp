@@ -5,11 +5,11 @@
 #include "iostream"
 
 
-BarManager::BarManager(Vector2 Position, float targetDistance, Bar *childBar) : Entity2D("BarManager", Position), bar(childBar), targetDistance(targetDistance), positionPointer(0) {
+BarManager::BarManager(Vector2 Position, float targetDistance, Bar* childBar) : Entity2D("BarManager", Position), bar(childBar), targetDistance(targetDistance), positionPointer(0) {
   addChild(childBar);
 }
 
-BarManager::BarManager(Vector2 *Position, float targetDistance, Bar *childBar) : Entity2D("BarManager", *Position), bar(childBar), targetDistance(targetDistance) {
+BarManager::BarManager(Vector2 *Position, float targetDistance, Bar* childBar) : Entity2D("BarManager", *Position), bar(childBar), targetDistance(targetDistance) {
   addChild(childBar);
 }
 
