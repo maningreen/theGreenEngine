@@ -10,6 +10,7 @@ class Spiraler : public Enemy {
   public:
     Vector2 targetPosition;
     float spinTime;
+    float shotTime;
     bool isSpinning;
 
     void Process(float delta) override; //yeah that's a good idea

@@ -13,6 +13,7 @@ float Spiraler::spiralSpeed = M_PI / 3.0f;
 
 Spiraler::Spiraler() : Enemy(Vector2Zero()), isSpinning(true) {
   Radius = DefaultRadius;
+  shotTime = 1.0f / 10.0f;
 }
 
 void Spiraler::Render() {
@@ -22,5 +23,6 @@ void Spiraler::Render() {
 void Spiraler::Process(float delta) {
   manageHealthBar(Radius);
   spinTime += delta;
-  getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed, Colour));
+  if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
+    getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed, Colour));
 }

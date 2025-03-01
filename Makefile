@@ -7,8 +7,12 @@ RAYLIB ?= ./external/raylib-5.5/src/
 RAYLIBFLAGS = -I $(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 ENGINEOUT = build/*.o
 
-program:
+game:
 	$(CC) $(SRC) $(ENGINEOUT) $(LDFLAGS) $(RAYLIBFLAGS) -o $(BUILDDIR)$(OUT) -L$(BUILDDIR) -lengine
+
+all:
+	make engine
+	make program
 
 engine: # -c makes it not link
 	g++ -c src/engine/entity.cpp -o build/entity.o
