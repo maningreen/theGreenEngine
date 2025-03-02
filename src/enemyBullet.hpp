@@ -12,6 +12,7 @@ class EnemyBullet : public Bullet {
     bool ManageCollision() override;
 
     EnemyBullet(Vector2 position, float angle, Color col);
+    EnemyBullet(Vector2 position, float angle, Color col, bool shouldWrap);
     ~EnemyBullet();
 };
 

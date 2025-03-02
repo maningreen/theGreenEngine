@@ -12,6 +12,13 @@ EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c) : Bullet(positi
   col = c;
 }
 
+EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c, bool w) : Bullet(position, angle, w)  {
+  //NOTHING YEAHHHHHHHHHHHHHH WOOOOOOOOOOOOOOOOOO
+  //wait
+  //we have to set the colour D:
+  col = c;
+}
+
 EnemyBullet::~EnemyBullet() {}
 
 bool EnemyBullet::ManageCollision() {

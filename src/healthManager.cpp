@@ -33,8 +33,11 @@ float HealthManager::getMaxHealth() {
 void HealthManager::setMaxHealth(float m) {
   if(m < 0)
     maxHealth = 0;
-  else
+  else {
     maxHealth = m;
+    if(health > maxHealth)
+      health = maxHealth;
+  }
 }
 
 HealthManager::~HealthManager() {}

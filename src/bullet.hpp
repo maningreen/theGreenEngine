@@ -16,6 +16,7 @@ class Bullet : public Entity2D {
     float Angle;
     float Lifetime;
     Colour col;
+    bool shouldWrap;
 
     void Process(float delta) override;
     void Render() override;
@@ -25,6 +26,7 @@ class Bullet : public Entity2D {
     virtual bool ManageCollision();
 
     Bullet(Vector2 position, float angle);
+    Bullet(Vector2 position, float angle, bool shouldWrap);
     ~Bullet();
 
     static float DefaultSpeed;
