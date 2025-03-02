@@ -44,6 +44,4 @@ void HealthManager::Process(float delta) {
   getBar()->Position = Position;
   setBarPercentage(health / maxHealth);
   getBar()->ShouldRender = true;
-  std::cout << getBar()->TargetProgress << " " << getBar()->ShouldRender << "\n";
-  std::cout << health << " " << maxHealth << "\n";
 }

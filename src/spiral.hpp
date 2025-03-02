@@ -11,7 +11,7 @@ class Spiraler : public Enemy {
     Vector2 targetPosition;
     float spinTime;
     float shotTime;
-    bool isSpinning;
+    unsigned char state;
 
     void Process(float delta) override; //yeah that's a good idea
     void Render() override;
@@ -24,6 +24,11 @@ class Spiraler : public Enemy {
     static float SpinSpeed;
     static float spiralSpeed;
     static float startingHealth;
+
+    enum states {
+      spinning,
+      approaching
+    };
 
     Spiraler();
 };
