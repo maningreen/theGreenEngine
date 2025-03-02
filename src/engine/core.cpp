@@ -64,6 +64,7 @@ bool Engine::entityHasTag(Entity* entity, std::string tag) {
 }
 
 void Engine::killEntity(Entity* en) {
+  en->Death();
   std::vector<Entity*> kids(en->Children);
   delete en;
   while(!kids.empty()) {

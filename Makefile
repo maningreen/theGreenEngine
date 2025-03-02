@@ -6,9 +6,10 @@ CC = g++
 RAYLIB ?= ./external/raylib-5.5/src/
 RAYLIBFLAGS = -I $(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 ENGINEOUT = build/*.o
+ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
 
 game:
-	$(CC) $(SRC) $(ENGINEOUT) $(LDFLAGS) $(RAYLIBFLAGS) -o $(BUILDDIR)$(OUT) -L$(BUILDDIR) -lengine
+	$(CC) $(SRC) $(LDFLAGS) $(RAYLIBFLAGS) -o $(BUILDDIR)$(OUT) $(ENGINEFLAGS)
 
 all:
 	make engine

@@ -31,6 +31,7 @@ public:
   virtual void Process(float delta) {};
   virtual void Render() {};
   virtual void Init() {};
+  virtual void Death() {};
 };
 
 class Entity2D : public Entity {
@@ -39,10 +40,6 @@ public:
 
   Entity2D(const std::string &name, Entity *Parent, Vector2 position);
   Entity2D(const std::string &name, Vector2 position);
-
-  virtual void Process(float delta) {};
-  virtual void Render() {};
-  virtual void Init() {};
 };
 
 #endif
