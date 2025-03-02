@@ -15,10 +15,11 @@ all:
 	make program
 
 engine: # -c makes it not link
-	g++ -c src/engine/entity.cpp -o build/entity.o
-	g++ -c src/engine/core.cpp -o build/core.o
-	g++ -c src/engine/main.cpp -o build/main.o
-	ar rcs build/libengine.a $(ENGINEOUT)
+	g++ -c src/engine/entity.cpp -o $(BUILDDIR)entity.o
+	g++ -c src/engine/core.cpp -o $(BUILDDIR)core.o
+	g++ -c src/engine/main.cpp -o $(BUILDDIR)main.o
+	ar rcs $(BUILDDIR)libengine.a $(ENGINEOUT)
+	rm $(BUILDDIR)*.o
 
 clean:
 	rm -rf $(BUILDDIR)*
