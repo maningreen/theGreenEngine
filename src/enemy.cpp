@@ -18,7 +18,7 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   Velocity = {0, 0};
   TargetPos = {0, 0};
   Radius = DefaultRadius;
-  healthManager = new HealthManager(10,BarManager(&Position, Radius * 1.5f, new Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
+  healthManager = new HealthManager(10,BarManager(&Position, Radius * 1.5f, Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
   addChild(healthManager);
   addTag("Enemy");
   PlayerBullet::enemies.push_back(this);

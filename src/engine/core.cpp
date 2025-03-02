@@ -63,10 +63,11 @@ bool Engine::entityHasTag(Entity* entity, std::string tag) {
   return false;
 }
 
-void Engine::deInitEntity(Entity* en) {
-  while(!en->Children.empty()) {
-    delete en->Children.back();
-    en->Children.pop_back();
-  }
+void Engine::killEntity(Entity* en) {
+  std::vector<Entity*> kids(en->Children);
   delete en;
+  while(!kids.empty()) {
+    killEntity(kids.back());
+    kids.pop_back();
+  }
 }

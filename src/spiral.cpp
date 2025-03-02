@@ -1,5 +1,8 @@
 #include "spiral.hpp"
+#include "bars.hpp"
 #include "enemy.hpp"
+#include "engine/core.h"
+#include "healthManager.hpp"
 #include "include.h"
 #include "enemyBullet.hpp"
 #include <cmath>
@@ -14,10 +17,11 @@ float Spiraler::startingHealth = 3;
 
 #define bulletsPerShot 3
 
+#define barDimensions (Vector2){Radius * 2, 10}
+
 Spiraler::Spiraler() : Enemy(Vector2Zero()), isSpinning(true) {
   Radius = DefaultRadius;
   shotTime = 1.0f / 10.0f;
-  healthManager->maxHealth = 2;
 }
 
 void Spiraler::Render() {

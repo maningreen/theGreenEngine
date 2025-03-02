@@ -5,8 +5,8 @@
 
 class HealthManager : public BarManager {
   private:
-    float health;
   public:
+    float health;
     float maxHealth;
 
     HealthManager(float maxHealth, BarManager b);

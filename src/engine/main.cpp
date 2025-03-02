@@ -12,7 +12,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     (*children)[i]->Process(delta);
     manageChildrenProcess(&(*children)[i]->Children, delta);
     if(!(*children)[i]->valid) {
-      Engine::deInitEntity((*children)[i]);
+      Engine::killEntity((*children)[i]);
       children->erase(children->begin() + i);
       i--;
       continue;
@@ -58,7 +58,7 @@ int main() {
     EndDrawing();
   }
 
-  Engine::deInitEntity(Root);
+  Engine::killEntity(Root);
 
   CloseWindow();
 }

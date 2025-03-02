@@ -6,7 +6,7 @@
 
 class BarManager : public Entity2D {
 private:
-  Bar* bar;
+  Bar bar;
   Vector2* positionPointer;
 
 public:
@@ -14,8 +14,8 @@ public:
   Vector2* getPositionPointer();
   float targetDistance;
 
-  BarManager(Vector2 Position, float targetDistance, Bar* childBar);
-  BarManager(Vector2 *Position, float targetDistance, Bar* childBar);
+  BarManager(Vector2 Position, float targetDistance, Bar childBar);
+  BarManager(Vector2 *Position, float targetDistance, Bar childBar);
   ~BarManager();
 
   void setBarPercentage(float p);

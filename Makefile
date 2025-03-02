@@ -12,7 +12,7 @@ game:
 
 all:
 	make engine
-	make program
+	make game
 
 engine: # -c makes it not link
 	g++ -c src/engine/entity.cpp -o $(BUILDDIR)entity.o
