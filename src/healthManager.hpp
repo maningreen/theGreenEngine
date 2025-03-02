@@ -6,8 +6,8 @@
 class HealthManager : public BarManager {
   private:
     float health;
-    float maxHealth;
   public:
+    float maxHealth;
 
     HealthManager(float maxHealth, BarManager b);
     HealthManager(float maxHealth, float health, BarManager b);
@@ -18,9 +18,11 @@ class HealthManager : public BarManager {
     void applyDamage(float d);
 
     bool isDead();
-    
+
     float getMaxHealth();
     void setMaxHealth(float m);
+
+    void Process(float delta) override;
 };
 
 #endif

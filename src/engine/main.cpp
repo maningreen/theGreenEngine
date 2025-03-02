@@ -34,7 +34,7 @@ void PreRendering(std::vector<Entity*>* entities);
 void PostRendering(std::vector<Entity*>* entities);
 
 int main() {
-  Entity* Root = new Entity("Root", nullptr);
+  Entity* Root = new Entity("Root", 0);
 
   SetTargetFPS(60);
 
@@ -57,6 +57,8 @@ int main() {
 
     EndDrawing();
   }
+
+  Engine::deInitEntity(Root);
 
   CloseWindow();
 }

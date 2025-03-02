@@ -6,11 +6,12 @@
 
 class BarManager : public Entity2D {
 private:
-  Bar *bar;
-  Vector2 *positionPointer;
+  Bar* bar;
+  Vector2* positionPointer;
 
 public:
-  Bar *getBar();
+  Bar* getBar();
+  Vector2* getPositionPointer();
   float targetDistance;
 
   BarManager(Vector2 Position, float targetDistance, Bar* childBar);

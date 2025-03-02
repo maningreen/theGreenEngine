@@ -82,7 +82,6 @@ Vector2 Enemy::getShortestVectorToPlayer() {
 
 void Enemy::manageHealthBar(float r) {
   healthManager->targetDistance = r * 1.5f;
-  healthManager->setBarPercentage(healthManager->getHealth() / healthManager->getMaxHealth());
   if(healthManager->isDead())
     valid = false;
 }
