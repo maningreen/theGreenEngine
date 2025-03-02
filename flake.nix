@@ -13,19 +13,22 @@
         inherit system;
       };
     in pkgs.mkShell {
-      packages = [
-        pkgs.libGL
+      packages = with pkgs; [
+        libGL
 
         # X11 dependencies
-        pkgs.xorg.libX11
-        pkgs.xorg.libX11.dev
-        pkgs.xorg.libXcursor
-        pkgs.xorg.libXi
-        pkgs.xorg.libXinerama
-        pkgs.xorg.libXrandr
+        xorg.libX11
+        xorg.libX11.dev
+        xorg.libXcursor
+        xorg.libXi
+        xorg.libXinerama
+        xorg.libXrandr
+
+        # make
+        gnumake
+        gcc # gcc
 
         # Uncomment the line below if you want to build Raylib with web support
-        # pkgs.emscripten
       ];
     };
   };
