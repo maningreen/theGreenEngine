@@ -41,8 +41,7 @@ void Spiraler::Process(float delta) {
       state = approaching;
       spinTime = 0;
     }
-  } else if(spinTime > SpinLength) {
-      state = spinning;
-      spinTime = 0;
+  } else if(state == approaching) {
+    //so here we wanna pick the closest point to the player
   }
 }
