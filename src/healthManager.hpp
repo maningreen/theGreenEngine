@@ -8,6 +8,8 @@ class HealthManager : public BarManager {
     float health;
     float maxHealth;
 
+    void initBar();
+
   public:
     HealthManager(float maxHealth, BarManager b);
     HealthManager(float maxHealth, float health, BarManager b);

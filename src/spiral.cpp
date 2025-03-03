@@ -21,11 +21,12 @@ float Spiraler::startingHealth = 3;
 
 Spiraler::Spiraler() : Enemy(Vector2Zero()), state(spinning) {
   Radius = DefaultRadius;
-healthManager->setMaxHealth(startingHealth);
+  healthManager->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
 }
 
 void Spiraler::Render() {
+  healthManager->getBar()->Render();
   DrawCircleV(Position, Radius, Colour);
 }
 

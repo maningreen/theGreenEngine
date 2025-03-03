@@ -25,6 +25,8 @@ public:
   bool removeTag(std::string tag);
   bool hasTag(std::string tag);
 
+  void printAllChildren();
+
   Entity *getParent();
   Entity *getRoot();
 

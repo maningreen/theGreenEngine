@@ -4,7 +4,7 @@
 #include "bars.hpp"
 #include "engine/entity.hpp"
 
-class BarManager : public Entity2D {
+class BarManager : public Entity {
 private:
   Bar bar;
   Vector2* positionPointer;
@@ -21,6 +21,7 @@ public:
   void setBarPercentage(float p);
 
   void Process(float delta) override;
+  void Render() override;
 };
 
 #endif
