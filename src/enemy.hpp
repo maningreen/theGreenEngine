@@ -35,6 +35,8 @@ class Enemy : public Entity2D {
 
     void manageHealthBar(float radius);
 
+    Vector2 getClosestPointToPlayerWithDistance(float distance);
+
     Enemy(Vector2 position);
     ~Enemy();
 

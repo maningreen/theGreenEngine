@@ -90,3 +90,12 @@ void Enemy::manageHealthBar(float r) {
 void Enemy::setPlayer() {
   plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
 }
+
+Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
+  // normalize the offset
+  if(plr == nullptr)
+    return Vector2Zero();
+  Vector2 diff = Vector2Subtract(plr->Position, Position);
+  Vector2 normalizedOffset = Vector2Scale(Vector2Normalize(diff), dist);
+  return Vector2Add(normalizedOffset, Position);
+}
