@@ -54,8 +54,6 @@ HealthManager::~HealthManager() {}
 void HealthManager::Process(float delta) {
   setBarPercentage(health / maxHealth);
   getBar()->Process(delta);
-  if(getBar()->TargetProgress != 1)
-    return;
   if(!getPositionPointer()) //should be 0 if not real
     return;
   // now we know we gots to set our position

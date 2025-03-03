@@ -19,7 +19,7 @@ float Spiraler::startingHealth = 3;
 
 #define barDimensions (Vector2){Radius * 2, 10}
 
-Spiraler::Spiraler() : Enemy(Vector2Zero()), state(spinning) {
+Spiraler::Spiraler() : Enemy(Vector2Zero()), state(approaching) {
   Radius = DefaultRadius;
   healthManager->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;

@@ -4,6 +4,7 @@
 #include "engine/entity.hpp"
 #include "bars.hpp"
 #include "camera.hpp"
+#include "healthManager.hpp"
 #include "include.h"
 
 class Player : public Entity2D {
@@ -17,6 +18,7 @@ class Player : public Entity2D {
 
     Bar* dashBar;
     Bar* dashCooldownBar;
+    HealthManager* healthManager;
 
     CameraEntity* cam;
 
@@ -69,6 +71,8 @@ class Player : public Entity2D {
     void wrapPosition();
 
     void SpawnBullet();
+
+    HealthManager* getHealthManager();
 
     float getLifetime();
 };

@@ -22,5 +22,10 @@ EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c, bool w) : Bulle
 EnemyBullet::~EnemyBullet() {}
 
 bool EnemyBullet::ManageCollision() {
-  return 0; // :)
+  //now we do some shmath
+  bool hit = CheckCollisionCircleRecEx(Plr->Position, Player::hitboxRadius, Position, bulletDimensions, Angle); //(we've done it all before)
+
+  if(hit)
+    Plr->getHealthManager()->applyDamage(1);
+  return hit;
 }

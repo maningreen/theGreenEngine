@@ -3,6 +3,7 @@
 #include "engine/entity.hpp"
 #include "engine/core.h"
 #include "border.hpp"
+#include "healthManager.hpp"
 #include "playerBullet.hpp"
 #include "afterimage.hpp"
 #include "bars.hpp"
@@ -149,6 +150,8 @@ void Player::manageRotation() {
 }
 
 Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) : Entity2D(name, position), cam(camera) {
+  healthManager = new HealthManager(10, BarManager(&Position, distance, Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)));
+  addChild(healthManager);
   Velocity = (Vector2){0,0};
   Speed = defaultSpeed;
   Friction = defaultFriction;
@@ -174,4 +177,8 @@ void Player::setCam(CameraEntity* camra) {
 
 float Player::getLifetime() {
   return lifetime;
+}
+
+HealthManager* Player::getHealthManager() {
+  return healthManager;
 }
