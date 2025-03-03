@@ -39,6 +39,8 @@ float Player::particleSpawnTime = 1.0f / 10.0f;
 
 const float distance = 50;
 
+float Player::hitboxRadius = 25;
+
 #define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {

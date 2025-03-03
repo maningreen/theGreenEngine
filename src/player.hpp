@@ -52,6 +52,8 @@ class Player : public Entity2D {
 
     static float particleSpawnTime;
 
+    static float hitboxRadius;
+
     void Process(float delta) override;
     void Render() override;
     void Init() override;
