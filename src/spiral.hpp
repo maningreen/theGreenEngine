@@ -7,8 +7,12 @@ class Spiraler : public Enemy {
   //check this shit out :sunglasses:
   //this is the first enemy made :D
   //(that isn't just the no ai one)
-  public:
+  private:
     Vector2 targetPosition;
+
+    void swapToApproaching();
+    void swapToSpinning();
+  public:
     float spinTime;
     float shotTime;
     unsigned char state;
@@ -24,6 +28,9 @@ class Spiraler : public Enemy {
     static float SpinSpeed;
     static float spiralSpeed;
     static float startingHealth;
+    static float maxTargetDistance;
+    static float minTargetDistance;
+    static float speed;
 
     enum states {
       spinning,

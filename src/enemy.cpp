@@ -10,6 +10,7 @@
 
 float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
+float Enemy::friction = 58;
 Color Enemy::Colour = RED;
 
 #define barDimensions (Vector2){Radius * 2, 10}

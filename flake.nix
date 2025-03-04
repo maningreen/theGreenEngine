@@ -27,8 +27,6 @@
         # make
         gnumake
         gcc # gcc
-
-        # Uncomment the line below if you want to build Raylib with web support
       ];
     };
   };
