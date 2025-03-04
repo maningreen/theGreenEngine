@@ -80,7 +80,7 @@ void Player::Process(float delta) {
   Velocity = Vector2Scale(Velocity, delta * Friction);
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
-      addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
+      getRoot()->addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
   wrapPosition();
   timeSinceDash += delta;
   if(dashing) {
@@ -91,7 +91,7 @@ void Player::Process(float delta) {
     if(Vector2LengthSqr(inputDirection) != 0)
       dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
     if(fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
-      addChild(new Afterimage(Position, Rotation));
+      getRoot()->addChild(new Afterimage(Position, Rotation));
     if(timeSinceDash > dashTime)
       dashing = false;
   }
@@ -109,7 +109,7 @@ void Player::Process(float delta) {
 void Player::SpawnBullet() {
   const float offsetAhead = 30;
   Bullet* bul = new PlayerBullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
-  addChild(bul);
+  getRoot()->addChild(bul);
 }
 
 void Player::wrapPosition() {
