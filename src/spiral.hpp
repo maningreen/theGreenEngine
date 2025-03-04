@@ -37,7 +37,7 @@ class Spiraler : public Enemy {
       approaching
     };
 
-    Spiraler();
+    Spiraler(Vector2 position);
 };
 
 #endif

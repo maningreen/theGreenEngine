@@ -36,6 +36,8 @@ void PostRendering(std::vector<Entity*>* entities);
 int main() {
   Entity* Root = new Entity("Root", 0);
 
+  Entity::setRoot(Root);
+
   SetTargetFPS(60);
 
   InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");

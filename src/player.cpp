@@ -8,7 +8,6 @@
 #include "afterimage.hpp"
 #include "bars.hpp"
 #include "particle.hpp"
-#include "enemyBullet.hpp"
 #include <cmath>
 #include <cstdlib>
 #include "include.h"
@@ -102,6 +101,8 @@ void Player::Process(float delta) {
   }
   if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
     SpawnBullet();
+  if(healthManager->isDead())
+    valid = false;
   manageBars();
   manageRotation();
 }
@@ -161,12 +162,12 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   addChild(dashCooldownBar);
   timeSinceDash = 0;
   dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
-  EnemyBullet::Plr = this;
+  Enemy::setPlayer();
   addChild(dashBar);
 }
 
 Player::~Player() {
-  EnemyBullet::Plr = nullptr;
+  Enemy::setPlayer();
 }
 
 void Player::Init() {};

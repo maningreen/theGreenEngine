@@ -12,6 +12,7 @@ float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
 float Enemy::friction = 58;
 Color Enemy::Colour = RED;
+Player* Enemy::plr = nullptr;
 
 #define barDimensions (Vector2){Radius * 2, 10}
 
@@ -37,14 +38,8 @@ void Enemy::Init() {
 }
 
 void Enemy::Process(float delta) {
-  Velocity = getNextVelocity(delta);
-  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   manageHealthBar(Radius);
   WrapPosition();
-}
-
-Vector2 Enemy::getNextVelocity(float delta) {
-  return Vector2Zero();
 }
 
 void Enemy::Render() {
@@ -52,10 +47,6 @@ void Enemy::Render() {
   //hear me out:
   //circle
   DrawCircleV(Position, Radius, Colour); //WHOOOOOO
-}
-
-Vector2 Enemy::GetNextTargetPosition() {
-  return Vector2Zero();
 }
 
 void Enemy::WrapPosition() {
@@ -89,7 +80,7 @@ void Enemy::manageHealthBar(float r) {
 }
 
 void Enemy::setPlayer() {
-  plr = (Player*)Engine::getFirstEntityIndexWithName(getRoot()->Children, "Player");
+  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->Children, "Player");
 }
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {

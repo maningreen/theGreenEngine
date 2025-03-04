@@ -26,7 +26,7 @@ float Spiraler::speed = 2100;
 
 #define barDimensions (Vector2){Radius * 2, 10}
 
-Spiraler::Spiraler() : Enemy(Vector2Zero()), state(spinning) {
+Spiraler::Spiraler(Vector2 position) : Enemy(position), state(approaching) {
   Radius = DefaultRadius;
   healthManager->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
@@ -44,7 +44,7 @@ void Spiraler::Process(float delta) {
   if(state == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
       for(int i = 0; i < bulletsPerShot; i++)
-    getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, false));
+        getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, false));
     if(spinTime > SpinLength) {
       swapToApproaching();
       state = approaching;

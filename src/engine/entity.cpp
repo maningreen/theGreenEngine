@@ -4,6 +4,19 @@
 #include <vector>
 #include <iostream>
 
+Entity* Entity::root = nullptr;
+
+bool Entity::setRoot(Entity* r) {
+  if(root != nullptr)
+    return false;
+  root = r;
+  return true;
+}
+
+Entity* Entity::getRoot() {
+  return root;
+}
+
 Entity2D::Entity2D(const std::string& name, Entity* par, Vector2 position) : Entity(name, par), Position(position) {
 }
 
@@ -31,13 +44,6 @@ void Entity::addTag(std::string tag) {
 
 Entity* Entity::getParent() {
   return Parent;
-}
-
-Entity* Entity::getRoot() {
-  Entity* climb = Parent;
-  while(climb->Parent != nullptr)
-    climb = climb->Parent;
-  return climb;
 }
 
 bool Entity::removeTag(std::string tag) {

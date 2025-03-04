@@ -1,9 +1,8 @@
 #include "enemyBullet.hpp"
 #include "bullet.hpp"
+#include "enemy.hpp"
 #include "player.hpp"
 #include "include.h"
-
-Player* EnemyBullet::Plr = nullptr;
 
 EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c) : Bullet(position, angle)  {
   //NOTHING YEAHHHHHHHHHHHHHH WOOOOOOOOOOOOOOOOOO
@@ -23,9 +22,9 @@ EnemyBullet::~EnemyBullet() {}
 
 bool EnemyBullet::ManageCollision() {
   //now we do some shmath
-  bool hit = CheckCollisionCircleRecEx(Plr->Position, Player::hitboxRadius, Position, bulletDimensions, Angle); //(we've done it all before)
+  bool hit = CheckCollisionCircleRecEx(Enemy::plr->Position, Player::hitboxRadius, Position, bulletDimensions, Angle); //(we've done it all before)
 
-  if(hit)
-    Plr->getHealthManager()->applyDamage(1);
+  if(hit && Enemy::plr != nullptr)
+    Enemy::plr->getHealthManager()->applyDamage(1);
   return hit;
 }

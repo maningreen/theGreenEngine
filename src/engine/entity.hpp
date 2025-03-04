@@ -9,14 +9,16 @@ class Entity {
 private:
   Entity *Parent;
 
+  static Entity* root;
+
 public:
   std::string Name;
-  std::vector<Entity *> Children;
+  std::vector<Entity*> Children;
   std::vector<std::string> Tags;
   bool valid;
 
-  Entity(const std::string &name, Entity *parent);
-  Entity(const std::string &name);
+  Entity(const std::string& name, Entity* parent);
+  Entity(const std::string& name);
   virtual ~Entity();
 
   void addChild(Entity *child);
@@ -27,8 +29,11 @@ public:
 
   void printAllChildren();
 
-  Entity *getParent();
-  Entity *getRoot();
+  Entity* getParent();
+
+  static Entity* getRoot();
+  //returns false if failed, true if succeeded
+  static bool setRoot(Entity* root);
 
   virtual void Process(float delta) {};
   virtual void Render() {};
@@ -40,8 +45,8 @@ class Entity2D : public Entity {
 public:
   Vector2 Position;
 
-  Entity2D(const std::string &name, Entity *Parent, Vector2 position);
-  Entity2D(const std::string &name, Vector2 position);
+  Entity2D(const std::string& name, Entity* Parent, Vector2 position);
+  Entity2D(const std::string& name, Vector2 position);
 };
 
 #endif

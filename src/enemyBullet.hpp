@@ -7,8 +7,6 @@
 
 class EnemyBullet : public Bullet {
   public:
-    static Player* Plr;
-
     bool ManageCollision() override;
 
     EnemyBullet(Vector2 position, float angle, Color col);

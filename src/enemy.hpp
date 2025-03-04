@@ -14,24 +14,15 @@ class Enemy : public Entity2D {
 
     float Radius;
 
-    Player* plr;
-
     HealthManager* healthManager;
 
     void Process(float delta) override;
     void Render() override;
     void Init() override;
 
-    virtual Vector2 getNextVelocity(float delta);
-
     Vector2 getShortestVectorToPlayer();
 
-    Vector2 GetNextTargetPosition();
     void WrapPosition();
-
-    bool isAlive();
-
-    void setPlayer();
 
     void manageHealthBar(float radius);
 
@@ -39,6 +30,9 @@ class Enemy : public Entity2D {
 
     Enemy(Vector2 position);
     ~Enemy();
+
+    static Player* plr;
+    static void setPlayer();
 
     static float DefaultRadius;
     static float Speed;
