@@ -29,5 +29,32 @@
         gcc # gcc
       ];
     };
+
+    packages.default = let 
+      pkgs = import nixpkgs { inherit system ;};
+    in{
+      nativeBuildInputs = with pkgs; [
+        gcc
+        gnumake
+      ];
+
+      buildInputs = with pkgs; [
+        libGL
+
+        # X11 dependencies
+        xorg.libX11
+        xorg.libX11.dev
+        xorg.libXcursor
+        xorg.libXi
+        xorg.libXinerama
+        xorg.libXrandr
+      ];
+
+      buildPhase = ''
+        make clean
+        make all
+      '';
+
+    };
   };
 }
