@@ -33,6 +33,8 @@
     packages.default = let 
       pkgs = import nixpkgs { inherit system ;};
     in{
+      name = "engine";
+      src = ./src;
       nativeBuildInputs = with pkgs; [
         gcc
         gnumake
