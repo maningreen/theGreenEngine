@@ -56,13 +56,10 @@
       ];
 
       buildPhase = ''
-        make clean
-        make all
+        g++ src/*.cpp src/engine/*.cpp -lraylib -lm
       '';
       
-      installPhase = ''
-      echo :p
-      '';
+      installPhase = '''';
 
     };
   };
