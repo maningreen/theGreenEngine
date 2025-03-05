@@ -80,7 +80,7 @@ void Player::Process(float delta) {
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
       getRoot()->addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
-  wrapPosition();
+  Border::wrapEntity(this);
   timeSinceDash += delta;
   if(dashing) {
     Velocity = dashDirection;
@@ -99,7 +99,7 @@ void Player::Process(float delta) {
     dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
   }
-  if(IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse))
+  if((IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse)) && !dashing)
     SpawnBullet();
   if(healthManager->isDead())
     valid = false;
@@ -111,18 +111,6 @@ void Player::SpawnBullet() {
   const float offsetAhead = 30;
   Bullet* bul = new PlayerBullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
   getRoot()->addChild(bul);
-}
-
-void Player::wrapPosition() {
-  bool out = false;
-  if(Position.x < -Border::Length)
-    Position.x += Border::Length * 2;
-  else if(Position.x > Border::Length)
-    Position.x -= Border::Length * 2;
-  if(Position.y < -Border::Length)
-    Position.y += Border::Length * 2;
-  else if(Position.y > Border::Length)
-    Position.y -= Border::Length * 2;
 }
 
 void Player::manageBars() {
@@ -182,4 +170,8 @@ float Player::getLifetime() {
 
 HealthManager* Player::getHealthManager() {
   return healthManager;
+}
+
+bool Player::getDashing() {
+  return dashing;
 }

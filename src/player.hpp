@@ -68,13 +68,12 @@ class Player : public Entity2D {
 
     void setCam(CameraEntity* cam);
 
-    void wrapPosition();
-
     void SpawnBullet();
 
     HealthManager* getHealthManager();
 
     float getLifetime();
+    bool getDashing();
 };
 
 #endif

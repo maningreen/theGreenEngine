@@ -15,3 +15,14 @@ void Border::Render() {
 
 void Border::Process(float delta) {
 }
+
+void Border::wrapEntity(Entity2D* en) {
+  if(en->Position.x < -Length)
+    en->Position.x += Length * 2;
+  else if(en->Position.x > Length)
+    en->Position.x -= Length * 2;
+  if(en->Position.y < -Length)
+    en->Position.y += Length * 2;
+  else if(en->Position.y > Length)
+    en->Position.y -= Length * 2;
+}

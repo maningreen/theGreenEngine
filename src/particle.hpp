@@ -5,7 +5,6 @@
 #include "include.h"
 
 class Particle : public Entity2D {
-  void wrapPosition();
   float lifetime;
   float maxLifetime;
 

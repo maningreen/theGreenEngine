@@ -17,7 +17,7 @@ void Particle::Process(float delta) {
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Rotation += RotationalVelocity * delta; //btw the * delta is because it's m/s^2 and so you have to account for that s^2 there
   lifetime += delta;
-  wrapPosition();
+  Border::wrapEntity(this);
   if(lifetime > maxLifetime) {
     Length += -Length * 1 * delta;
     Colour.a += -Colour.a * 5 * delta;
@@ -40,17 +40,6 @@ Particle::Particle(Vector2 pos, Vector2 vel) : Entity2D("Particle", pos), Veloci
   lifetime = 0;
   Colour = (Color){YELLOW.r, YELLOW.g, YELLOW.b, 150};
   maxLifetime = ((MaxLifetime - MinLifetime) * (float)rand() / (float)RAND_MAX) + MinLifetime;
-}
-
-void Particle::wrapPosition() {
-  if(Position.x < -Border::Length)
-    Position.x += Border::Length * 2;
-  else if(Position.x > Border::Length)
-    Position.x -= Border::Length * 2;
-  if(Position.y < -Border::Length)
-    Position.y += Border::Length * 2;
-  else if(Position.y > Border::Length)
-    Position.y -= Border::Length * 2;
 }
 
 float Particle::GetLifetime() {

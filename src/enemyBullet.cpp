@@ -22,9 +22,11 @@ EnemyBullet::~EnemyBullet() {}
 
 bool EnemyBullet::ManageCollision() {
   //now we do some shmath
+  if(Enemy::plr == nullptr)
+    return false;
   bool hit = CheckCollisionCircleRecEx(Enemy::plr->Position, Player::hitboxRadius, Position, bulletDimensions, Angle); //(we've done it all before)
 
-  if(hit && Enemy::plr != nullptr)
+  if(hit)
     Enemy::plr->getHealthManager()->applyDamage(1);
   return hit;
 }

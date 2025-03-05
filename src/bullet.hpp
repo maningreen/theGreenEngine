@@ -21,7 +21,6 @@ class Bullet : public Entity2D {
     void Process(float delta) override;
     void Render() override;
     void Init() override;
-    void wrapPosition();
 
     virtual bool ManageCollision();
 

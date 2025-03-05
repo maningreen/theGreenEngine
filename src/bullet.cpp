@@ -61,21 +61,10 @@ void Bullet::Process(float delta) {
     }
     Position = Vector2Add(Position, Vector2Scale(Velocity, delta / stepCount));
     if(shouldWrap)
-      wrapPosition();
+      Border::wrapEntity(this);
   }
   Lifetime += delta;
   valid = valid && Lifetime < MaxLifetime;
-}
-
-void Bullet::wrapPosition() {
-  if(Position.x >= Border::Length)
-    Position.x -= Border::Length * 2;
-  else if(Position.x <= -Border::Length)
-    Position.x += Border::Length * 2;
-  if(Position.y >= Border::Length)
-    Position.y -= Border::Length * 2;
-  else if(Position.y <= -Border::Length)
-    Position.y += Border::Length * 2;
 }
 
 bool Bullet::ManageCollision() {

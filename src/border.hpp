@@ -12,6 +12,8 @@ class Border : public Entity2D {
 
     Border();
     ~Border();
+
+    static void wrapEntity(Entity2D* en);
 };
 
 #endif
