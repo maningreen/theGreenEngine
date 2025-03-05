@@ -14,7 +14,6 @@ namespace Engine {
   std::vector<Entity*> getAllChildrenWithTagRecursive(Entity* en, std::string tag);
   void addEntity(std::vector<Entity*>* entities, Entity* entity);
   bool entityHasTag(Entity* en, std::string tag);
-  void killEntity(Entity* en);
 }
 
 #endif

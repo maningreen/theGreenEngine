@@ -62,13 +62,3 @@ bool Engine::entityHasTag(Entity* entity, std::string tag) {
       return true;
   return false;
 }
-
-void Engine::killEntity(Entity* en) {
-  en->Death();
-  std::vector<Entity*> kids(en->Children);
-  while(!kids.empty()) {
-    killEntity(kids.back());
-    kids.pop_back();
-  }
-  delete en;
-}

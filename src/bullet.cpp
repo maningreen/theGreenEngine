@@ -29,7 +29,7 @@ bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Ve
 }
 
 float Bullet::DefaultSpeed = 3040;
-float Bullet::MaxLifetime = 1;
+float Bullet::DefaultMaxLifetime = 1;
 Vector2 Bullet::bulletDimensions = (Vector2){30, 15};
 Colour Bullet::DefaultColour = YELLOW;
 
@@ -38,14 +38,23 @@ float Bullet::Damage = 1;
 Bullet::Bullet(Vector2 position, float angle) : Entity2D("Bullet", position), Angle(angle) {
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
   col = DefaultColour;
-  Lifetime = 0;
+  Lifetime = DefaultMaxLifetime;
   shouldWrap = true;
 }
 
 Bullet::Bullet(Vector2 position, float angle, bool w) : Entity2D("Bullet", position), Angle(angle), shouldWrap(w) {
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
   col = DefaultColour;
-  Lifetime = 0;
+  Lifetime = DefaultMaxLifetime;
+}
+
+Bullet::Bullet(Vector2 position, float angle, float maxLifetime) : Entity2D("bullet", position), Angle(angle), Lifetime(maxLifetime) {
+  Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
+  col = DefaultColour;
+}
+Bullet::Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime) : Entity2D("bullet", position), Angle(angle), shouldWrap(shouldWrap), Lifetime(maxLifetime) {
+  Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
+  col = DefaultColour;
 }
 
 void Bullet::Init() {}
@@ -63,8 +72,8 @@ void Bullet::Process(float delta) {
     if(shouldWrap)
       Border::wrapEntity(this);
   }
-  Lifetime += delta;
-  valid = valid && Lifetime < MaxLifetime;
+  Lifetime -= delta;
+  valid = valid && Lifetime > 0;
 }
 
 bool Bullet::ManageCollision() {

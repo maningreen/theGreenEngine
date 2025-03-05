@@ -26,10 +26,12 @@ class Bullet : public Entity2D {
 
     Bullet(Vector2 position, float angle);
     Bullet(Vector2 position, float angle, bool shouldWrap);
+    Bullet(Vector2 position, float angle, float maxLifetime);
+    Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime);
     ~Bullet();
 
     static float DefaultSpeed;
-    static float MaxLifetime;
+    static float DefaultMaxLifetime;
     static Vector2 bulletDimensions;
     static Colour DefaultColour;
 

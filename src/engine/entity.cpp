@@ -70,3 +70,12 @@ void Entity::printAllChildren() {
     child->printAllChildren();
   }
 }
+
+void Entity::kill() {
+  Death();
+  while(!Children.empty()) {
+    Children.back()->kill();
+    Children.pop_back();
+  }
+  delete this;
+}

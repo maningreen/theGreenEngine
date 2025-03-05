@@ -29,6 +29,8 @@ public:
 
   void printAllChildren();
 
+  void kill();
+
   Entity* getParent();
 
   static Entity* getRoot();
