@@ -22,4 +22,5 @@ engine: # -c makes it not link
 	ar rcs $(BUILDDIR)libengine.a $(ENGINEOUT)
 
 clean:
-	rm $(BUILDDIR)*
+	rm -rf $(BUILDDIR)
+	mkdir $(BUILDDIR)

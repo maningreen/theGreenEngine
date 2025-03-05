@@ -30,11 +30,12 @@
       ];
     };
 
-    packages.default = let 
+    packages.${system}.default = let 
       pkgs = import nixpkgs { inherit system ;};
-    in{
+    in pkgs.stdenv.mkDerivation {
       name = "engine";
-      src = ./src;
+      description = "a game in a custom engine";
+      src = ./.; 
       nativeBuildInputs = with pkgs; [
         gcc
         gnumake
@@ -55,6 +56,10 @@
       buildPhase = ''
         make clean
         make all
+      '';
+      
+      installPhase = ''
+      echo :p
       '';
 
     };
