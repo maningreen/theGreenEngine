@@ -51,6 +51,8 @@
         xorg.libXi
         xorg.libXinerama
         xorg.libXrandr
+
+        raylib
       ];
 
       buildPhase = ''
