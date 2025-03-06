@@ -78,7 +78,24 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
   // normalize the offset
   if(plr == nullptr)
     return Vector2Zero();
-  Vector2 diff = getShortestVectorToPlayer();
-  Vector2 normalizedOffset = Vector2Scale(Vector2Normalize(diff), dist);
-  return Border::wrapPos(Vector2Add(normalizedOffset, Position));
+  Vector2 shortestPathToPlayer = getShortestVectorToPlayer();
+  //lets get a model
+  //--------->
+  //say that is our vector to our player so our player is 
+  //--------->* here
+  //i want a distance around there so we would have a vector of
+  //<---
+  //ish
+  //so that's what we wanna do
+  Vector2 vectorFromPlayer = Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
+  //then we do some shmath
+  return Vector2Add(vectorFromPlayer, plr->Position);
+}
+
+unsigned char Enemy::getState() {
+  return state;
+}
+
+void Enemy::setState(unsigned char s) {
+  state = s;
 }
