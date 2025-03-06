@@ -69,7 +69,6 @@ void Player::Render() {
       );
 
   DrawCircleV(Position, 5, WHITE);
-  DrawCircleLinesV(Position, 300, WHITE);
 }
 
 void Player::Process(float delta) {
