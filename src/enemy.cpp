@@ -88,8 +88,10 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
   //ish
   //so that's what we wanna do
   Vector2 vectorFromPlayer = Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
+  Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->Position);
+  Vector2 vectorToGlobal = Border::getShortestPathToPoint(this, globalPos);
   //then we do some shmath
-  return Vector2Add(vectorFromPlayer, plr->Position);
+  return vectorToGlobal;
 }
 
 unsigned char Enemy::getState() {

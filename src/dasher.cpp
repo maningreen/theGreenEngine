@@ -48,35 +48,30 @@ void Dasher::Process(float delta) {
     //we get the vector to the player
     Vector2 closestVecToPlr = getClosestPointToPlayerWithDistance(targetDist);
     //step two we cap the bagnibude
-    if(Vector2LengthSqr(closestVecToPlr) > speed * speed)
-      closestVecToPlr = Vector2Scale(Vector2Normalize(closestVecToPlr), speed * delta);
+    Vector2 velToAdd = Vector2Scale(Vector2Normalize(closestVecToPlr), delta * speed);
     //step c
     //add this to vel
-    Velocity = Vector2Add(Velocity, closestVecToPlr);
+    Velocity = Vector2Add(Velocity, velToAdd);
     //step 5
     //if we close enough we swap states
-    if(Vector2DistanceSqr(plr->Position, Position) >= maximumDist * maximumDist)
-      goto lbl;
-    //we close enough :D
-    swapState();
-    setState(winding);
-    goto lbl;
+    if(Vector2DistanceSqr(plr->Position, Position) <= maximumDist * maximumDist) {
+      //we close enough :D
+      swapState();
+      setState(winding);
+    }
   } else if(getState() == recovery) {
     //we wait :p
-    if(stateTime <= recoveryTime)
-      goto lbl;
-    setState(approaching);
-    swapState();
-    goto lbl;
+    if(stateTime > recoveryTime) {
+      setState(approaching);
+      swapState();
+    }
   } else if(getState() == winding) {
     //i have no fuckin clue lets skip this for now
     setState(dashing);
     swapState();
   } else if(getState() == dashing) {
-  } else {
+  } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
-  }
-lbl:
   // :D
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, friction * delta);
