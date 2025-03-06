@@ -15,7 +15,6 @@ class Spiraler : public Enemy {
   public:
     float spinTime;
     float shotTime;
-    unsigned char state;
 
     void Process(float delta) override; //yeah that's a good idea
     void Render() override;

@@ -28,7 +28,8 @@ float Spiraler::bulletLifetime = .5;
 
 #define barDimensions (Vector2){Radius * 2, 10}
 
-Spiraler::Spiraler(Vector2 position) : Enemy(position), state(approaching) {
+Spiraler::Spiraler(Vector2 position) : Enemy(position) {
+  setState(approaching);
   Radius = DefaultRadius;
   healthManager->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
@@ -43,15 +44,15 @@ void Spiraler::Render() {
 void Spiraler::Process(float delta) {
   manageHealthBar(Radius);
   spinTime += delta; 
-  if(state == spinning) {
+  if(getState() == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
       for(int i = 0; i < bulletsPerShot; i++)
         getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, true, bulletLifetime));
     if(spinTime > SpinLength) {
       swapToApproaching();
-      state = approaching;
+      setState(approaching);
     }
-  } else if(state == approaching) {
+  } else if(getState() == approaching) {
     //here we wanna approach the target point :)
     //get vector to the point
     Vector2 vectorToPoint = Border::getShortestPathToPoint(this, targetPosition);
@@ -61,7 +62,7 @@ void Spiraler::Process(float delta) {
     //then if we're close enough to our target pos we break
     if(Vector2DistanceSqr(Position, targetPosition) <= 100 * 100) {
       swapToSpinning();
-      state = spinning;
+      setState(spinning);
     }
   }
   Border::wrapEntity(this);

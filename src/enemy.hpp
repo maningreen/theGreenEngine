@@ -8,6 +8,9 @@
 #include "include.h"
 
 class Enemy : public Entity2D {
+  private:
+    unsigned char state;
+
   public:
     Vector2 Velocity;
     Vector2 TargetPos;
@@ -33,6 +36,9 @@ class Enemy : public Entity2D {
 
     static Player* plr;
     static void setPlayer();
+
+    void setState(unsigned char s);
+    unsigned char getState();
 
     static float DefaultRadius;
     static float Speed;
