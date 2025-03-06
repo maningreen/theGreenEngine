@@ -11,9 +11,7 @@ ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
 game:
 	$(CC) $(SRC) $(LDFLAGS) $(RAYLIBFLAGS) -o $(BUILDDIR)$(OUT) $(ENGINEFLAGS)
 
-all:
-	make engine
-	make game
+all: engine game
 
 engine: # -c makes it not link
 	g++ -c src/engine/entity.cpp -o $(BUILDDIR)entity.o

@@ -7,6 +7,7 @@
 class Dasher : public Enemy {
   private:
     float stateTime;
+    Vector2 stateVector;
 
     static Color defaultCol;
     static float speed;
@@ -15,6 +16,9 @@ class Dasher : public Enemy {
     static float targetDist;
     static float maximumDist;
     static float recoveryTime;
+    static float defaultHealth;
+    static float dashTime;
+    static float dashSpeed;
 
     void swapState();
   public:
@@ -26,6 +30,9 @@ class Dasher : public Enemy {
     float getStateTime();
     float getSpeed();
     float getWindupTime();
+    float getDefaultHealth();
+    float getDashTime();
+    float getDashSpeed();
     Color getColour();
 
     //constructors

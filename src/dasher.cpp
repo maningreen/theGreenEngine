@@ -3,6 +3,7 @@
 #include "include.h"
 #include "playerBullet.hpp"
 #include "border.hpp"
+#include <cstdlib>
 #include <iostream>
 
 Colour Dasher::defaultCol = BROWN;
@@ -12,10 +13,18 @@ float Dasher::windupTime = .5;
 float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 2;
+float Dasher::defaultHealth = 2;
+float Dasher::dashTime = 1;
+float Dasher::dashSpeed = 1000;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
+  healthManager->setMaxHealth(defaultHealth);
   Colour = defaultCol;
+}
+
+float Dasher::getDefaultHealth() {
+  return defaultHealth;
 }
 
 float Dasher::getStateTime() {
@@ -69,7 +78,15 @@ void Dasher::Process(float delta) {
     //i have no fuckin clue lets skip this for now
     setState(dashing);
     swapState();
+    //then we set our state vector
+    stateVector = getShortestVectorToPlayer();
   } else if(getState() == dashing) {
+    //we... dash?
+    Velocity = Vector2Scale(stateVector, dashSpeed * delta);
+    if(stateTime > dashTime) {
+      setState(recovery);
+      swapState();
+    }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
   // :D
