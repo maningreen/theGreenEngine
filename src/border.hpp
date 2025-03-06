@@ -14,6 +14,8 @@ class Border : public Entity2D {
     ~Border();
 
     static void wrapEntity(Entity2D* en);
+
+    static Vector2 getShortestPathToPoint(Entity2D* en, Vector2 position);
 };
 
 #endif

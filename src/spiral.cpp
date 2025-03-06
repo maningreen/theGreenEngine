@@ -5,6 +5,7 @@
 #include "healthManager.hpp"
 #include "include.h"
 #include "enemyBullet.hpp"
+#include "border.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -53,7 +54,7 @@ void Spiraler::Process(float delta) {
   } else if(state == approaching) {
     //here we wanna approach the target point :)
     //get vector to the point
-    Vector2 vectorToPoint = Vector2Subtract(targetPosition, Position);
+    Vector2 vectorToPoint = Border::getShortestPathToPoint(this, targetPosition);
     //then we scale this to speed
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToPoint), speed * delta);
     Velocity = Vector2Add(Velocity, velToAdd);
