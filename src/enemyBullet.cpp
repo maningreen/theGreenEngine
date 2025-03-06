@@ -18,6 +18,10 @@ EnemyBullet::EnemyBullet(Vector2 position, float angle, Color c, bool w) : Bulle
   col = c;
 }
 
+EnemyBullet::EnemyBullet(Vector2 position, float a, Color c, bool w, float l) : Bullet(position, a, w, l) {
+  col = c;
+}
+
 EnemyBullet::~EnemyBullet() {}
 
 bool EnemyBullet::ManageCollision() {
