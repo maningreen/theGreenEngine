@@ -56,10 +56,14 @@
       ];
 
       buildPhase = ''
-        g++ src/*.cpp src/engine/*.cpp -lraylib -lm
+        mkdir -p build
+        make all
       '';
       
-      installPhase = '''';
+      installPhase = ''
+        mkdir -p $out/bin
+        install -t $out/bin build/engine
+      '';
 
     };
   };
