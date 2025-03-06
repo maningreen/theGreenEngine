@@ -61,16 +61,7 @@ void Enemy::WrapPosition() {
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() {
-  Vector2 vectorToPlayer = Vector2Subtract(plr->Position, Position);
-  if(vectorToPlayer.x >= Border::Length)
-    vectorToPlayer.x -= Border::Length * 2.0f;
-  else if(vectorToPlayer.x <= -Border::Length)
-    vectorToPlayer.x += Border::Length * 2.0f;
-  if(vectorToPlayer.y >= Border::Length)
-    vectorToPlayer.y -= Border::Length * 2.0f;
-  else if(vectorToPlayer.y <= -Border::Length)
-    vectorToPlayer.y += Border::Length * 2.0f;
-  return vectorToPlayer;
+  return Border::getShortestPathToPoint(this, plr->Position);
 }
 
 void Enemy::manageHealthBar(float r) {
@@ -87,7 +78,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
   // normalize the offset
   if(plr == nullptr)
     return Vector2Zero();
-  Vector2 diff = Vector2Subtract(plr->Position, Position);
+  Vector2 diff = getShortestVectorToPlayer();
   Vector2 normalizedOffset = Vector2Scale(Vector2Normalize(diff), dist);
-  return Vector2Add(normalizedOffset, Position);
+  return Border::wrapPos(Vector2Add(normalizedOffset, Position));
 }
