@@ -62,7 +62,7 @@
       
       installPhase = ''
         mkdir -p $out/bin
-        install -t $out/bin build/engine
+        install -t $out/ build/engine
       '';
 
     };
