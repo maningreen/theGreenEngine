@@ -9,14 +9,14 @@
 Colour Dasher::defaultCol = BROWN;
 float Dasher::speed = 2100;
 float Dasher::radius = 40;
-float Dasher::windupTime = 1;
+float Dasher::windupTime = .5;
 float Dasher::windupSpeed = 200;
 float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 1;
 float Dasher::defaultHealth = 2;
 float Dasher::dashTime = .2;
-float Dasher::dashSpeed = 400;
+float Dasher::dashSpeed = 300;
 float Dasher::damage = 4;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
@@ -87,7 +87,7 @@ void Dasher::Process(float delta) {
     stateVector = getShortestVectorToPlayer();
     //so what we wanna do, get the shortest vector to player
     //then we scale this to windupSpeed
-    Velocity = Vector2Scale(Vector2Normalize(stateVector), -stateTime * windupSpeed);
+    Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector), -stateTime * windupSpeed), Velocity);
     if(stateTime > windupTime) {
       swapState(dashing);
       Velocity = Vector2Zero();
@@ -100,12 +100,11 @@ void Dasher::Process(float delta) {
     //we also gotta check some collision shtuff
     if(Vector2DistanceSqr(Position, plr->Position) < (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       //for psuedo i-frames
-      plr->getHealthManager()->applyDamage(5);
+      plr->getHealthManager()->applyDamage(damage);
       swapState(recovery);
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
-  std::cout << stateTime << '\n';
   // :D
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, friction * delta);
