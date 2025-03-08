@@ -57,12 +57,12 @@
 
       buildPhase = ''
         mkdir -p build
-        make all
+        make
       '';
       
       installPhase = ''
         mkdir -p $out/bin
-        install -t $out/ build/engine
+        install -t $out/bin build/engine
       '';
 
     };

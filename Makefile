@@ -20,16 +20,20 @@ LDFLAGS =
 OUT = engine
 BUILDDIR = build/
 
-game: $(ENGINEOUT)
-	$(CC) $(SRC) $(LDFLAGS) $(RAYLIBFLAGS) -o $(BUILDDIR)$(OUT) $(ENGINEFLAGS)
+game: $(ENGINEOUT) $(OBJECTS)
+	$(CC) $(OBJECTS) -o $(BUILDDIR)$(OUT) $(LDFLAGS) $(RAYLIBFLAGS) $(ENGINEFLAGS)
 
 engine: $(ENGINEOUT)
 
 $(ENGINEOUT): $(ENGINEOBJS) # -c makes it not link
 	ar rcs $(ENGINEOUT) $(ENGINEOBJS)
 
+build/%.o: src/%.cpp
+	$(CC) -c $< -o $@
+
+
 $(BUILDDIR)%.o: src/engine/%.cpp
-	$(CC) $(LDFLAGS) $(RAYLIBFLAGS) -c $< -o $@
+	$(CC) -c $< -o $@
 
 clean:
 	rm -rf $(BUILDDIR)
