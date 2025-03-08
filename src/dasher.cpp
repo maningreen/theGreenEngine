@@ -14,9 +14,10 @@ float Dasher::windupSpeed = 200;
 float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 1;
+float Dasher::recoverSpeedThreshold = 200;
 float Dasher::defaultHealth = 2;
 float Dasher::dashTime = .2;
-float Dasher::dashSpeed = 300;
+float Dasher::dashSpeed = 350;
 float Dasher::damage = 4;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
@@ -58,6 +59,14 @@ float Dasher::getDamage() {
   return damage;
 }
 
+float Dasher::getRecoverTime() {
+  return recoveryTime;
+}
+
+float Dasher::getRecoverSpeedThreshold() {
+  return recoverSpeedThreshold;
+}
+
 void Dasher::Process(float delta) {
   stateTime += delta;
   //oh god here we goooooo
@@ -79,6 +88,8 @@ void Dasher::Process(float delta) {
       swapState(winding);
   } else if(getState() == recovery) {
     //we wait :p
+    if(Vector2LengthSqr(Velocity) >= recoverSpeedThreshold * recoverSpeedThreshold)
+      stateTime = 0;
     if(stateTime > recoveryTime)
       swapState(approaching);
   } else if(getState() == winding) {

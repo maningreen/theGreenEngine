@@ -17,6 +17,7 @@ class Dasher : public Enemy {
     static float targetDist;
     static float maximumDist;
     static float recoveryTime;
+    static float recoverSpeedThreshold;
     static float defaultHealth;
     static float dashTime;
     static float dashSpeed;
@@ -36,6 +37,8 @@ class Dasher : public Enemy {
     float getDefaultHealth();
     float getDashTime();
     float getDashSpeed();
+    float getRecoverTime();
+    float getRecoverSpeedThreshold();
     float getDamage();
     Color getColour();
 
