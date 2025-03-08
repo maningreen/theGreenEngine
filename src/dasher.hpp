@@ -13,14 +13,16 @@ class Dasher : public Enemy {
     static float speed;
     static float radius;
     static float windupTime;
+    static float windupSpeed;
     static float targetDist;
     static float maximumDist;
     static float recoveryTime;
     static float defaultHealth;
     static float dashTime;
     static float dashSpeed;
+    static float damage;
 
-    void swapState();
+    void swapState(unsigned char s);
   public:
 
     //process
@@ -30,9 +32,11 @@ class Dasher : public Enemy {
     float getStateTime();
     float getSpeed();
     float getWindupTime();
+    float getWindupSpeed();
     float getDefaultHealth();
     float getDashTime();
     float getDashSpeed();
+    float getDamage();
     Color getColour();
 
     //constructors

@@ -9,18 +9,25 @@
 Colour Dasher::defaultCol = BROWN;
 float Dasher::speed = 2100;
 float Dasher::radius = 40;
-float Dasher::windupTime = .5;
+float Dasher::windupTime = 1;
+float Dasher::windupSpeed = 200;
 float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
-float Dasher::recoveryTime = 2;
+float Dasher::recoveryTime = 1;
 float Dasher::defaultHealth = 2;
-float Dasher::dashTime = 1;
-float Dasher::dashSpeed = 1000;
+float Dasher::dashTime = .2;
+float Dasher::dashSpeed = 400;
+float Dasher::damage = 4;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
   healthManager->setMaxHealth(defaultHealth);
   Colour = defaultCol;
+}
+
+void Dasher::swapState(unsigned char s) {
+  setState(s);
+  stateTime = 0;
 }
 
 float Dasher::getDefaultHealth() {
@@ -39,12 +46,16 @@ float Dasher::getWindupTime() {
   return windupTime;
 }
 
+float Dasher::getWindupSpeed() {
+  return windupSpeed;
+}
+
 float Dasher::getSpeed() {
   return speed;
 }
 
-void Dasher::swapState() {
-  stateTime = 0;
+float Dasher::getDamage() {
+  return damage;
 }
 
 void Dasher::Process(float delta) {
@@ -63,32 +74,38 @@ void Dasher::Process(float delta) {
     Velocity = Vector2Add(Velocity, velToAdd);
     //step 5
     //if we close enough we swap states
-    if(Vector2DistanceSqr(plr->Position, Position) <= maximumDist * maximumDist) {
+    if(Vector2DistanceSqr(plr->Position, Position) <= maximumDist * maximumDist)
       //we close enough :D
-      swapState();
-      setState(winding);
-    }
+      swapState(winding);
   } else if(getState() == recovery) {
     //we wait :p
-    if(stateTime > recoveryTime) {
-      setState(approaching);
-      swapState();
-    }
+    if(stateTime > recoveryTime)
+      swapState(approaching);
   } else if(getState() == winding) {
     //i have no fuckin clue lets skip this for now
-    setState(dashing);
-    swapState();
     //then we set our state vector
     stateVector = getShortestVectorToPlayer();
+    //so what we wanna do, get the shortest vector to player
+    //then we scale this to windupSpeed
+    Velocity = Vector2Scale(Vector2Normalize(stateVector), -stateTime * windupSpeed);
+    if(stateTime > windupTime) {
+      swapState(dashing);
+      Velocity = Vector2Zero();
+    }
   } else if(getState() == dashing) {
     //we... dash?
     Velocity = Vector2Scale(stateVector, dashSpeed * delta);
-    if(stateTime > dashTime) {
-      setState(recovery);
-      swapState();
+    if(stateTime > dashTime)
+      swapState(recovery);
+    //we also gotta check some collision shtuff
+    if(Vector2DistanceSqr(Position, plr->Position) < (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
+      //for psuedo i-frames
+      plr->getHealthManager()->applyDamage(5);
+      swapState(recovery);
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
+  std::cout << stateTime << '\n';
   // :D
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, friction * delta);
