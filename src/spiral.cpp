@@ -23,6 +23,7 @@ float Spiraler::maxTargetDistance = 770;
 float Spiraler::minTargetDistance = 600;
 float Spiraler::speed = 2100;
 float Spiraler::bulletLifetime = .5;
+float Spiraler::bulletLifetimeGrowth = .15;
 
 #define bulletsPerShot 3
 
@@ -47,7 +48,7 @@ void Spiraler::Process(float delta) {
   if(getState() == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
       for(int i = 0; i < bulletsPerShot; i++)
-        getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, true, bulletLifetime));
+        getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, true, bulletLifetime + spinTime * bulletLifetimeGrowth));
     if(spinTime > SpinLength) {
       swapToApproaching();
       setState(approaching);

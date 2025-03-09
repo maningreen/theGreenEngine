@@ -51,3 +51,7 @@ Vector2 Border::getShortestPathToPoint(Entity2D* en, Vector2 point) {
     vectorTo.y -= Length * 2;
   return vectorTo;
 }
+
+Vector2 Border::getRandomPosInBorder() {
+  return (Vector2){(float)(rand() % (int)Length), (float)(rand() % (int)Length)};
+}

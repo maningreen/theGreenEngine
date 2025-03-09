@@ -31,6 +31,7 @@ class Spiraler : public Enemy {
     static float minTargetDistance;
     static float speed;
     static float bulletLifetime;
+    static float bulletLifetimeGrowth;
 
     enum states {
       spinning,

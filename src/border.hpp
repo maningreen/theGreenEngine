@@ -18,6 +18,8 @@ class Border : public Entity2D {
     static Vector2 wrapPos(Vector2 vector);
 
     static Vector2 getShortestPathToPoint(Entity2D* en, Vector2 position);
+
+    static Vector2 getRandomPosInBorder();
 };
 
 #endif
