@@ -6,23 +6,25 @@
 #include "engine/entity.hpp"
 
 unsigned WaveManager::enemyTypeCount = 2;
+float WaveManager::waveDelay = 5;
 
-WaveManager::WaveManager() : Entity("waveManager"), waveCount(1) {
-}
+WaveManager::WaveManager() : Entity("waveManager"), waveCount(1), currentTime(0) {}
 
 WaveManager::~WaveManager() {}
 
 void WaveManager::Process(float delta) {
   if(Children.size() != 0)
     return;
-  //if we're here that means we're outa enemies
-  spawnWave();
+  currentTime -= delta;
+  if(currentTime <= 0)  // if we here we outa enemies and have waited long enough
+    spawnWave();
 }
 
 void WaveManager::spawnWave() {
   for(int i = 0; i < waveCount; i++)
     spawnRandomEnemy(Border::getRandomPosInBorder());
   waveCount++;
+  currentTime = waveDelay;
 }
 
 void WaveManager::spawnRandomEnemy(Vector2 p) {
@@ -45,3 +47,4 @@ unsigned WaveManager::getWaveCount() {
 unsigned WaveManager::getEnemyTypeCount() {
   return enemyTypeCount;
 }
+

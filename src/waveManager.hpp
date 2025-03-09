@@ -8,10 +8,15 @@ class WaveManager : public Entity {
     unsigned waveCount;
 
     static unsigned enemyTypeCount;
+    static float waveDelay;
+
+    float currentTime;
   public:
 
     unsigned getWaveCount();
     unsigned getEnemyTypeCount();
+    float getWaveDelay();
+    float getTimeSinceLastWave();
 
     void Process(float delta) override;
 
