@@ -23,7 +23,7 @@ void Particle::Process(float delta) {
     Colour.a += -Colour.a * 5 * delta;
   }
   if(Length <= 1 || Colour.a <= 10)
-    valid = false;
+    killDefered();
 }
 
 

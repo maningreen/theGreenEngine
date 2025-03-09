@@ -11,7 +11,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   for(int i = 0; i < children->size(); i++) {
     (*children)[i]->Process(delta);
     manageChildrenProcess(&(*children)[i]->Children, delta);
-    if(!(*children)[i]->valid) {
+    if(!(*children)[i]->getValid()) {
       (*children)[i]->kill();
       children->erase(children->begin() + i);
       i--;

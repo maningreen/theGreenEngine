@@ -65,15 +65,16 @@ void Bullet::Process(float delta) {
   //check if colliding with enemy
   for(int i = 0; i < stepCount; i++) {
     if(ManageCollision()) {
-      valid = false; //WARNING if this is dumb as shit
-       return;       //make it smart as shit
+      killDefered();
+      return;       //make it smart as shit
     }
     Position = Vector2Add(Position, Vector2Scale(Velocity, delta / stepCount));
     if(shouldWrap)
       Border::wrapEntity(this);
   }
   Lifetime -= delta;
-  valid = valid && Lifetime > 0;
+  if(Lifetime < 0)
+    killDefered();
 }
 
 bool Bullet::ManageCollision() {

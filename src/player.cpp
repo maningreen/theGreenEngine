@@ -102,7 +102,7 @@ void Player::Process(float delta) {
   if((IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse)) && !dashing)
     SpawnBullet();
   if(healthManager->isDead())
-    valid = false;
+    killDefered();
   manageBars();
   manageRotation();
 }

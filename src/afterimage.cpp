@@ -30,5 +30,5 @@ void Afterimage::Render() {
 void Afterimage::Process(float delta) {
   Opacity += -Opacity * FadePower * delta;
   if(Opacity < 10)
-    valid = false;
+    killDefered();
 }

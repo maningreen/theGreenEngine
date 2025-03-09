@@ -79,3 +79,11 @@ void Entity::kill() {
   }
   delete this;
 }
+
+bool Entity::getValid() {
+  return valid;
+}
+
+void Entity::killDefered() {
+  valid = false; // :p
+}

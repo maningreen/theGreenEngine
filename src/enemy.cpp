@@ -67,7 +67,7 @@ Vector2 Enemy::getShortestVectorToPlayer() {
 void Enemy::manageHealthBar(float r) {
   healthManager->targetDistance = r * 1.5f;
   if(healthManager->isDead())
-    valid = false;
+    killDefered();
 }
 
 void Enemy::setPlayer() {

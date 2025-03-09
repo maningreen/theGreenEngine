@@ -11,11 +11,12 @@ private:
 
   static Entity* root;
 
+  bool valid;
+
 public:
   std::string Name;
   std::vector<Entity*> Children;
   std::vector<std::string> Tags;
-  bool valid;
 
   Entity(const std::string& name, Entity* parent);
   Entity(const std::string& name);
@@ -30,8 +31,11 @@ public:
   void printAllChildren();
 
   void kill();
+  void killDefered();
 
   Entity* getParent();
+
+  bool getValid();
 
   static Entity* getRoot();
   //returns false if failed, true if succeeded
