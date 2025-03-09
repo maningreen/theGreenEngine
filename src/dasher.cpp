@@ -17,7 +17,7 @@ float Dasher::recoveryTime = 1;
 float Dasher::recoverSpeedThreshold = 260;
 float Dasher::defaultHealth = 2;
 float Dasher::dashTime = .2;
-float Dasher::dashSpeed = 250;
+float Dasher::dashSpeed = 200000;
 float Dasher::damage = 4;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
@@ -95,7 +95,7 @@ void Dasher::Process(float delta) {
   } else if(getState() == winding) {
     //i have no fuckin clue lets skip this for now
     //then we set our state vector
-    stateVector = getShortestVectorToPlayer();
+    stateVector = Vector2Normalize(getShortestVectorToPlayer());
     //so what we wanna do, get the shortest vector to player
     //then we scale this to windupSpeed
     Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector), -stateTime * windupSpeed), Velocity);

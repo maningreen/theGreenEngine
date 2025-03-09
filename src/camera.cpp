@@ -14,7 +14,8 @@ void CameraEntity::ManageCameraShake(float delta) {
 }
 
 void CameraEntity::ManageCameraMotion(float delta) {
-  Target = Vector2Lerp(Target, *Follow, Smoothing * delta);
+  if(Follow != nullptr)
+    Target = Vector2Lerp(Target, *Follow, Smoothing * delta);
 }
 
 void CameraEntity::Process(float delta) {
