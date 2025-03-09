@@ -14,10 +14,10 @@ float Dasher::windupSpeed = 200;
 float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 1;
-float Dasher::recoverSpeedThreshold = 200;
+float Dasher::recoverSpeedThreshold = 260;
 float Dasher::defaultHealth = 2;
 float Dasher::dashTime = .2;
-float Dasher::dashSpeed = 350;
+float Dasher::dashSpeed = 250;
 float Dasher::damage = 4;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {

@@ -4,6 +4,7 @@
 #include "player.hpp"
 #include "border.hpp"
 #include "dasher.hpp"
+#include "spiral.hpp"
 
 void Init(Entity* root) {
   root->addChild(new PostProcessingData());
@@ -12,6 +13,7 @@ void Init(Entity* root) {
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
   root->addChild(new Dasher((Vector2){600, 600}));
+  root->addChild(new Spiraler((Vector2){-600, -600}));
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

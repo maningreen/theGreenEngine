@@ -57,7 +57,7 @@
 
       buildPhase = ''
         mkdir -p build
-        make
+        make -j3
       '';
       
       installPhase = ''
