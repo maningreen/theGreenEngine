@@ -5,6 +5,7 @@
 #include "waveManager.hpp"
 #include "border.hpp"
 #include "spiral.hpp"
+#include "sniper.hpp"
 #include "time.h"
 
 void Init(Entity* root) {
@@ -14,7 +15,8 @@ void Init(Entity* root) {
   root->Children[0]->addChild(new CameraEntity("Camera", &((Player*)(root->Children)[1])->Position));
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
-  root->addChild(new WaveManager());
+  //root->addChild(new WaveManager());
+  root->addChild(new Sniper((Vector2){100, 100}));
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

@@ -37,3 +37,6 @@ $(BUILDDIR)%.o: src/engine/%.cpp
 
 clean:
 	rm -r $(BUILDDIR)*
+
+run: $(ENGINEOUT) $(OBJECTS) game
+	$(BUILDDIR)$(OUT)

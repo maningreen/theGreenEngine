@@ -66,7 +66,7 @@ void Enemy::WrapPosition() {
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
-  return Border::getShortestPathToPoint(this, plr->Position);
+  return Border::getShortestPathToPoint(Position, plr->Position);
 }
 
 void Enemy::manageHealthBar(float r) {
@@ -98,7 +98,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
   //so that's what we wanna do
   Vector2 vectorFromPlayer = Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
   Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->Position);
-  Vector2 vectorToGlobal = Border::getShortestPathToPoint(this, globalPos);
+  Vector2 vectorToGlobal = Border::wrapPos(globalPos);
   //then we do some shmath
   return vectorToGlobal;
 }
