@@ -83,7 +83,7 @@ void Enemy::setPlayer(Player* p) {
   plr = p;
 }
 
-Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
+Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // normalize the offset
   if(plr == nullptr)
     return Vector2Zero();
@@ -114,7 +114,7 @@ void Enemy::setState(unsigned char s) {
 
 float Enemy::getAngleToPlayer() const {
   Vector2 vToP = getShortestVectorToPlayer();
-  return atan2f(vToP.x, vToP.y);
+  return atan2f(vToP.y, vToP.x);
 }
 
 void ManageStates() {

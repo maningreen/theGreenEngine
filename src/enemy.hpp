@@ -35,7 +35,7 @@ class Enemy : public Entity2D {
     void resetStateTime();
 
     void WrapPosition();
-    Vector2 getClosestPointToPlayerWithDistance(float distance);
+    Vector2 getClosestPointToPlayerWithDistance(float distance) const;
 
     void Process(float delta) override;
     void Render() override;

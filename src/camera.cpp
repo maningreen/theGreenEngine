@@ -5,7 +5,7 @@
 #include <string>
 
 float CameraEntity::Smoothing = 10;
-float CameraEntity::DefaultZoom = .4;
+float CameraEntity::DefaultZoom = .2;
 
 #define mouseLean .3
 
@@ -19,7 +19,7 @@ void CameraEntity::ManageCameraMotion(float delta) {
 }
 
 void CameraEntity::Process(float delta) {
-  ManageCameraMotion(delta);
+  //ManageCameraMotion(delta);
   ManageCameraShake(delta);
   Camera.offset = (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
 }

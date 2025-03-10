@@ -2,6 +2,7 @@
 #define snip_h
 
 #include "enemy.hpp"
+#include "laser.hpp"
 
 //wooooo
 class Sniper : public Enemy {
@@ -17,7 +18,10 @@ class Sniper : public Enemy {
 
     Vector2 targetPosition;
 
+    Laser* las;
+
   public:
+
     float getRotation() const;
     float getStateTime() const;
     Vector2 getTargetPosition() const;
@@ -33,7 +37,6 @@ class Sniper : public Enemy {
     void manageStates(float delta) override;
     void Render() override;
   
-
     enum states {
       positioning,
       aiming

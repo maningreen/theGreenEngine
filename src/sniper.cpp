@@ -10,8 +10,10 @@ float Sniper::rotationSpeed = M_PI / 2.0f;
 float Sniper::speed = 2600;
 Color Sniper::defaultColour = PURPLE;
 
-Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0) {
+Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position)) {
   setState(positioning);
+  addChild(las);
+  las->length = 1000;
   Colour = defaultColour;
 }
 
@@ -31,6 +33,9 @@ Vector2 Sniper::getTargetPosition() const { return targetPosition; }
 
 void Sniper::manageStates(float delta) {
   //so here it's pretty easy
+  las->rotation = getAngleToPlayer();
+  las->length = Vector2Length(getShortestVectorToPlayer());
+  las->Position = Position;
   if(getState() == positioning) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
