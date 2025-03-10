@@ -32,18 +32,17 @@ float Spiraler::bulletLifetimeGrowth = .15;
 Spiraler::Spiraler(Vector2 position) : Enemy(position) {
   setState(approaching);
   Radius = DefaultRadius;
-  healthManager->setMaxHealth(startingHealth);
+  getHealthManager()->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
   targetPosition = Vector2Zero();
 }
 
 void Spiraler::Render() {
-  healthManager->getBar()->Render();
+  getHealthManager()->getBar()->Render();
   DrawCircleV(Position, Radius, Colour);
 }
 
-void Spiraler::Process(float delta) {
-  manageHealthBar(Radius);
+void Spiraler::manageStates(float delta) {
   spinTime += delta; 
   if(getState() == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)

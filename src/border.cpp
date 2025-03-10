@@ -39,7 +39,7 @@ Vector2 Border::wrapPos(Vector2 p) {
   return p;
 }
 
-Vector2 Border::getShortestPathToPoint(Entity2D* en, Vector2 point) {
+Vector2 Border::getShortestPathToPoint(const Entity2D* en, Vector2 point) {
   Vector2 vectorTo = Vector2Subtract(point, en->Position);
   if(vectorTo.x < -Length)
     vectorTo.x += Length * 2;

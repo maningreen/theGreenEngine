@@ -20,6 +20,9 @@ float Sniper::getRotationSpeed() { return rotationSpeed; }
 Color Sniper::getDefaultColour() { return defaultColour; }
 //regular
 float Sniper::getRotation() const { return rotation; }
+float Sniper::getStateTime() const { return stateTime; }
 
 void Sniper::Process(float delta) {
+  //we do state shtuff
+  stateTime += delta;
 }

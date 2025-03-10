@@ -11,36 +11,44 @@ class Enemy : public Entity2D {
   private:
     unsigned char state;
 
+    float stateTime;
+    static Player* plr;
+
+    HealthManager* healthManager;
+    void manageHealthBar(float radius);
+
   public:
     Vector2 Velocity;
     Vector2 TargetPos;
 
     float Radius;
 
-    HealthManager* healthManager;
+    Vector2 getShortestVectorToPlayer() const;
+    float getAngleToPlayer() const;
+
+    HealthManager* getHealthManager() const;
+
+    void setState(unsigned char s);
+    unsigned char getState() const;
+
+    float getStateTime() const;
+    void resetStateTime();
+
+    void WrapPosition();
+    Vector2 getClosestPointToPlayerWithDistance(float distance);
 
     void Process(float delta) override;
     void Render() override;
     void Init() override;
 
-    Vector2 getShortestVectorToPlayer();
-
-    float getAngleToPlayer();
-
-    void WrapPosition();
-
-    void manageHealthBar(float radius);
-
-    Vector2 getClosestPointToPlayerWithDistance(float distance);
+    virtual void manageStates(float delta) {};
 
     Enemy(Vector2 position);
     ~Enemy();
 
-    static Player* plr;
     static void setPlayer();
-
-    void setState(unsigned char s);
-    unsigned char getState();
+    static void setPlayer(Player* address);
+    static Player* getPlayer();
 
     static float DefaultRadius;
     static float Speed;

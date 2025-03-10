@@ -14,8 +14,11 @@ class Sniper : public Enemy {
 
     float rotation;
 
+    float stateTime;
+
   public:
     float getRotation() const;
+    float getStateTime() const;
     static float getMinDist();
     static float getMaxDist();
     static float getRotationSpeed();

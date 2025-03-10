@@ -6,7 +6,6 @@
 
 class Dasher : public Enemy {
   private:
-    float stateTime;
     Vector2 stateVector;
 
     static Color defaultCol;
@@ -27,10 +26,9 @@ class Dasher : public Enemy {
   public:
 
     //process
-    void Process(float delta) override;
+    void manageStates(float delta) override;
 
     //getters
-    float getStateTime();
     float getSpeed();
     float getWindupTime();
     float getWindupSpeed();

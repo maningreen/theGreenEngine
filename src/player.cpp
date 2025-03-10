@@ -155,7 +155,7 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
 }
 
 Player::~Player() {
-  Enemy::plr = nullptr;
+  Enemy::setPlayer(nullptr);
   cam->Follow = nullptr;
 }
 

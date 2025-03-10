@@ -16,7 +16,7 @@ class Spiraler : public Enemy {
     float spinTime;
     float shotTime;
 
-    void Process(float delta) override; //yeah that's a good idea
+    void manageStates(float delta) override; //yeah that's a good idea
     void Render() override;
 
     Vector2 getTargetPosition();

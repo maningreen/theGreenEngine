@@ -2,6 +2,7 @@
 #include "border.hpp"
 #include "engine/entity.hpp"
 #include "engine/core.h"
+#include "healthManager.hpp"
 #include "playerBullet.hpp"
 #include "bars.hpp"
 #include "include.h"
@@ -39,6 +40,8 @@ void Enemy::Init() {
 
 void Enemy::Process(float delta) {
   manageHealthBar(Radius);
+  stateTime += delta;
+  manageStates(delta);
   WrapPosition();
 }
 
@@ -60,7 +63,7 @@ void Enemy::WrapPosition() {
     Position.y -= Border::Length * 2;
 }
 
-Vector2 Enemy::getShortestVectorToPlayer() {
+Vector2 Enemy::getShortestVectorToPlayer() const {
   return Border::getShortestPathToPoint(this, plr->Position);
 }
 
@@ -72,6 +75,10 @@ void Enemy::manageHealthBar(float r) {
 
 void Enemy::setPlayer() {
   plr = (Player*)Engine::searchTreeForEntity(&getRoot()->Children, "Player");
+}
+
+void Enemy::setPlayer(Player* p) {
+  plr = p;
 }
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
@@ -94,7 +101,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) {
   return vectorToGlobal;
 }
 
-unsigned char Enemy::getState() {
+unsigned char Enemy::getState() const {
   return state;
 }
 
@@ -102,7 +109,26 @@ void Enemy::setState(unsigned char s) {
   state = s;
 }
 
-float Enemy::getAngleToPlayer() {
+float Enemy::getAngleToPlayer() const {
   Vector2 vToP = getShortestVectorToPlayer();
   return atan2f(vToP.x, vToP.y);
+}
+
+void ManageStates() {
+}
+
+float Enemy::getStateTime() const {
+  return stateTime;
+}
+
+Player* Enemy::getPlayer() {
+  return plr;
+}
+
+HealthManager* Enemy::getHealthManager() const {
+  return healthManager;
+}
+
+void Enemy::resetStateTime() {
+  stateTime = 0;
 }
