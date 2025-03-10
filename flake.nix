@@ -63,6 +63,7 @@
       installPhase = ''
         mkdir -p $out/bin
         install -t $out/bin build/engine
+        cp ${./resources} -r $out/bin
       '';
 
     };

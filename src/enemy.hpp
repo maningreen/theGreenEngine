@@ -25,6 +25,8 @@ class Enemy : public Entity2D {
 
     Vector2 getShortestVectorToPlayer();
 
+    float getAngleToPlayer();
+
     void WrapPosition();
 
     void manageHealthBar(float radius);

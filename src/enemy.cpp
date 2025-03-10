@@ -6,7 +6,7 @@
 #include "bars.hpp"
 #include "include.h"
 #include <vector>
-#include <iostream>
+#include <cmath>
 
 float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
@@ -100,4 +100,9 @@ unsigned char Enemy::getState() {
 
 void Enemy::setState(unsigned char s) {
   state = s;
+}
+
+float Enemy::getAngleToPlayer() {
+  Vector2 vToP = getShortestVectorToPlayer();
+  return atan2f(vToP.x, vToP.y);
 }
