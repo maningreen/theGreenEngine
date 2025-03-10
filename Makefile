@@ -36,5 +36,4 @@ $(BUILDDIR)%.o: src/engine/%.cpp
 	$(CC) -c $< -o $@
 
 clean:
-	rm -rf $(BUILDDIR)
-	mkdir $(BUILDDIR)
+	rm -r $(BUILDDIR)*

@@ -65,9 +65,6 @@ void Spiraler::manageStates(float delta) {
       setState(spinning);
     }
   }
-  Border::wrapEntity(this);
-  Velocity = Vector2Scale(Velocity, friction * delta);
-  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
 }
 
 Vector2 Spiraler::getTargetPosition() {

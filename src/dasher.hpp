@@ -22,7 +22,6 @@ class Dasher : public Enemy {
     static float dashSpeed;
     static float damage;
 
-    void swapState(unsigned char s);
   public:
 
     //process

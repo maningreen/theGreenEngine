@@ -40,9 +40,11 @@ void Enemy::Init() {
 
 void Enemy::Process(float delta) {
   manageHealthBar(Radius);
+  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
+  Velocity = Vector2Scale(Velocity, friction * delta);
   stateTime += delta;
   manageStates(delta);
-  WrapPosition();
+  Border::wrapEntity(this);
 }
 
 void Enemy::Render() {
@@ -107,6 +109,7 @@ unsigned char Enemy::getState() const {
 
 void Enemy::setState(unsigned char s) {
   state = s;
+  resetStateTime();
 }
 
 float Enemy::getAngleToPlayer() const {

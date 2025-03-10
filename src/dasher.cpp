@@ -16,7 +16,7 @@ float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 1;
 float Dasher::recoverSpeedThreshold = 260;
 float Dasher::defaultHealth = 2;
-float Dasher::dashTime = .2;
+float Dasher::dashTime = .5;
 float Dasher::dashSpeed = 200000;
 float Dasher::damage = 4;
 
@@ -24,10 +24,6 @@ Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
   getHealthManager()->setMaxHealth(defaultHealth);
   Colour = defaultCol;
-}
-
-void Dasher::swapState(unsigned char s) {
-  setState(s);
 }
 
 float Dasher::getDefaultHealth() {
@@ -80,39 +76,35 @@ void Dasher::manageStates(float delta) {
     //if we close enough we swap states
     if(Vector2DistanceSqr(getPlayer()->Position, Position) <= maximumDist * maximumDist)
       //we close enough :D
-      swapState(winding);
+      setState(winding);
   } else if(getState() == recovery) {
     //we wait :p
     if(Vector2LengthSqr(Velocity) >= recoverSpeedThreshold * recoverSpeedThreshold)
-      swapState(recovery); // a touch fucked up but :p
+      resetStateTime();
     if(getStateTime() > recoveryTime)
-      swapState(approaching);
+      setState(approaching);
   } else if(getState() == winding) {
-    //i have no fuckin clue lets skip this for now
     //then we set our state vector
     stateVector = Vector2Normalize(getShortestVectorToPlayer());
     //so what we wanna do, get the shortest vector to player
     //then we scale this to windupSpeed
     Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector), -getStateTime() * windupSpeed), Velocity);
     if(getStateTime() > windupTime) {
-      swapState(dashing);
+      setState(dashing);
       Velocity = Vector2Zero();
     }
   } else if(getState() == dashing) {
     //we... dash?
     Velocity = Vector2Scale(stateVector, dashSpeed * delta);
     if(getStateTime() > dashTime)
-      swapState(recovery);
+      setState(recovery);
     //we also gotta check some collision shtuff
     if(Vector2DistanceSqr(Position, getPlayer()->Position) < (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       //for psuedo i-frames
       getPlayer()->getHealthManager()->applyDamage(damage);
-      swapState(recovery);
+      setState(recovery);
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
   // :D
-  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
-  Velocity = Vector2Scale(Velocity, friction * delta);
-  Border::wrapEntity(this);
 }
