@@ -38,18 +38,18 @@ void Laser::Render() {
     bool swapY = preWrap.y != endPos.y;
     
     float originPreX = localOffset.x;
-    float originPostX = endPos.x + (left ? Border::Length : -Border::Length);
+    float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
 
     float originPreY = localOffset.y;
-    float originPostY = endPos.y + (top ? Border::Length : -Border::Length);
+    float originPostY = endPos.y + (swapY ? (top ? Border::Length : -Border::Length) : 0);
 
-    float percX = originPostX / originPreX;
-    float percY = originPostY / originPreY;
+    float perc = originPostX / originPreX;
 
-    Vector2 collisionPosition = Vector2Add(Position, (Vector2){localOffset.x * (1 - percX), localOffset.y * (1 - percY)});
+    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - perc);
+    Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
 
     DrawLineEx(Position, collisionPosition, width, colour);
-    DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)}, endPos, width, colour);
+    DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y}, endPos, width, colour);
     DrawCircleV(collisionPosition, 50, BLUE);
   } else
     DrawLineEx(Position, endPos, width, colour);
