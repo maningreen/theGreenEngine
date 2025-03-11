@@ -43,13 +43,14 @@ void Laser::Render() {
     float originPreY = localOffset.y;
     float originPostY = endPos.y + (swapY ? (top ? Border::Length : -Border::Length) : 0);
 
-    float perc = originPostX / originPreX;
+    float percX = originPostX / originPreX;
+    float percY = originPostY / originPreY;
 
-    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - perc);
+    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
     Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
 
     DrawLineEx(Position, collisionPosition, width, colour);
-    DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y}, endPos, width, colour);
+    DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)}, endPos, width, colour);
     DrawCircleV(collisionPosition, 50, BLUE);
   } else
     DrawLineEx(Position, endPos, width, colour);
