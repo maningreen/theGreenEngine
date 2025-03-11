@@ -34,27 +34,23 @@ void Laser::Render() {
     bool left = endPos.x < 0;
     bool top = endPos.y < 0;
 
-
     bool swapX = preWrap.x != endPos.x;
     bool swapY = preWrap.y != endPos.y;
     
-    float originPreX = preWrap.x - Position.x;
+    float originPreX = localOffset.x;
     float originPostX = endPos.x + (left ? Border::Length : -Border::Length);
 
-    float originPreY = preWrap.y - Position.y;
+    float originPreY = localOffset.y;
     float originPostY = endPos.y + (top ? Border::Length : -Border::Length);
 
-    float percX = abs(originPostX / originPreX);
-    float percY = abs(originPostY / originPreY);
+    float percX = originPostX / originPreX;
+    float percY = originPostY / originPreY;
 
     Vector2 collisionPosition = Vector2Add(Position, (Vector2){localOffset.x * (1 - percX), localOffset.y * (1 - percY)});
-
-    printf("%f %f\n", percX, percY);
 
     DrawLineEx(Position, collisionPosition, width, colour);
     DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)}, endPos, width, colour);
     DrawCircleV(collisionPosition, 50, BLUE);
-
   } else
     DrawLineEx(Position, endPos, width, colour);
 }
