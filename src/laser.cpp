@@ -49,9 +49,16 @@ void Laser::Render() {
     Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
     Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
 
+    Vector2 playerCollisionPoint = (Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)};
+
     DrawLineEx(Position, collisionPosition, width, colour);
-    DrawLineEx((Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)}, endPos, width, colour);
-    DrawCircleV(collisionPosition, 50, BLUE);
+    if(swapX ^ swapY)
+      DrawLineEx(playerCollisionPoint, endPos, width, colour);
+    else {
+      localOffset = (Vector2){cosf(rotation) * length * percX, sinf(rotation) * length * percY};
+      DrawLineV(Vector2Add(localOffset, collisionPosition), collisionPosition, colour);
+    }
+    DrawCircleV(Border::wrapPos(collisionPosition), 50, BLUE);
   } else
     DrawLineEx(Position, endPos, width, colour);
 }
