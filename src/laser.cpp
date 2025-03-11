@@ -37,28 +37,42 @@ void Laser::Render() {
     bool swapX = preWrap.x != endPos.x;
     bool swapY = preWrap.y != endPos.y;
     
-    float originPreX = localOffset.x;
     float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
-
-    float originPreY = localOffset.y;
     float originPostY = endPos.y + (swapY ? (top ? Border::Length : -Border::Length) : 0);
 
-    float percX = originPostX / originPreX;
-    float percY = originPostY / originPreY;
+    DrawCircleV((Vector2){originPostX, originPostY}, 50, BLUE);
 
-    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
+    float percX = originPostX / localOffset.x;
+    float percY = originPostY / localOffset.y;
+
+    Vector2 vectorToCollision = Vector2Scale(localOffset, (1 - (swapX ? percX : percY)));
     Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
 
     Vector2 playerCollisionPoint = (Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)};
 
     DrawLineEx(Position, collisionPosition, width, colour);
+    //DrawCircleV(collisionPosition, 50, BLUE);
     if(swapX ^ swapY)
       DrawLineEx(playerCollisionPoint, endPos, width, colour);
     else {
-      localOffset = (Vector2){cosf(rotation) * length * percX, sinf(rotation) * length * percY};
-      DrawLineV(Vector2Add(localOffset, collisionPosition), collisionPosition, colour);
+      Vector2 remainingVector = (Vector2){localOffset.x * percX, localOffset.y * percY};
+      //what we wanna do is get whichevery has a larger x/y
+      bool xLarger = localOffset.x > localOffset.y;
+      printf("%d\n", xLarger);
+      Vector2 wrapPos;
+      Vector2 secondColPos = collisionPosition;
+      if(xLarger) {
+        wrapPos = Border::wrapPosX(Vector2Add(remainingVector, collisionPosition));
+        secondColPos.x *= -1;
+      } else {
+        wrapPos = Border::wrapPosY(Vector2Add(remainingVector, collisionPosition));
+        secondColPos.y *= -1;
+      }
+      DrawCircleV(wrapPos, 50, ORANGE);
+      DrawCircleV(secondColPos, 50, ORANGE);
+      DrawCircleV(remainingVector, 50, ORANGE);
+      printf("%f %f\n", wrapPos.x, wrapPos.y);
     }
-    DrawCircleV(Border::wrapPos(collisionPosition), 50, BLUE);
   } else
     DrawLineEx(Position, endPos, width, colour);
 }

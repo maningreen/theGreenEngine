@@ -28,15 +28,23 @@ void Border::wrapEntity(Entity2D* en) {
 }
 
 Vector2 Border::wrapPos(Vector2 p) {
-  if(p.x < -Length)
-    p.x += Length * 2;
-  else if(p.x > Length)
-    p.x -= Length * 2;
-  if(p.y < -Length)
-    p.y += Length * 2;
-  else if(p.y > Length)
-    p.y -= Length * 2;
-  return p;
+  return (Vector2){wrapPosX(p).x, wrapPosY(p).y};
+}
+
+Vector2 Border::wrapPosX(Vector2 v) {
+  if(v.x < -Length)
+    v.x += Length * 2;
+  else if(v.x > Length)
+    v.x -= Length * 2;
+  return v;
+}
+
+Vector2 Border::wrapPosY(Vector2 v) {
+  if(v.y < -Length)
+    v.y += Length * 2;
+  else if(v.y > Length)
+    v.y -= Length * 2;
+  return v;
 }
 
 Vector2 Border::getShortestPathToPoint(const Entity2D* en, const Vector2 point) {
