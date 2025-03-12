@@ -50,29 +50,21 @@ void Laser::Render() {
 
     Vector2 playerCollisionPoint = (Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)};
 
-    DrawLineEx(Position, collisionPosition, width, colour);
-    //DrawCircleV(collisionPosition, 50, BLUE);
     if(swapX ^ swapY)
       DrawLineEx(playerCollisionPoint, endPos, width, colour);
     else {
-      Vector2 remainingVector = (Vector2){localOffset.x * percX, localOffset.y * percY};
-      //what we wanna do is get whichevery has a larger x/y
-      bool xLarger = localOffset.x > localOffset.y;
-      printf("%d\n", xLarger);
-      Vector2 wrapPos;
-      Vector2 secondColPos = collisionPosition;
-      if(xLarger) {
-        wrapPos = Border::wrapPosX(Vector2Add(remainingVector, collisionPosition));
-        secondColPos.x *= -1;
-      } else {
-        wrapPos = Border::wrapPosY(Vector2Add(remainingVector, collisionPosition));
-        secondColPos.y *= -1;
-      }
-      DrawCircleV(wrapPos, 50, ORANGE);
-      DrawCircleV(secondColPos, 50, ORANGE);
-      DrawCircleV(remainingVector, 50, ORANGE);
-      printf("%f %f\n", wrapPos.x, wrapPos.y);
+      //get the length of y is relative to the length of x
+      float slope = vectorToCollision.x / vectorToCollision.y;
+      //get how much the y is over (if any)
+      float overY = 0;
+      if(collisionPosition.y >= Border::Length)
+        overY = Border::Length - collisionPosition.y;
+      printf("%f\n", overY);
+      collisionPosition.x += overY * slope;
+      collisionPosition.y += overY;
     }
+    DrawLineEx(Position, collisionPosition, width, colour);
+    DrawCircleV(collisionPosition, 50, BLUE);
   } else
     DrawLineEx(Position, endPos, width, colour);
 }

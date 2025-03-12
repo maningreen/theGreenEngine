@@ -40,3 +40,5 @@ clean:
 
 run: $(ENGINEOUT) $(OBJECTS) game
 	$(BUILDDIR)$(OUT)
+
+all: clean game
