@@ -26,9 +26,9 @@ float Laser::getDefaultWidth() {
 
 void Laser::Render() {
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
-  Vector2 preWrap = Vector2Add(Position, localOffset);
-  Vector2 endPos = Border::wrapPos(preWrap);
   Vector2 rayOrigin = Position;
+  Vector2 preWrap = Vector2Add(rayOrigin, localOffset);
+  Vector2 endPos = Border::wrapPos(preWrap);
 
   if(preWrap == endPos)
     DrawLineEx(Position, endPos, width, colour);
@@ -37,21 +37,23 @@ void Laser::Render() {
     bool left = endPos.x < 0;
     bool top = endPos.y < 0;
 
-    bool swapX = preWrap.x != endPos.x;
-    bool swapY = preWrap.y != endPos.y;
+    bool swapX = preWrap.x - Border::Length > preWrap.y - Border::Length;
     
     float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
-    float originPostY = endPos.y + (swapY ? (top ? Border::Length : -Border::Length) : 0);
+    float originPostY = endPos.y + (!swapX ? (top ? Border::Length : -Border::Length) : 0);
 
     float percX = originPostX / localOffset.x;
     float percY = originPostY / localOffset.y;
 
     Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
     Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
-    DrawCircleV(collisionPosition, 50, BLUE);
     DrawLineEx(rayOrigin, collisionPosition, width, colour);
     localOffset = Vector2Subtract(localOffset, vectorToCollision);
-    rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, swapY ? -collisionPosition.y : collisionPosition.y};
+    rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, !swapX ? -collisionPosition.y : collisionPosition.y};
     preWrap = Vector2Add(Position, localOffset);
+
+    if(preWrap != endPos) {}
+
   }
+  DrawLineEx(rayOrigin, endPos, width, colour);
 }
