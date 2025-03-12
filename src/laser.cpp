@@ -28,8 +28,11 @@ void Laser::Render() {
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
   Vector2 preWrap = Vector2Add(Position, localOffset);
   Vector2 endPos = Border::wrapPos(preWrap);
+  Vector2 rayOrigin = Position;
 
-  if(preWrap != endPos) {
+  if(preWrap == endPos)
+    DrawLineEx(Position, endPos, width, colour);
+  else if(preWrap != endPos) {
     //get intersection
     bool left = endPos.x < 0;
     bool top = endPos.y < 0;
@@ -43,30 +46,12 @@ void Laser::Render() {
     float percX = originPostX / localOffset.x;
     float percY = originPostY / localOffset.y;
 
-    Vector2 vectorToCollision = Vector2Scale(localOffset, (1 - (swapX ? percX : percY)));
+    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
     Vector2 collisionPosition = Vector2Add(Position, vectorToCollision);
-
-    Vector2 playerCollisionPoint = (Vector2){collisionPosition.x * (swapX ? -1 : 1), collisionPosition.y * (swapY ? -1 : 1)};
-
-    if(swapX ^ swapY)
-      DrawLineEx(playerCollisionPoint, endPos, width, colour);
-    else {
-      //get the length of x is relative to the length of y
-      float slope = vectorToCollision.x / vectorToCollision.y;
-      //get how much the y is over (if any)
-      float overY = 0;
-      if(collisionPosition.y >= Border::Length)
-        overY = Border::Length - collisionPosition.y;
-      collisionPosition.x += overY * slope;
-      collisionPosition.y += overY;
-      bool swapX = collisionPosition.x > collisionPosition.y;
-      Vector2 firstLoopPos = {swapX ? -vectorToCollision.x : collisionPosition.x, swapX ? collisionPosition.y : -collisionPosition.y};
-      Vector2 secondLoopPos = {firstLoopPos.x, firstLoopPos.y};
-      DrawCircleV(firstLoopPos, 50, BLUE);
-      DrawCircleV(secondLoopPos, 50, BLUE);
-    }
-    DrawLineEx(Position, collisionPosition, width, colour);
     DrawCircleV(collisionPosition, 50, BLUE);
-  } else
-    DrawLineEx(Position, endPos, width, colour);
+    DrawLineEx(rayOrigin, collisionPosition, width, colour);
+    localOffset = Vector2Subtract(localOffset, vectorToCollision);
+    rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, swapY ? -collisionPosition.y : collisionPosition.y};
+    preWrap = Vector2Add(Position, localOffset);
+  }
 }
