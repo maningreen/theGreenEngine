@@ -30,6 +30,8 @@ void Laser::Render() {
   Vector2 preWrap = Vector2Add(rayOrigin, localOffset);
   Vector2 endPos = Border::wrapPos(preWrap);
 
+  int i = 0;
+
   if(preWrap == endPos)
     DrawLineEx(Position, endPos, width, colour);
   else while(abs(preWrap.x - endPos.x) > 10 || abs(preWrap.y - endPos.y) > 10) {
@@ -48,11 +50,13 @@ void Laser::Render() {
     Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
     Vector2 collisionPosition = Vector2Add(rayOrigin, vectorToCollision);
 
-    DrawLineEx(rayOrigin, collisionPosition, width, GREEN);
+    DrawLineEx(rayOrigin, collisionPosition, width, colour);
     
     localOffset = Vector2Subtract(localOffset, vectorToCollision);
     rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, !swapX ? -collisionPosition.y : collisionPosition.y};
     preWrap = Vector2Add(rayOrigin, localOffset);
+    if(i++ > 5)
+      break;
   }
   DrawLineEx(rayOrigin, endPos, width, colour);
 }

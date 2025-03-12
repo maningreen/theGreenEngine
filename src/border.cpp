@@ -2,6 +2,8 @@
 #include "engine/entity.hpp"
 #include "include.h"
 
+#define abs(x) (x < 0 ? -x : x)
+
 float Border::Length = 2000;
 
 Border::Border() : Entity2D("Border", (Vector2){0, 0}){
@@ -17,14 +19,7 @@ void Border::Process(float delta) {
 }
 
 void Border::wrapEntity(Entity2D* en) {
-  if(en->Position.x < -Length)
-    en->Position.x += Length * 2;
-  else if(en->Position.x > Length)
-    en->Position.x -= Length * 2;
-  if(en->Position.y < -Length)
-    en->Position.y += Length * 2;
-  else if(en->Position.y > Length)
-    en->Position.y -= Length * 2;
+  en->Position = wrapPos(en->Position);
 }
 
 Vector2 Border::wrapPos(Vector2 p) {
@@ -32,18 +27,22 @@ Vector2 Border::wrapPos(Vector2 p) {
 }
 
 Vector2 Border::wrapPosX(Vector2 v) {
-  if(v.x < -Length)
-    v.x += Length * 2;
-  else if(v.x > Length)
-    v.x -= Length * 2;
+  while(abs(v.x) > Border::Length) {
+    if(v.x < -Length)
+      v.x += Length * 2;
+    else if(v.x > Length)
+      v.x -= Length * 2;
+  }
   return v;
 }
 
 Vector2 Border::wrapPosY(Vector2 v) {
-  if(v.y < -Length)
-    v.y += Length * 2;
-  else if(v.y > Length)
-    v.y -= Length * 2;
+  while(abs(v.y) > Border::Length) {
+    if(v.y < -Length)
+      v.y += Length * 2;
+    else if(v.y > Length)
+      v.y -= Length * 2;
+  }
   return v;
 }
 
