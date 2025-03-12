@@ -34,12 +34,12 @@ void Laser::Render() {
 
   if(preWrap == endPos)
     DrawLineEx(Position, endPos, width, colour);
-  else while(abs(preWrap.x - endPos.x) > 10 || abs(preWrap.y - endPos.y) > 10) {
+  else while(abs(preWrap.x - endPos.x) > 1 || abs(preWrap.y - endPos.y) > 1) {
     //get intersection
     bool left = endPos.x < 0;
     bool top = endPos.y < 0;
 
-    bool swapX = preWrap.x - Border::Length > preWrap.y - Border::Length;
+    bool swapX = abs(preWrap.x) - Border::Length > abs(preWrap.y) - Border::Length;
     
     float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
     float originPostY = endPos.y + (!swapX ? (top ? Border::Length : -Border::Length) : 0);

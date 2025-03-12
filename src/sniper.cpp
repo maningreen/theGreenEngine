@@ -34,7 +34,7 @@ Vector2 Sniper::getTargetPosition() const { return targetPosition; }
 void Sniper::manageStates(float delta) {
   //so here it's pretty easy
   las->rotation = getAngleToPlayer();
-  las->length = Vector2Length(getShortestVectorToPlayer());
+  las->length = Border::Length;;//Vector2Length(getShortestVectorToPlayer());
   las->Position = Position;
   if(getState() == positioning) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));
