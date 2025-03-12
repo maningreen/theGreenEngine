@@ -35,7 +35,6 @@ class Sniper : public Enemy {
     ~Sniper();
 
     void manageStates(float delta) override;
-    void Render() override;
   
     enum states {
       positioning,

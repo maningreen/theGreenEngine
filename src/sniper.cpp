@@ -46,8 +46,3 @@ void Sniper::manageStates(float delta) {
     printf("Current state is invalid with value %d on Sniper", getState());
   }
 }
-
-void Sniper::Render() {
-  DrawCircleV(Position, Radius, Colour);
-  DrawCircleV(targetPosition, 10, WHITE);
-}
