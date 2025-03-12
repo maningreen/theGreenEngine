@@ -40,9 +40,7 @@ void Sniper::manageStates(float delta) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToTarget), speed * delta);
-    //Velocity = Vector2Add(Velocity, velToAdd);
-    Position.x = Border::Length - 500;
-    Position.y = Border::Length - 500;
+    Velocity = Vector2Add(Velocity, velToAdd);
   } else if(getState() == aiming) {
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());
