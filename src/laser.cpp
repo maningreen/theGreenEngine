@@ -47,7 +47,6 @@ void Laser::Render() {
     {
       float slope = tan(rotation);
       float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
-      DrawCircle(left ? Border::Length : -Border::Length,yPosAtBorder, 60, WHITE);
       swapX = abs(yPosAtBorder) <= Border::Length;
       //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
       if(swapX) {
