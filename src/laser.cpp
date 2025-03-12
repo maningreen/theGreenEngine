@@ -40,8 +40,6 @@ void Laser::Render() {
     float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
     float originPostY = endPos.y + (swapY ? (top ? Border::Length : -Border::Length) : 0);
 
-    DrawCircleV((Vector2){originPostX, originPostY}, 50, BLUE);
-
     float percX = originPostX / localOffset.x;
     float percY = originPostY / localOffset.y;
 
@@ -53,15 +51,19 @@ void Laser::Render() {
     if(swapX ^ swapY)
       DrawLineEx(playerCollisionPoint, endPos, width, colour);
     else {
-      //get the length of y is relative to the length of x
+      //get the length of x is relative to the length of y
       float slope = vectorToCollision.x / vectorToCollision.y;
       //get how much the y is over (if any)
       float overY = 0;
       if(collisionPosition.y >= Border::Length)
         overY = Border::Length - collisionPosition.y;
-      printf("%f\n", overY);
       collisionPosition.x += overY * slope;
       collisionPosition.y += overY;
+      bool swapX = collisionPosition.x > collisionPosition.y;
+      Vector2 firstLoopPos = {swapX ? -vectorToCollision.x : collisionPosition.x, swapX ? collisionPosition.y : -collisionPosition.y};
+      Vector2 secondLoopPos = {firstLoopPos.x, firstLoopPos.y};
+      DrawCircleV(firstLoopPos, 50, BLUE);
+      DrawCircleV(secondLoopPos, 50, BLUE);
     }
     DrawLineEx(Position, collisionPosition, width, colour);
     DrawCircleV(collisionPosition, 50, BLUE);
