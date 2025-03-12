@@ -1,7 +1,10 @@
 #include "laser.hpp"
 #include "engine/entity.hpp"
 #include "border.hpp"
+#include <cmath>
 #include <stdio.h>
+
+#define cot(x) (cos(x) / sin(x))
 
 Color Laser::defaultColour = WHITE;
 float Laser::defaultLength = 100;
@@ -36,36 +39,37 @@ void Laser::Render() {
     DrawLineEx(Position, endPos, width, colour);
   else while(abs(preWrap.x - endPos.x) > 100 || abs(preWrap.y - endPos.y) > 100) {
     //get intersection
-    bool left = endPos.x < 0;
-    bool top = endPos.y < 0;
+    bool left = localOffset.x > 0;
+    bool top = localOffset.y > 0;
 
     bool swapX;
+    Vector2 collisionPosition;
     {
-      float slope = tan(rotation);
-      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
+      double slope = tan(rotation);
+      double yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
+      DrawCircle(left ? Border::Length : -Border::Length,yPosAtBorder, 60, WHITE);
       swapX = abs(yPosAtBorder) <= Border::Length;
       if(i == 0)
         printf("%b\n", swapX);
       //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
-      float variablePosition;
-      if(swapX)
+      double variablePosition;
+      if(swapX) {
         variablePosition = yPosAtBorder;
-      else
-        variablePosition = rayOrigin.x + ((1 / slope) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
+        collisionPosition.y = variablePosition;
+        collisionPosition.x = left ? Border::Length : -Border::Length;
+      }
+      else {
+        variablePosition = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
+        collisionPosition.x = variablePosition;
+        collisionPosition.y = top ? Border::Length : -Border::Length;
+      }
+      DrawCircleV(collisionPosition, 60, GRAY);
+      Vector2 vectorToCol = Vector2Subtract(collisionPosition, rayOrigin);
+      localOffset = Vector2Subtract(localOffset, vectorToCol);
     }
-    
-    float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
-    float originPostY = endPos.y + (!swapX ? (top ? Border::Length : -Border::Length) : 0);
-
-    float percX = originPostX / localOffset.x;
-    float percY = originPostY / localOffset.y;
-
-    Vector2 vectorToCollision = Vector2Scale(localOffset, 1 - (swapX ? percX : percY));
-    Vector2 collisionPosition = Vector2Add(rayOrigin, vectorToCollision);
 
     DrawLineEx(rayOrigin, collisionPosition, width, colour);
     
-    localOffset = Vector2Subtract(localOffset, vectorToCollision);
     rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, !swapX ? -collisionPosition.y : collisionPosition.y};
     preWrap = Vector2Add(rayOrigin, localOffset);
     if(++i > 5)
