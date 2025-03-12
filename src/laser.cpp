@@ -34,12 +34,25 @@ void Laser::Render() {
 
   if(preWrap == endPos)
     DrawLineEx(Position, endPos, width, colour);
-  else while(abs(preWrap.x - endPos.x) > 1 || abs(preWrap.y - endPos.y) > 1) {
+  else while(abs(preWrap.x - endPos.x) > 100 || abs(preWrap.y - endPos.y) > 100) {
     //get intersection
     bool left = endPos.x < 0;
     bool top = endPos.y < 0;
 
-    bool swapX = abs(preWrap.x) - Border::Length > abs(preWrap.y) - Border::Length;
+    bool swapX;
+    {
+      float slope = tan(rotation);
+      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
+      swapX = abs(yPosAtBorder) <= Border::Length;
+      if(i == 0)
+        printf("%b\n", swapX);
+      //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
+      float variablePosition;
+      if(swapX)
+        variablePosition = yPosAtBorder;
+      else
+        variablePosition = rayOrigin.x + ((1 / slope) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
+    }
     
     float originPostX = endPos.x + (swapX ? (left ? Border::Length : -Border::Length) : 0);
     float originPostY = endPos.y + (!swapX ? (top ? Border::Length : -Border::Length) : 0);
@@ -55,7 +68,7 @@ void Laser::Render() {
     localOffset = Vector2Subtract(localOffset, vectorToCollision);
     rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, !swapX ? -collisionPosition.y : collisionPosition.y};
     preWrap = Vector2Add(rayOrigin, localOffset);
-    if(i++ > 5)
+    if(++i > 5)
       break;
   }
   DrawLineEx(rayOrigin, endPos, width, colour);
