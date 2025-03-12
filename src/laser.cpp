@@ -39,8 +39,8 @@ void Laser::Render() {
     DrawLineEx(Position, endPos, width, colour);
   else while(abs(preWrap.x - endPos.x) > 100 || abs(preWrap.y - endPos.y) > 100) {
     //get intersection
-    bool left = localOffset.x > 0;
-    bool top = localOffset.y > 0;
+    bool left = localOffset.x >= 0;
+    bool top = localOffset.y >= 0;
 
     bool swapX;
     Vector2 collisionPosition;
@@ -58,7 +58,6 @@ void Laser::Render() {
         collisionPosition.x = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
         collisionPosition.y = top ? Border::Length : -Border::Length;
       }
-      DrawCircleV(collisionPosition, 60, GRAY);
       Vector2 vectorToCol = Vector2Subtract(collisionPosition, rayOrigin);
       localOffset = Vector2Subtract(localOffset, vectorToCol);
     }
@@ -67,8 +66,6 @@ void Laser::Render() {
     
     rayOrigin = {swapX ? -collisionPosition.x : collisionPosition.x, !swapX ? -collisionPosition.y : collisionPosition.y};
     preWrap = Vector2Add(rayOrigin, localOffset);
-    if(++i > 5)
-      break;
   }
   DrawLineEx(rayOrigin, endPos, width, colour);
 }
