@@ -45,22 +45,17 @@ void Laser::Render() {
     bool swapX;
     Vector2 collisionPosition;
     {
-      double slope = tan(rotation);
-      double yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
+      float slope = tan(rotation);
+      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
       DrawCircle(left ? Border::Length : -Border::Length,yPosAtBorder, 60, WHITE);
       swapX = abs(yPosAtBorder) <= Border::Length;
-      if(i == 0)
-        printf("%b\n", swapX);
       //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
-      double variablePosition;
       if(swapX) {
-        variablePosition = yPosAtBorder;
-        collisionPosition.y = variablePosition;
+        collisionPosition.y = yPosAtBorder;
         collisionPosition.x = left ? Border::Length : -Border::Length;
       }
       else {
-        variablePosition = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
-        collisionPosition.x = variablePosition;
+        collisionPosition.x = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
         collisionPosition.y = top ? Border::Length : -Border::Length;
       }
       DrawCircleV(collisionPosition, 60, GRAY);
