@@ -9,7 +9,7 @@ ENGINEOUT = build/libengine.a
 
 # define misc
 CC = g++
-RAYLIB ?= ./external/raylib-5.5/src/
+RAYLIB ?= ./external/raylib-5.5
 
 # flags
 ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine

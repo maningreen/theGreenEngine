@@ -7,7 +7,7 @@
 
 float Sniper::minDist = Border::Length / 1.6f;
 float Sniper::maxDist = Border::Length / 1.2f;
-float Sniper::rotationSpeed = M_PI / 2.0f;
+float Sniper::rotationSpeed = M_PI;
 float Sniper::speed = 2600;
 float Sniper::defaultHealth = 4;
 float Sniper::maxDistFromTargetPos = 4;
@@ -49,12 +49,12 @@ void Sniper::manageStates(float delta) {
     else if(rotDist > M_PI) 
       rotation += M_PI * 2;
     rotDist = plrAngle - rotation;
-    rotationalVelocity += rotDist * delta;
+    rotationalVelocity += rotDist * rotationSpeed * delta;
     rotation += rotationalVelocity * delta;
     las->rotation = rotation;
+    las->length = Border::Length * 30;//Vector2Length(getShortestVectorToPlayer()) * 50;
     rotationalVelocity *= friction * delta;
   }
-  las->length = Vector2Length(getShortestVectorToPlayer());
   las->Position = Position;
   if(getState() == positioning) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));

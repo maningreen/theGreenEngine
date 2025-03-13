@@ -37,29 +37,26 @@ void Laser::Render() {
 
   if(preWrap == endPos)
     DrawLineEx(Position, endPos, width, colour);
-  else while(abs(preWrap.x - endPos.x) > 100 || abs(preWrap.y - endPos.y) > 100) {
+  else while(abs(preWrap.x - endPos.x) > 10 || abs(preWrap.y - endPos.y) > 10) {
     //get intersection
     bool left = localOffset.x >= 0;
     bool top = localOffset.y >= 0;
 
     bool swapX;
     Vector2 collisionPosition;
-    {
-      float slope = tan(rotation);
-      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
-      swapX = abs(yPosAtBorder) <= Border::Length;
-      //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
-      if(swapX) {
-        collisionPosition.y = yPosAtBorder;
-        collisionPosition.x = left ? Border::Length : -Border::Length;
-      }
-      else {
-        collisionPosition.x = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
-        collisionPosition.y = top ? Border::Length : -Border::Length;
-      }
-      Vector2 vectorToCol = Vector2Subtract(collisionPosition, rayOrigin);
-      localOffset = Vector2Subtract(localOffset, vectorToCol);
+    float slope = tan(rotation);
+    float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
+    swapX = abs(yPosAtBorder) <= Border::Length;
+    //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
+    if(swapX) {
+      collisionPosition.y = yPosAtBorder;
+      collisionPosition.x = left ? Border::Length : -Border::Length;
+    } else {
+      collisionPosition.x = rayOrigin.x + ((cot(rotation)) * ((top ? Border::Length : -Border::Length) - rayOrigin.y));
+      collisionPosition.y = top ? Border::Length : -Border::Length;
     }
+    Vector2 vectorToCol = Vector2Subtract(collisionPosition, rayOrigin);
+    localOffset = Vector2Subtract(localOffset, vectorToCol);
 
     DrawLineEx(rayOrigin, collisionPosition, width, colour);
     
