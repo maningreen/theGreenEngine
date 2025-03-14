@@ -6,11 +6,13 @@
 #include <stdio.h>
 
 float Sniper::minDist = Border::Length / 1.6f;
-float Sniper::maxDist = Border::Length / 1.2f;
+float Sniper::maxDist = Border::Length * 1.4;
 float Sniper::rotationSpeed = M_PI;
 float Sniper::speed = 2600;
 float Sniper::defaultHealth = 4;
 float Sniper::maxDistFromTargetPos = 4;
+float Sniper::aimTime = 4;
+float Sniper::widthGrowthRate = 40;
 Color Sniper::defaultColour = PURPLE;
 
 Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position)) {
@@ -31,11 +33,12 @@ float Sniper::getMaxDist() { return maxDist; }
 float Sniper::getRotationSpeed() { return rotationSpeed; }
 float Sniper::getSpeed() { return speed; }
 float Sniper::getDefaultHealth() { return defaultHealth; }
+float Sniper::getAimTime() { return aimTime; }
+float Sniper::getWidthGrowthRate() { return widthGrowthRate; }
 Color Sniper::getDefaultColour() { return defaultColour; }
 //regular
 float Sniper::getRotation() const { return rotation; }
 float Sniper::getRotationalVelocity() const { return rotationalVelocity; }
-float Sniper::getStateTime() const { return stateTime; }
 Vector2 Sniper::getTargetPosition() const { return targetPosition; }
 
 void Sniper::manageStates(float delta) {
@@ -43,17 +46,9 @@ void Sniper::manageStates(float delta) {
   {
     //this scope manages rotation
     float plrAngle = getAngleToPlayer();
-    float rotDist = plrAngle - rotation;
-    if(rotDist < -M_PI)
-      rotation -= M_PI * 2;
-    else if(rotDist > M_PI) 
-      rotation += M_PI * 2;
-    rotDist = plrAngle - rotation;
-    rotationalVelocity += rotDist * rotationSpeed * delta;
-    rotation += rotationalVelocity * delta;
-    las->rotation = rotation;
-    las->length = Border::Length * 30;//Vector2Length(getShortestVectorToPlayer()) * 50;
-    rotationalVelocity *= friction * delta;
+    rotation = plrAngle;
+    las->rotation = plrAngle;
+    las->length = Vector2Length(getShortestVectorToPlayer());
   }
   las->Position = Position;
   if(getState() == positioning) {
@@ -61,10 +56,15 @@ void Sniper::manageStates(float delta) {
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToTarget), speed * delta);
     Velocity = Vector2Add(Velocity, velToAdd);
+    las->shouldRender = false;
     //get if close enough to target
     if(Vector2Distance(Position, targetPosition) < maxDistFromTargetPos)
       setState(aiming);
   } else if(getState() == aiming) {
+    if(las->length > maxDist)
+      setState(positioning);
+    las->shouldRender = true;
+    las->width = widthGrowthRate * getStateTime();
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());
   }

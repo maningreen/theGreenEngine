@@ -10,10 +10,10 @@ Color Laser::defaultColour = WHITE;
 float Laser::defaultLength = 100;
 float Laser::defaultWidth = 20;
 
-Laser::Laser(Vector2 p, float rot, float len, Color col) : Entity2D("Laser", p), rotation(rot), length(len), colour(col), width(defaultWidth) {}
-Laser::Laser(Vector2 p, float rot, float len) : Entity2D("Laser", p), rotation(rot), length(len), colour(defaultColour), width(defaultWidth) {}
-Laser::Laser(Vector2 p, float rot) : Entity2D("Laser", p), rotation(rot), length(defaultLength), colour(defaultColour), width(defaultWidth) {}
-Laser::Laser(Vector2 p) : Entity2D("Laser", p), rotation(0), length(defaultLength), colour(defaultColour), width(defaultWidth) {}
+Laser::Laser(Vector2 p, float rot, float len, Color col) : Entity2D("Laser", p), rotation(rot), length(len), colour(col), shouldRender(true), width(defaultWidth) {}
+Laser::Laser(Vector2 p, float rot, float len) : Entity2D("Laser", p), rotation(rot), length(len), colour(defaultColour), shouldRender(true), width(defaultWidth) {}
+Laser::Laser(Vector2 p, float rot) : Entity2D("Laser", p), rotation(rot), length(defaultLength), colour(defaultColour), shouldRender(true), width(defaultWidth) {}
+Laser::Laser(Vector2 p) : Entity2D("Laser", p), rotation(0), length(defaultLength), colour(defaultColour), shouldRender(true), width(defaultWidth) {}
 
 Color Laser::getDefaultColour() {
   return defaultColour;
@@ -28,6 +28,8 @@ float Laser::getDefaultWidth() {
 }
 
 void Laser::Render() {
+  if(!shouldRender) //:)
+    return;
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
   Vector2 rayOrigin = Position;
   Vector2 preWrap = Vector2Add(rayOrigin, localOffset);

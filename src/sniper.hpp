@@ -12,13 +12,13 @@ class Sniper : public Enemy {
     static float rotationSpeed;
     static float speed;
     static float defaultHealth;
-    static Color defaultColour;
     static float maxDistFromTargetPos;
+    static float widthGrowthRate;
+    static float aimTime;
+    static Color defaultColour;
 
     float rotation;
     float rotationalVelocity;
-
-    float stateTime;
 
     Vector2 targetPosition;
 
@@ -27,7 +27,6 @@ class Sniper : public Enemy {
   public:
 
     float getRotation() const;
-    float getStateTime() const;
     float getRotationalVelocity() const;
     Vector2 getTargetPosition() const;
     static float getMinDist();
@@ -35,6 +34,8 @@ class Sniper : public Enemy {
     static float getRotationSpeed();
     static float getSpeed();
     static float getDefaultHealth();
+    static float getWidthGrowthRate();
+    static float getAimTime();
     static Color getDefaultColour();
 
     Sniper(Vector2 position);

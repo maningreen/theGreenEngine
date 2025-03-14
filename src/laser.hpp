@@ -13,6 +13,7 @@ class Laser : public Entity2D {
     float rotation;
     float length;
     float width;
+    bool shouldRender;
     Color colour;
     
     void Render() override;
