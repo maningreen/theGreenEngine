@@ -2,16 +2,16 @@
 #include "stdio.h"
 #include "enemy.hpp"
 #include "player.hpp"
-
-template <typename t>
-void UpgradeManager<t>::upgrade(t *ptr, float upCount) {
-  *ptr += upCount;
-}
+#include <algorithm>
 
 template <typename t>
 Vector2 StoreItem<t>::stdDimensions = (Vector2){1000, 200};
 template <typename t>
 float StoreItem<t>::borderWidth = 30;
+template <typename t>
+float StoreItem<t>::upgradePercent = 10;
+template <typename t>
+float StoreItem<t>::purchaseTime = 1;
 
 template <typename t>
 StoreItem<t>::StoreItem(std::string name, t* ptr) :  ptr(ptr), Entity2D(name, Vector2Zero()), purchaseProgress(0) {}
@@ -41,12 +41,18 @@ void StoreItem<t>::Process(float delta) {
     return;
   printf("%f\n", purchaseProgress);
   if(CheckCollisionCircleRec(Enemy::getPlayer()->Position, Player::hitboxRadius, (Rectangle){Position.x, Position.y, stdDimensions.x, stdDimensions.y})) {
-    purchaseProgress += delta;
-    if(purchaseProgress > 1) {
-      purchaseProgress = 0;
-      *ptr *= 30;
-    }
-  }
+    purchaseProgress += delta / purchaseTime;
+    if(purchaseProgress > 1)
+      upgrade(upgradePercent);
+  } else
+    purchaseProgress -= delta / purchaseTime;
+  purchaseProgress = purchaseProgress < 0 ? 0 : purchaseProgress > 1 ? 1 : purchaseProgress;
+}
+
+template <typename t>
+void StoreItem<t>::StoreItem::upgrade(float perc) {
+  purchaseProgress = 0;
+  *ptr += *ptr * perc / 100;
 }
 
 template <typename t>

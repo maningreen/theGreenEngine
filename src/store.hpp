@@ -5,13 +5,6 @@
 #include <string>
 
 template <typename t>
-class UpgradeManager {
-public:
-  //upCount will be rounded if it's an integer
-  static void upgrade(t* ptr, float upCount);
-};
-
-template <typename t>
 class StoreItem : public Entity2D {
 
 private:
@@ -21,6 +14,9 @@ private:
   float purchaseProgress;
 
 public:
+  static float upgradePercent;
+  static float purchaseTime;
+
   StoreItem(std::string name, t* ptr);
   t* ptr;
   ~StoreItem();
@@ -28,9 +24,12 @@ public:
   void Process(float delta) override;
   void Render() override;
 
+  void upgrade(float perc);
+
+  float getPurchaseProgress();
+
   static Vector2 getStdDimensions();
   static float getBorderWidth();
-  float getPurchaseProgress();
 };
 
 #endif
