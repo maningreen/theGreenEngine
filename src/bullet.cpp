@@ -52,8 +52,14 @@ Bullet::Bullet(Vector2 position, float angle, float maxLifetime) : Entity2D("bul
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
   col = DefaultColour;
 }
+
 Bullet::Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime) : Entity2D("bullet", position), Angle(angle), shouldWrap(shouldWrap), Lifetime(maxLifetime) {
   Velocity = (Vector2){cosf(angle) * DefaultSpeed, -sinf(angle) * DefaultSpeed};
+  col = DefaultColour;
+}
+
+Bullet::Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime, float speed) : Entity2D("bullet", position), Angle(angle), shouldWrap(shouldWrap), Lifetime(maxLifetime) {
+  Velocity = (Vector2){cosf(angle) * speed, -sinf(angle) * speed};
   col = DefaultColour;
 }
 

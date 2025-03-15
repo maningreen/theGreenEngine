@@ -34,8 +34,10 @@ class Enemy : public Entity2D {
     float getStateTime() const;
     void resetStateTime();
 
-    void WrapPosition();
     Vector2 getClosestPointToPlayerWithDistance(float distance) const;
+
+    void fireBullet(float angle, float lifetime, Color col) const;
+    void fireBullet(float angle, float lifetime, float speed, Color col) const;
 
     void Process(float delta) override;
     void Render() override;

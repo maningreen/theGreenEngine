@@ -47,7 +47,7 @@ void Spiraler::manageStates(float delta) {
   if(getState() == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
       for(int i = 0; i < bulletsPerShot; i++)
-        getRoot()->addChild(new EnemyBullet(Position, spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), Colour, true, bulletLifetime + spinTime * bulletLifetimeGrowth));
+        fireBullet(spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), bulletLifetime + spinTime * bulletLifetimeGrowth, Colour);
     if(spinTime > SpinLength) {
       swapToApproaching();
       setState(approaching);

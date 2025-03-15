@@ -11,8 +11,9 @@ float Sniper::rotationSpeed = M_PI;
 float Sniper::speed = 2600;
 float Sniper::defaultHealth = 4;
 float Sniper::maxDistFromTargetPos = 4;
-float Sniper::aimTime = 4;
-float Sniper::widthGrowthRate = 40;
+float Sniper::aimTime = 3;
+float Sniper::widthGrowthRate = 10;
+float Sniper::shotRecoil = 2000;
 Color Sniper::defaultColour = PURPLE;
 
 Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position)) {
@@ -34,6 +35,7 @@ float Sniper::getRotationSpeed() { return rotationSpeed; }
 float Sniper::getSpeed() { return speed; }
 float Sniper::getDefaultHealth() { return defaultHealth; }
 float Sniper::getAimTime() { return aimTime; }
+float Sniper::getShotRecoil() { return shotRecoil; }
 float Sniper::getWidthGrowthRate() { return widthGrowthRate; }
 Color Sniper::getDefaultColour() { return defaultColour; }
 //regular
@@ -65,6 +67,11 @@ void Sniper::manageStates(float delta) {
       setState(positioning);
     las->shouldRender = true;
     las->width = widthGrowthRate * getStateTime();
+    if(getStateTime() > aimTime) {
+      setState(positioning);
+      Velocity = Vector2Add(Velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
+      fireBullet(rotation, 50, 500, Colour);
+    }
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());
   }

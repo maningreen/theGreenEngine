@@ -15,6 +15,7 @@ class Sniper : public Enemy {
     static float maxDistFromTargetPos;
     static float widthGrowthRate;
     static float aimTime;
+    static float shotRecoil;
     static Color defaultColour;
 
     float rotation;
@@ -36,6 +37,7 @@ class Sniper : public Enemy {
     static float getDefaultHealth();
     static float getWidthGrowthRate();
     static float getAimTime();
+    static float getShotRecoil();
     static Color getDefaultColour();
 
     Sniper(Vector2 position);

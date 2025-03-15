@@ -28,6 +28,7 @@ class Bullet : public Entity2D {
     Bullet(Vector2 position, float angle, bool shouldWrap);
     Bullet(Vector2 position, float angle, float maxLifetime);
     Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime);
+    Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime, float speed);
     ~Bullet();
 
     static float DefaultSpeed;

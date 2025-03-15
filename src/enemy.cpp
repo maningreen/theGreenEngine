@@ -3,6 +3,7 @@
 #include "engine/entity.hpp"
 #include "engine/core.h"
 #include "healthManager.hpp"
+#include "enemyBullet.hpp"
 #include "playerBullet.hpp"
 #include "bars.hpp"
 #include "include.h"
@@ -52,17 +53,6 @@ void Enemy::Render() {
   //hear me out:
   //circle
   DrawCircleV(Position, Radius, Colour); //WHOOOOOO
-}
-
-void Enemy::WrapPosition() {
-  if(Position.x < -Border::Length)
-    Position.x += Border::Length * 2;
-  else if(Position.x > Border::Length)
-    Position.x -= Border::Length * 2;
-  if(Position.y < -Border::Length)
-    Position.y += Border::Length * 2;
-  else if(Position.y > Border::Length)
-    Position.y -= Border::Length * 2;
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
@@ -134,4 +124,12 @@ HealthManager* Enemy::getHealthManager() const {
 
 void Enemy::resetStateTime() {
   stateTime = 0;
+}
+
+void Enemy::fireBullet(float angle, float lifetime, Color col) const {
+  getRoot()->addChild(new EnemyBullet(Position, angle, col, true, lifetime));
+}
+
+void Enemy::fireBullet(float angle, float lifetime, float s, Color col) const {
+  getRoot()->addChild(new EnemyBullet(Position, angle, col, true, lifetime, s));
 }

@@ -12,6 +12,7 @@ class EnemyBullet : public Bullet {
     EnemyBullet(Vector2 position, float angle, Color col);
     EnemyBullet(Vector2 position, float angle, Color col, bool shouldWrap);
     EnemyBullet(Vector2 position, float angle, Color col, bool shouldWrap, float lifetime);
+    EnemyBullet(Vector2 position, float angle, Color col, bool shouldWrap, float lifetime, float speed);
     ~EnemyBullet();
 };
 
