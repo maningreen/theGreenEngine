@@ -129,10 +129,20 @@ void Enemy::resetStateTime() {
   stateTime = 0;
 }
 
-void Enemy::fireBullet(float angle, float lifetime, Color col) const {
-  getRoot()->addChild(new EnemyBullet(Position, angle, col, true, lifetime));
+EnemyBullet* Enemy::fireBullet(float angle, float lifetime, Color col) const {
+  EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime);
+  getRoot()->addChild(bul);
+  return bul;
 }
 
-void Enemy::fireBullet(float angle, float lifetime, float s, Color col) const {
-  getRoot()->addChild(new EnemyBullet(Position, angle, col, true, lifetime, s));
+EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, Color col) const {
+  EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime, s);
+  getRoot()->addChild(bul);
+  return bul;
+}
+
+EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, float dmg, Color col) const {
+  EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime, s, dmg);
+  getRoot()->addChild(bul);
+  return bul;
 }

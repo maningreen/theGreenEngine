@@ -15,6 +15,7 @@ float Sniper::aimTime = 3;
 float Sniper::widthGrowthRate = 10;
 float Sniper::shotRecoil = 2000;
 float Sniper::bulletSpeed = 5000;
+float Sniper::bulletDamage = 2;
 Color Sniper::defaultColour = PURPLE;
 Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 
@@ -74,7 +75,7 @@ void Sniper::manageStates(float delta) {
     if(getStateTime() > aimTime) {
       setState(positioning);
       Velocity = Vector2Add(Velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
-      fireBullet(rotation, 5, bulletSpeed, Colour);
+      fireBullet(rotation, 5, bulletSpeed, bulletDamage, Colour);
     }
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());

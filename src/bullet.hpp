@@ -3,7 +3,6 @@
 #define bullet_h AA
 
 #include "engine/entity.hpp"
-#include "enemy.hpp"
 #include "include.h"
 
 typedef Color Colour;
