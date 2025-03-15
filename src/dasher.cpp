@@ -68,7 +68,7 @@ void Dasher::manageStates(float delta) {
     //we get the vector to the player
     Vector2 closestVecToPlr = getClosestPointToPlayerWithDistance(targetDist);
     //step two we cap the bagnibude
-    Vector2 velToAdd = Vector2Scale(Vector2Normalize(closestVecToPlr), delta * speed);
+    Vector2 velToAdd = Vector2Scale(Vector2Normalize(Vector2Subtract(closestVecToPlr, Position)), delta * speed);
     //step c
     //add this to vel
     Velocity = Vector2Add(Velocity, velToAdd);
@@ -86,7 +86,7 @@ void Dasher::manageStates(float delta) {
   } else if(getState() == winding) {
     //then we set our state vector
     stateVector = Vector2Normalize(getShortestVectorToPlayer());
-    //so what we wanna do, get the shortest vector to player
+    //so sniper what we wanna do, get the shortest vector to player
     //then we scale this to windupSpeed
     Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector), -getStateTime() * windupSpeed), Velocity);
     if(getStateTime() > windupTime) {
