@@ -159,7 +159,10 @@ Player::~Player() {
   cam->Follow = nullptr;
 }
 
-void Player::Init() {};
+void Player::Init() {
+  Enemy::setPlayer();
+  std::cout << Enemy::getPlayer() << '\n';
+};
 
 void Player::setCam(CameraEntity* camra) {
   cam = camra;

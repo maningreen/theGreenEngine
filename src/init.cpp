@@ -4,6 +4,7 @@
 #include "player.hpp"
 #include "waveManager.hpp"
 #include "border.hpp"
+#include "enemy.hpp"
 #include "store.hpp"
 #include "time.h"
 
@@ -15,6 +16,7 @@ void Init(Entity* root) {
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
   //root->addChild(new WaveManager());
+  root->addChild(new Enemy(Vector2Zero()));
   root->addChild(new StoreItem<float>("dashSpeed", &Player::dashSpeed));
 }
 

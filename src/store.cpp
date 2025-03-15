@@ -1,4 +1,6 @@
 #include "store.hpp"
+#include "stdio.h"
+#include "enemy.hpp"
 #include "player.hpp"
 
 template <typename t>
@@ -12,9 +14,9 @@ template <typename t>
 float StoreItem<t>::borderWidth = 30;
 
 template <typename t>
-StoreItem<t>::StoreItem(std::string name, t* ptr) :  ptr(ptr), Entity2D(name, Vector2Zero()) {}
+StoreItem<t>::StoreItem(std::string name, t* ptr) :  ptr(ptr), Entity2D(name, Vector2Zero()), purchaseProgress(0) {}
 template <>
-StoreItem<float>::StoreItem(std::string name, float* ptr) :  ptr(ptr), Entity2D(name, Vector2Zero()) {}
+StoreItem<float>::StoreItem(std::string name, float* ptr) :  ptr(ptr), Entity2D(name, Vector2Zero()), purchaseProgress(0) {}
 
 template <typename t>
 StoreItem<t>::~StoreItem() {}
@@ -29,14 +31,27 @@ void StoreItem<t>::Render() {
     Vector2 offset = Vector2Scale(Vector2Subtract(stdDimensions, fontDems), .5);
     DrawText(Name.c_str(), Position.x + offset.x, Position.y + offset.y, 100, WHITE);
   }
-  //:wq
-  //
+  //then we draw progress
+  DrawRectangleV(Position, (Vector2){stdDimensions.x * purchaseProgress, stdDimensions.y}, WHITE);
 }
 
 template <typename t>
-void StoreItem<t>::Process(float delta) {}
+void StoreItem<t>::Process(float delta) {
+  if(Enemy::getPlayer() == nullptr)
+    return;
+  printf("%f\n", purchaseProgress);
+  if(CheckCollisionCircleRec(Enemy::getPlayer()->Position, Player::hitboxRadius, (Rectangle){Position.x, Position.y, stdDimensions.x, stdDimensions.y})) {
+    purchaseProgress += delta;
+    if(purchaseProgress > 1) {
+      purchaseProgress = 0;
+      *ptr *= 30;
+    }
+  }
+}
 
 template <typename t>
 Vector2 StoreItem<t>::getStdDimensions() { return stdDimensions; }
 template <typename t>
 float StoreItem<t>::getBorderWidth() { return borderWidth; }
+template <typename t>
+float StoreItem<t>::getPurchaseProgress() { return purchaseProgress; }

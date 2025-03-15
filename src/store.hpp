@@ -18,6 +18,8 @@ private:
   static Vector2 stdDimensions;
   static float borderWidth;
 
+  float purchaseProgress;
+
 public:
   StoreItem(std::string name, t* ptr);
   t* ptr;
@@ -28,6 +30,7 @@ public:
 
   static Vector2 getStdDimensions();
   static float getBorderWidth();
+  float getPurchaseProgress();
 };
 
 #endif
