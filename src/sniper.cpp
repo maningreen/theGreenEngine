@@ -14,9 +14,11 @@ float Sniper::maxDistFromTargetPos = 4;
 float Sniper::aimTime = 3;
 float Sniper::widthGrowthRate = 10;
 float Sniper::shotRecoil = 2000;
+float Sniper::bulletSpeed = 5000;
 Color Sniper::defaultColour = PURPLE;
+Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 
-Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position)) {
+Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position, 0, 0, laserColour)) {
   setState(positioning);
   addChild(las);
   getHealthManager()->setMaxHealth(defaultHealth);
@@ -36,8 +38,10 @@ float Sniper::getSpeed() { return speed; }
 float Sniper::getDefaultHealth() { return defaultHealth; }
 float Sniper::getAimTime() { return aimTime; }
 float Sniper::getShotRecoil() { return shotRecoil; }
+float Sniper::getBulletSpeed() { return bulletSpeed; }
 float Sniper::getWidthGrowthRate() { return widthGrowthRate; }
 Color Sniper::getDefaultColour() { return defaultColour; }
+Color Sniper::getLaserColour() { return laserColour; }
 //regular
 float Sniper::getRotation() const { return rotation; }
 float Sniper::getRotationalVelocity() const { return rotationalVelocity; }
@@ -63,14 +67,14 @@ void Sniper::manageStates(float delta) {
     if(Vector2Distance(Position, targetPosition) < maxDistFromTargetPos)
       setState(aiming);
   } else if(getState() == aiming) {
-    if(las->length > maxDist)
+    if(las->length < minDist)
       setState(positioning);
     las->shouldRender = true;
     las->width = widthGrowthRate * getStateTime();
     if(getStateTime() > aimTime) {
       setState(positioning);
       Velocity = Vector2Add(Velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
-      fireBullet(rotation, 50, 500, Colour);
+      fireBullet(rotation, 5, bulletSpeed, Colour);
     }
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());

@@ -35,7 +35,7 @@ const float Player::defaultFriction = 58;
 
 float Player::dashCooldown = .7;
 
-float Player::particleSpawnTime = 1.0f / 10.0f;
+float Player::particleSpawnTime = 1.0f / 30.0f;
 
 const float distance = 50;
 

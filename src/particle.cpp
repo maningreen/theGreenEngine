@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include "include.h"
 
-float Particle::MaxLifetime = 2;
-float Particle::MinLifetime = 1;
+float Particle::MaxLifetime = .5;
+float Particle::MinLifetime = .1;
 
 void Particle::Render() {
   //sick so here's what we wanna do here
