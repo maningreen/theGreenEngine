@@ -16,7 +16,7 @@
 Color Spiraler::Colour = BLUE;
 float Spiraler::SpinLength = 5;
 float Spiraler::SpinSpeed = 10;
-float Spiraler::DefaultRadius = 50;
+float Spiraler::DefaultRadius = 100;
 float Spiraler::spiralSpeed = M_PI / 3.0f;
 float Spiraler::startingHealth = 3;
 float Spiraler::maxTargetDistance = 770;
