@@ -44,7 +44,8 @@ void Enemy::Process(float delta) {
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, friction * delta);
   stateTime += delta;
-  manageStates(delta);
+  if(plr != nullptr)
+    manageStates(delta);
   Border::wrapEntity(this);
 }
 
@@ -56,6 +57,8 @@ void Enemy::Render() {
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
+  if(plr == nullptr)
+    return Vector2Zero();
   return Border::getShortestPathToPoint(Position, plr->Position);
 }
 

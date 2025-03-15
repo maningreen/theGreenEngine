@@ -65,7 +65,6 @@ bool Entity::hasTag(std::string tag) {
 
 void Entity::printAllChildren() {
   //so, what we wants to do here is print a bunch of sthuff, in particular all of the children *recursively*
-  std::cout << Name << '\n';
   for(Entity* child : Children) {
     child->printAllChildren();
   }
@@ -77,6 +76,7 @@ void Entity::kill() {
     Children.back()->kill();
     Children.pop_back();
   }
+  std::cout << Name << '\n';
   delete this;
 }
 

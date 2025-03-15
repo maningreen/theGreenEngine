@@ -3,9 +3,10 @@
 #include "border.hpp"
 #include "spiral.hpp"
 #include "dasher.hpp"
+#include "sniper.hpp"
 #include "engine/entity.hpp"
 
-unsigned WaveManager::enemyTypeCount = 2;
+unsigned WaveManager::enemyTypeCount = 3;
 float WaveManager::waveDelay = 5;
 
 WaveManager::WaveManager() : Entity("waveManager"), waveCount(1), currentTime(0) {}
@@ -35,6 +36,7 @@ void WaveManager::spawnRandomEnemy(Vector2 p) {
     break;
     case 1: en = new Dasher(p);
     break;
+    case 2: en = new Sniper(p);
     default:;
   }
   addChild(en);
