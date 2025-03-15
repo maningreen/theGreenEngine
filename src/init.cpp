@@ -14,8 +14,7 @@ void Init(Entity* root) {
   root->Children[0]->addChild(new CameraEntity("Camera", &((Player*)(root->Children)[1])->Position));
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
-  // root->addChild(new WaveManager());
-  root->addChild(new Dasher((Vector2){600, 600}));
+  root->addChild(new WaveManager());
 }
 
 void PreRendering(std::vector<Entity*>* entities) {

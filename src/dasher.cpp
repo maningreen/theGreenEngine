@@ -103,6 +103,9 @@ void Dasher::manageStates(float delta) {
       //for psuedo i-frames
       getPlayer()->getHealthManager()->applyDamage(damage);
       setState(recovery);
+      //then we do a bounce
+      Vector2 scaledOffset = Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
+      Velocity = (Vector2){scaledOffset.x * Velocity.x, scaledOffset.y * Velocity.y};
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";

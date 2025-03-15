@@ -76,7 +76,6 @@ void Entity::kill() {
     Children.back()->kill();
     Children.pop_back();
   }
-  std::cout << Name << '\n';
   delete this;
 }
 
