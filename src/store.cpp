@@ -2,10 +2,10 @@
 #include "stdio.h"
 #include "enemy.hpp"
 #include "player.hpp"
-#include <algorithm>
+#include "engine/core.h"
 
 template <typename t>
-Vector2 StoreItem<t>::stdDimensions = (Vector2){1000, 200};
+Vector2 StoreItem<t>::stdDimensions = (Vector2){700, 200};
 template <typename t>
 float StoreItem<t>::borderWidth = 30;
 template <typename t>
@@ -42,11 +42,13 @@ void StoreItem<t>::Process(float delta) {
   printf("%f\n", purchaseProgress);
   if(CheckCollisionCircleRec(Enemy::getPlayer()->Position, Player::hitboxRadius, (Rectangle){Position.x, Position.y, stdDimensions.x, stdDimensions.y})) {
     purchaseProgress += delta / purchaseTime;
-    if(purchaseProgress > 1)
+    if(purchaseProgress > 1) {
       upgrade(upgradePercent);
+      killDefered();
+    }
   } else
     purchaseProgress -= delta / purchaseTime;
-  purchaseProgress = purchaseProgress < 0 ? 0 : purchaseProgress > 1 ? 1 : purchaseProgress;
+  purchaseProgress = purchaseProgress < 0 ? 0 : purchaseProgress;
 }
 
 template <typename t>
