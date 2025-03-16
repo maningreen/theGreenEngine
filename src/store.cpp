@@ -39,7 +39,6 @@ template <typename t>
 void StoreItem<t>::Process(float delta) {
   if(Enemy::getPlayer() == nullptr)
     return;
-  printf("%f\n", purchaseProgress);
   if(CheckCollisionCircleRec(Enemy::getPlayer()->Position, Player::hitboxRadius, (Rectangle){Position.x, Position.y, stdDimensions.x, stdDimensions.y})) {
     purchaseProgress += delta / purchaseTime;
     if(purchaseProgress > 1) {
