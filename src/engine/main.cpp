@@ -1,8 +1,5 @@
 #include "entity.hpp"
-#include "core.h"
-#include "../include.h"
 #include <vector>
-#include <iostream>
 
 #define baseScreenScalar 1000
 #define initialScreenDimensions (Vector2){baseScreenScalar * 16/9, baseScreenScalar / (16 / 9)}

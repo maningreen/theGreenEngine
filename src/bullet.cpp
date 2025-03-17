@@ -31,7 +31,7 @@ bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Ve
 float Bullet::DefaultSpeed = 3040;
 float Bullet::DefaultMaxLifetime = 1;
 Vector2 Bullet::bulletDimensions = (Vector2){30, 15};
-Colour Bullet::DefaultColour = YELLOW;
+Color Bullet::DefaultColour = YELLOW;
 
 float Bullet::Damage = 1;
 

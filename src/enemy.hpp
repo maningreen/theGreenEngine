@@ -4,8 +4,8 @@
 #include "engine/entity.hpp"
 #include "player.hpp"
 #include "healthManager.hpp"
-#include "barManager.hpp"
 #include "include.h"
+#include "enemyBullet.hpp"
 
 class Enemy : public Entity2D {
   private:
@@ -36,8 +36,9 @@ class Enemy : public Entity2D {
 
     Vector2 getClosestPointToPlayerWithDistance(float distance) const;
 
-    void fireBullet(float angle, float lifetime, Color col) const;
-    void fireBullet(float angle, float lifetime, float speed, Color col) const;
+    EnemyBullet* fireBullet(float angle, float lifetime, Color col) const;
+    EnemyBullet* fireBullet(float angle, float lifetime, float speed, Color col) const;
+    EnemyBullet* fireBullet(float angle, float lifetime, float speed, float dmg, Color col) const;
 
     void Process(float delta) override;
     void Render() override;
@@ -55,7 +56,7 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
     static float friction;
-    static Color Colour;
+    Color Colour;
 };
 
 #endif
