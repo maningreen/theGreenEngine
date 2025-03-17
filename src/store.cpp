@@ -1,8 +1,6 @@
 #include "store.hpp"
-#include "stdio.h"
 #include "enemy.hpp"
 #include "player.hpp"
-#include "engine/core.h"
 
 template <typename t>
 Vector2 StoreItem<t>::stdDimensions = (Vector2){700, 200};
@@ -23,16 +21,17 @@ StoreItem<t>::~StoreItem() {}
 
 template <typename t>
 void StoreItem<t>::Render() {
-  DrawRectangleV(Position, stdDimensions, BLACK);
-  DrawRectangleLinesEx((Rectangle){Position.x, Position.y, stdDimensions.x, stdDimensions.y}, borderWidth, WHITE);
-  {
-    //here we do some magic shtuff to center the text
-    Vector2 fontDems = MeasureTextEx(GetFontDefault(), Name.c_str(), 100, 1);
-    Vector2 offset = Vector2Scale(Vector2Subtract(stdDimensions, fontDems), .5);
-    DrawText(Name.c_str(), Position.x + offset.x, Position.y + offset.y, 100, WHITE);
-  }
+  Vector2 drawDems = stdDimensions;
+  //here we do some magic shtuff to center the text
+  Vector2 fontDems = MeasureTextEx(GetFontDefault(), Name.c_str(), 100, 1);
+  Vector2 offset = Vector2Scale(Vector2Subtract(stdDimensions, fontDems), .5);
+  if(fontDems.x > drawDems.x) drawDems.x = fontDems.x;
+  //draw the dimensions
+  DrawRectangleV(Position, drawDems, BLACK);
+  DrawRectangleLinesEx((Rectangle){Position.x, Position.y, drawDems.x, drawDems.y}, borderWidth, WHITE);
+  DrawText(Name.c_str(), Position.x + offset.x, Position.y + offset.y, 100, WHITE);
   //then we draw progress
-  DrawRectangleV(Position, (Vector2){stdDimensions.x * purchaseProgress, stdDimensions.y}, WHITE);
+  DrawRectangleV(Position, (Vector2){drawDems.x * purchaseProgress, drawDems.y}, WHITE);
 }
 
 template <typename t>
