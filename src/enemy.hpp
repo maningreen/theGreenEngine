@@ -56,7 +56,7 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
     static float friction;
-    static Color Colour;
+    Color Colour;
 };
 
 #endif

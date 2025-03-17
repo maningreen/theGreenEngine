@@ -13,7 +13,7 @@
 
 #define min(a, b) (b < a ? b : a)
 
-Color Spiraler::Colour = BLUE;
+Color Spiraler::defaultColour = BLUE;
 float Spiraler::SpinLength = 5;
 float Spiraler::SpinSpeed = 10;
 float Spiraler::DefaultRadius = 100;
@@ -35,11 +35,7 @@ Spiraler::Spiraler(Vector2 position) : Enemy(position) {
   getHealthManager()->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
   targetPosition = Vector2Zero();
-}
-
-void Spiraler::Render() {
-  getHealthManager()->getBar()->Render();
-  DrawCircleV(Position, Radius, Colour);
+  Colour = defaultColour;
 }
 
 void Spiraler::manageStates(float delta) {

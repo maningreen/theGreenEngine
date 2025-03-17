@@ -46,14 +46,9 @@ void WaveManager::spawnWave() {
 void WaveManager::spawnRandomEnemy(Vector2 p) {
   unsigned type = rand() % enemyTypeCount;
   Enemy* en;
-  switch(type) {
-    case 0: en = new Spiraler(p);
-    break;
-    case 1: en = new Dasher(p);
-    break;
-    case 2: en = new Sniper(p);
-    default:;
-  }
+  if(type == 0) en = new Dasher(p);
+  else if(type == 1) en = new Spiraler(p);
+  else if(type == 2) en = new Sniper(p);
   addChild(en);
 }
 

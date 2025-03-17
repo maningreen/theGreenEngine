@@ -18,6 +18,7 @@ class Sniper : public Enemy {
     static float shotRecoil;
     static float bulletSpeed;
     static float bulletDamage;
+    static float radius;
     static Color laserColour;
     static Color defaultColour;
 
@@ -42,6 +43,7 @@ class Sniper : public Enemy {
     static float getAimTime();
     static float getShotRecoil();
     static float getBulletSpeed();
+    static float getRadius();
     static float getBulletDamage();
     static Color getDefaultColour();
     static Color getLaserColour();

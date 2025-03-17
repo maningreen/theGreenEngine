@@ -5,8 +5,6 @@
 #include "engine/entity.hpp"
 #include "include.h"
 
-typedef Color Colour;
-
 bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
 
 class Bullet : public Entity2D {
@@ -14,7 +12,7 @@ class Bullet : public Entity2D {
     Vector2 Velocity;
     float Angle;
     float Lifetime;
-    Colour col;
+    Color col;
     bool shouldWrap;
 
     void Process(float delta) override;
@@ -33,7 +31,7 @@ class Bullet : public Entity2D {
     static float DefaultSpeed;
     static float DefaultMaxLifetime;
     static Vector2 bulletDimensions;
-    static Colour DefaultColour;
+    static Color DefaultColour;
 
     static float Damage;
 };

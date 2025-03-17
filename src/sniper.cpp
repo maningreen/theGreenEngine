@@ -16,6 +16,7 @@ float Sniper::widthGrowthRate = 10;
 float Sniper::shotRecoil = 2000;
 float Sniper::bulletSpeed = 5000;
 float Sniper::bulletDamage = 2;
+float Sniper::radius = 50;
 Color Sniper::defaultColour = PURPLE;
 Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 
@@ -25,7 +26,8 @@ Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position, 0
   getHealthManager()->setMaxHealth(defaultHealth);
   getHealthManager()->setHealth(defaultHealth);
   las->length = 1000;
-  Colour = defaultColour;
+  Radius = getRadius();
+  Colour = PURPLE;
 }
 
 Sniper::~Sniper() {}
@@ -41,6 +43,7 @@ float Sniper::getAimTime() { return aimTime; }
 float Sniper::getShotRecoil() { return shotRecoil; }
 float Sniper::getBulletSpeed() { return bulletSpeed; }
 float Sniper::getWidthGrowthRate() { return widthGrowthRate; }
+float Sniper::getRadius() { return radius; }
 Color Sniper::getDefaultColour() { return defaultColour; }
 Color Sniper::getLaserColour() { return laserColour; }
 //regular

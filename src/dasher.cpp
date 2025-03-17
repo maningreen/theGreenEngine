@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 
-Colour Dasher::defaultCol = BROWN;
+Color Dasher::defaultCol = BROWN;
 float Dasher::speed = 2100;
 float Dasher::radius = 40;
 float Dasher::windupTime = .5;
@@ -23,7 +23,7 @@ float Dasher::damage = 4;
 Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
   getHealthManager()->setMaxHealth(defaultHealth);
-  Colour = defaultCol;
+  Colour = BROWN;
 }
 
 float Dasher::getDefaultHealth() {
