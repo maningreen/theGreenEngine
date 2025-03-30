@@ -23,13 +23,13 @@ template <typename t>
 void StoreItem<t>::Render() {
   Vector2 drawDems = stdDimensions;
   //here we do some magic shtuff to center the text
-  Vector2 fontDems = MeasureTextEx(GetFontDefault(), Name.c_str(), 100, 1);
-  Vector2 offset = Vector2Scale(Vector2Subtract(stdDimensions, fontDems), .5);
+  Vector2 fontDems = MeasureTextEx(GetFontDefault(), Name.c_str(), 100, 10);
   if(fontDems.x > drawDems.x) drawDems.x = fontDems.x;
+  Vector2 offset = Vector2Scale(Vector2Subtract(drawDems, fontDems), .5);
   //draw the dimensions
   DrawRectangleV(Position, drawDems, BLACK);
   DrawRectangleLinesEx((Rectangle){Position.x, Position.y, drawDems.x, drawDems.y}, borderWidth, WHITE);
-  DrawText(Name.c_str(), Position.x + offset.x, Position.y + offset.y, 100, WHITE);
+  DrawTextEx(GetFontDefault(), Name.c_str(), Vector2Add(Position, offset), 100, 10, WHITE);
   //then we draw progress
   DrawRectangleV(Position, (Vector2){drawDems.x * purchaseProgress, drawDems.y}, WHITE);
 }

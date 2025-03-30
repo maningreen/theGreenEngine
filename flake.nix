@@ -27,6 +27,7 @@
         # make
         gnumake
         gcc # gcc
+        raylib
       ];
     };
 
@@ -57,7 +58,7 @@
 
       buildPhase = ''
         mkdir -p build
-        make -j3
+        make -j5
       '';
       
       installPhase = ''

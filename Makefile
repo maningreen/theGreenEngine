@@ -9,19 +9,17 @@ ENGINEOUT = build/libengine.a
 
 # define misc
 CC = g++
-RAYLIB ?= ./external/raylib-5.5
 
 # flags
 ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
-RAYLIBFLAGS = -I $(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-LDFLAGS =
+LDFLAGS = -lraylib
 
 # target
 OUT = engine
 BUILDDIR = build/
 
 game: $(ENGINEOUT) $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(BUILDDIR)$(OUT) $(LDFLAGS) $(RAYLIBFLAGS) $(ENGINEFLAGS)
+	$(CC) $(OBJECTS) -o $(BUILDDIR)$(OUT) $(LDFLAGS) $(ENGINEFLAGS)
 
 engine: $(ENGINEOUT)
 

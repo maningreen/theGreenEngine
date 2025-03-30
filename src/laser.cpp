@@ -44,11 +44,10 @@ void Laser::Render() {
     bool left = localOffset.x >= 0;
     bool top = localOffset.y >= 0;
 
-    bool swapX;
     Vector2 collisionPosition;
     float slope = tan(rotation);
     float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
-    swapX = abs(yPosAtBorder) <= Border::Length;
+    bool swapX = abs(yPosAtBorder) <= Border::Length;
     //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
     if(swapX) {
       collisionPosition.y = yPosAtBorder;
