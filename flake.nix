@@ -7,33 +7,13 @@
 
   outputs = { self , nixpkgs ,... }: let
     system = "x86_64-linux";
+
+    pkgs = nixpkgs.${system}.legacyPackages;
+
   in {
-    devShells."${system}".default = let
-      pkgs = import nixpkgs {
-        inherit system;
-      };
-    in pkgs.mkShell {
-      packages = with pkgs; [
-        libGL
+    devShells."${system}".default = pkgs.callPackage ./shell.nix;
 
-        # X11 dependencies
-        xorg.libX11
-        xorg.libX11.dev
-        xorg.libXcursor
-        xorg.libXi
-        xorg.libXinerama
-        xorg.libXrandr
-
-        # make
-        gnumake
-        gcc # gcc
-        raylib
-      ];
-    };
-
-    packages.${system}.default = let 
-      pkgs = import nixpkgs { inherit system ;};
-    in pkgs.stdenv.mkDerivation {
+    packages.${system}.default = pkgs.stdenv.mkDerivation {
       name = "engine";
       description = "a game in a custom engine";
       src = ./.; 
