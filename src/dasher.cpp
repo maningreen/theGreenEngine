@@ -15,7 +15,7 @@ float Dasher::targetDist = 300;
 float Dasher::maximumDist = 400;
 float Dasher::recoveryTime = 1;
 float Dasher::recoverSpeedThreshold = 260;
-float Dasher::defaultHealth = 2;
+float Dasher::defaultHealth = 1;
 float Dasher::dashTime = .5;
 float Dasher::dashSpeed = 200000;
 float Dasher::damage = 4;
@@ -105,6 +105,7 @@ void Dasher::manageStates(float delta) {
       setState(recovery);
       //then we do a bounce
       Vector2 scaledOffset = Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
+      scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x, scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
       Velocity = (Vector2){scaledOffset.x * Velocity.x, scaledOffset.y * Velocity.y};
     }
   } else

@@ -12,12 +12,19 @@
 unsigned WaveManager::enemyTypeCount = 3;
 float WaveManager::upgradeOptions = 3;
 
-unsigned WaveManager::floatUpgradeCount = 4;
+unsigned WaveManager::upgradeCount = 4;
 float* WaveManager::floatUpgrades[] = {
   &Player::dashSpeed,
   &Player::dashControl,
   &PlayerBullet::DefaultMaxLifetime,
   &Particle::MaxLifetime
+};
+
+std::string WaveManager::upgradeNames[] = {
+  "Dash Speed",
+  "Dash Control",
+  "Bullet Lifetime",
+  "Particle Lifetime"
 };
 
 WaveManager::WaveManager() : Entity("waveManager"), waveCount(1), inStore(false) {
@@ -28,7 +35,8 @@ WaveManager::~WaveManager() {}
 
 void WaveManager::Process(float delta) {
   if(!inStore && Children.size() == 0) {
-    addChild(new StoreItem<float>("Dash Speed", floatUpgrades[0]));
+    unsigned uIn = rand() % upgradeCount;
+    addChild(new StoreItem<float>(upgradeNames[uIn], floatUpgrades[uIn]));
     inStore = true;
   }
   else if(inStore && Children.size() == 0) {

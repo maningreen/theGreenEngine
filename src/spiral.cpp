@@ -1,15 +1,9 @@
 #include "spiral.hpp"
-#include "bars.hpp"
 #include "enemy.hpp"
-#include "engine/core.h"
 #include "healthManager.hpp"
-#include "include.h"
-#include "enemyBullet.hpp"
 #include "border.hpp"
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
-#include <vector>
 
 #define min(a, b) (b < a ? b : a)
 
@@ -34,7 +28,7 @@ Spiraler::Spiraler(Vector2 position) : Enemy(position) {
   Radius = DefaultRadius;
   getHealthManager()->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
-  targetPosition = Vector2Zero();
+  targetPosition = getClosestPointToPlayerWithDistance(500);
   Colour = defaultColour;
 }
 
