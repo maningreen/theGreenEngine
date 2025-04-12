@@ -37,7 +37,7 @@ void Laser::Render() {
 
   int i = 0;
 
-  if(preWrap == endPos)
+  if(preWrap.x == endPos.x && preWrap.y == endPos.y)
     DrawLineEx(Position, endPos, width, colour);
   else while(abs(preWrap.x - endPos.x) > 10 || abs(preWrap.y - endPos.y) > 10) {
     //get intersection

@@ -21,15 +21,22 @@ StoreItem<t>::~StoreItem() {}
 
 template <typename t>
 void StoreItem<t>::Render() {
+  const float padding = 60;
+  
   Vector2 drawDems = stdDimensions;
   //here we do some magic shtuff to center the text
+
   Vector2 fontDems = MeasureTextEx(GetFontDefault(), Name.c_str(), 100, 10);
-  if(fontDems.x > drawDems.x) drawDems.x = fontDems.x;
+
+  if(fontDems.x + padding > drawDems.x) drawDems.x = fontDems.x + padding;
+
   Vector2 offset = Vector2Scale(Vector2Subtract(drawDems, fontDems), .5);
+
   //draw the dimensions
   DrawRectangleV(Position, drawDems, BLACK);
   DrawRectangleLinesEx((Rectangle){Position.x, Position.y, drawDems.x, drawDems.y}, borderWidth, WHITE);
   DrawTextEx(GetFontDefault(), Name.c_str(), Vector2Add(Position, offset), 100, 10, WHITE);
+
   //then we draw progress
   DrawRectangleV(Position, (Vector2){drawDems.x * purchaseProgress, drawDems.y}, WHITE);
 }
