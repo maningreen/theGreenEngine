@@ -8,72 +8,76 @@
 #include "include.h"
 
 class Player : public Entity2D {
-  private:
-    bool dashing;
-    bool canDash;
-    float timeSinceDash;
-    Vector2 dashDirection;
+private:
+  bool dashing;
+  bool canDash;
+  float timeSinceDash;
+  Vector2 dashDirection;
 
-    float lifetime;
+  float lifetime;
 
-    Bar* dashBar;
-    Bar* dashCooldownBar;
-    HealthManager* healthManager;
+  Bar* dashCooldownBar;
+  HealthManager* healthManager;
 
-    CameraEntity* cam;
+  CameraEntity* cam;
 
-    void manageBars();
+  void manageBars();
 
-    void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
+  void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
 
-    void manageRotation();
+  void manageRotation();
 
-  public:
-    Vector2 Velocity;
+public:
+  Vector2 Velocity;
 
-    float Speed;
-    float Friction;
+  float Speed;
+  float Friction;
 
-    float Rotation;
+  float Rotation;
 
-    static int upKey;
-    static int downKey;
-    static int leftKey;
-    static int rightKey;
-    static int shootKey;
-    static int shootKeyMouse;
-    static int dashKey;
-    static const float defaultSpeed;
-    static const float defaultFriction;
+  unsigned dashCount;
+  float dashProgress;
 
-    static float dashSpeed;
-    static float dashTime;
-    static float dashControl;
+  static int upKey;
+  static int downKey;
+  static int leftKey;
+  static int rightKey;
+  static int shootKey;
+  static int shootKeyMouse;
+  static int dashKey;
+  static const float defaultSpeed;
+  static const float defaultFriction;
 
-    static float dashCooldown;
+  static float dashSpeed;
+  static float dashTime;
+  static float dashControl;
 
-    static float particleSpawnTime;
+  static unsigned maxDashCount;
 
-    static float hitboxRadius;
+  static float dashCooldown;
 
-    void Process(float delta) override;
-    void Render() override;
-    void Init() override;
+  static float particleSpawnTime;
 
-    Player(const std::string& name, Vector2 position, CameraEntity* cam);
-    ~Player();
+  static float hitboxRadius;
 
-    Vector2 getInput();
-    Vector2 getInput(int u, int d, int l, int r);
+  void Process(float delta) override;
+  void Render() override;
+  void Init() override;
 
-    void setCam(CameraEntity* cam);
+  Player(const std::string& name, Vector2 position, CameraEntity* cam);
+  ~Player();
 
-    void SpawnBullet();
+  Vector2 getInput();
+  Vector2 getInput(int u, int d, int l, int r);
 
-    HealthManager* getHealthManager();
+  void setCam(CameraEntity* cam);
 
-    float getLifetime();
-    bool getDashing();
+  void SpawnBullet();
+
+  HealthManager* getHealthManager();
+
+  float getLifetime();
+  bool getDashing();
 };
 
 #endif
