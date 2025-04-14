@@ -1,52 +1,29 @@
 {
-  description = "Raylib development environment";
+  description = "An environment for the shwompEngine";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs = { self , nixpkgs ,... }: let
-    system = "x86_64-linux";
-
-    pkgs = nixpkgs.${system}.legacyPackages;
-
+    supportedSystems = [
+      "x86_64-linux"
+      "x86_64-darwin"
+      "aarch64-linux"
+      "aarch64-darwin"
+    ];
+    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
   in {
-    devShells."${system}".default = pkgs.callPackage ./shell.nix;
+    devShells = forAllSystems (system: let 
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      default = pkgs.callPackage ./shell.nix { inherit pkgs; };
+    });
 
-    packages.${system}.default = pkgs.stdenv.mkDerivation {
-      name = "engine";
-      description = "a game in a custom engine";
-      src = ./.; 
-      nativeBuildInputs = with pkgs; [
-        gcc
-        gnumake
-      ];
-
-      buildInputs = with pkgs; [
-        libGL
-
-        # X11 dependencies
-        xorg.libX11
-        xorg.libX11.dev
-        xorg.libXcursor
-        xorg.libXi
-        xorg.libXinerama
-        xorg.libXrandr
-
-        raylib
-      ];
-
-      buildPhase = ''
-        mkdir -p build
-        make -j5
-      '';
-      
-      installPhase = ''
-        mkdir -p $out/bin
-        install -t $out/bin build/engine
-        cp ${./resources} -r $out/bin
-      '';
-
-    };
+    packages = forAllSystems (system: let 
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      default = pkgs.callPackage ./default.nix { inherit pkgs; };
+    });
   };
 }
