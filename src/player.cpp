@@ -10,9 +10,8 @@
 #include "particle.hpp"
 #include <cmath>
 #include <cstdlib>
-#include "include.h"
+#include <raylib.h>
 #include <string>
-#include <iostream>
 
 #define max(a, b) (a < b ? b : a)
 #define min(a, b) (a < b ? a : b)
@@ -30,10 +29,12 @@ float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
 float Player::dashControl = 2;
 
+unsigned Player::maxDashCount = 3;
+
 const float Player::defaultSpeed = 4000;
 const float Player::defaultFriction = 58;
 
-float Player::dashCooldown = .7;
+float Player::dashCooldown = 1.5;
 
 float Player::particleSpawnTime = 1.0f / 30.0f;
 
@@ -56,17 +57,28 @@ void Player::Render() {
   //get the mouse position (in cartesian)
   //draw our triangle
   DrawTriangle(
-      Position,
-      Vector2Add(Position, (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance, -sinf(Rotation + 4 * M_PI / 3) * distance}),
-      Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
-        YELLOW
-      );
+    Position,
+    Vector2Add(Position, (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance, -sinf(Rotation + 4 * M_PI / 3) * distance}),
+    Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
+    YELLOW
+  );
   DrawTriangle(
-      Position,
-      Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
-      Vector2Add(Position, (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance, -sinf(Rotation + 2 * M_PI / 3) * distance}),
-        YELLOW
-      );
+    Position,
+    Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
+    Vector2Add(Position, (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance, -sinf(Rotation + 2 * M_PI / 3) * distance}),
+    YELLOW
+  );
+
+  // we draw them darn sqrs
+  const float height = 5;
+  const Vector2 dems = {dashCooldownBar->Dimensions.x, height};
+  // maxDashCount is the amount we draw
+  float offsetY = dashCooldownBar->Dimensions.y / maxDashCount;
+
+  for(int i = 0; i < maxDashCount; i++) {
+    DrawRectangleV((Vector2){dashCooldownBar->Position.x, dashCooldownBar->Position.y + (i * offsetY)}, 
+                   dems, dashCooldownBar->EmptyCol);
+  }
 
   DrawCircleV(Position, 5, WHITE);
 }
@@ -77,28 +89,34 @@ void Player::Process(float delta) {
   Velocity = Vector2Add(Vector2Scale(inputDirection, delta * Speed), Velocity);
   Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
   Velocity = Vector2Scale(Velocity, delta * Friction);
+
+  Border::wrapEntity(this);
+
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
       getRoot()->addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
-  Border::wrapEntity(this);
+
   timeSinceDash += delta;
   if(dashing) {
     Velocity = dashDirection;
     //i wanna do something funny.
     //that funny is changing the dashDirection.
     //based on the playerInput.
-    if(Vector2LengthSqr(inputDirection) != 0)
-      dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
+    dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
+
     if(fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
       getRoot()->addChild(new Afterimage(Position, Rotation));
+
     if(timeSinceDash > dashTime)
       dashing = false;
   }
-  if(IsKeyPressed(dashKey) && !dashing && timeSinceDash >= dashCooldown) {
+  if(IsKeyPressed(dashKey) && !dashing && dashProgress > 1) {
     dashing = true;
+    dashProgress--;
     dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
-  }
+  } else if(dashProgress <= maxDashCount)
+    dashProgress += delta / dashCooldown;
   if((IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse)) && !dashing)
     SpawnBullet();
   if(healthManager->isDead())
@@ -114,8 +132,7 @@ void Player::SpawnBullet() {
 }
 
 void Player::manageBars() {
-  manageBar(dashCooldownBar, 1, timeSinceDash / dashCooldown, timeSinceDash <= dashCooldown);
-  manageBar(dashBar, 3, timeSinceDash / dashTime, timeSinceDash <= dashTime);
+  manageBar(dashCooldownBar, 1, dashProgress / maxDashCount, true);
 }
 
 void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
@@ -139,19 +156,22 @@ void Player::manageRotation() {
 }
 
 Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) : Entity2D(name, position), cam(camera) {
+
   healthManager = new HealthManager(10, BarManager(&Position, distance, Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)));
   addChild(healthManager);
+
   Velocity = (Vector2){0,0};
   Speed = defaultSpeed;
   Friction = defaultFriction;
-  dashing = false;
+
   dashDirection = Vector2Zero();
+  dashing = false;
+  dashProgress = 0;
+  timeSinceDash = 0;
+
   dashCooldownBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashCooldownBar);
-  timeSinceDash = 0;
-  dashBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   Enemy::setPlayer();
-  addChild(dashBar);
 }
 
 Player::~Player() {
@@ -161,7 +181,6 @@ Player::~Player() {
 
 void Player::Init() {
   Enemy::setPlayer();
-  std::cout << Enemy::getPlayer() << '\n';
 };
 
 void Player::setCam(CameraEntity* camra) {
