@@ -5,7 +5,7 @@
 #include <string>
 
 float CameraEntity::Smoothing = 10;
-float CameraEntity::DefaultZoom = .3;
+float CameraEntity::DefaultZoom = .5;
 
 #define mouseLean .3
 

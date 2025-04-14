@@ -10,6 +10,7 @@
 #include "particle.hpp"
 #include <cmath>
 #include <cstdlib>
+#include <raylib.h>
 #include <string>
 
 #define max(a, b) (a < b ? b : a)
@@ -68,6 +69,17 @@ void Player::Render() {
     YELLOW
   );
 
+  // we draw them darn sqrs
+  const float height = 5;
+  const Vector2 dems = {dashCooldownBar->Dimensions.x, height};
+  // maxDashCount is the amount we draw
+  float offsetY = dashCooldownBar->Dimensions.y / maxDashCount;
+
+  for(int i = 0; i < maxDashCount; i++) {
+    DrawRectangleV((Vector2){dashCooldownBar->Position.x, dashCooldownBar->Position.y + (i * offsetY)}, 
+                   dems, dashCooldownBar->EmptyCol);
+  }
+
   DrawCircleV(Position, 5, WHITE);
 }
 
@@ -98,7 +110,6 @@ void Player::Process(float delta) {
     if(timeSinceDash > dashTime)
       dashing = false;
   }
-  printf("%f\n", dashProgress);
   if(IsKeyPressed(dashKey) && !dashing && dashProgress > 1) {
     dashing = true;
     dashProgress--;
