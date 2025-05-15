@@ -70,7 +70,7 @@ void Player::Render() {
   );
 
   // we draw them darn sqrs
-  const float height = 5;
+  const float height = 10;
   const Vector2 dems = {dashCooldownBar->Dimensions.x, height};
   // maxDashCount is the amount we draw
   float offsetY = dashCooldownBar->Dimensions.y / maxDashCount;
