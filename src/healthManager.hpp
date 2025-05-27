@@ -18,6 +18,7 @@ class HealthManager : public BarManager {
     float getHealth();
     void setHealth(float h);
     void applyDamage(float d);
+    void applyHealing(float h);
 
     bool isDead();
 

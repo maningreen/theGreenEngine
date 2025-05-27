@@ -38,6 +38,8 @@ public:
   unsigned dashCount;
   float dashProgress;
 
+  static float maxHealth;
+
   static int upKey;
   static int downKey;
   static int leftKey;

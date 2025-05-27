@@ -2,6 +2,7 @@
 #include "enemy.hpp"
 #include "healthManager.hpp"
 #include "border.hpp"
+#include "sniper.hpp"
 #include <cmath>
 #include <cstdlib>
 

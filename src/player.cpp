@@ -29,6 +29,8 @@ float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
 float Player::dashControl = 2;
 
+float Player::maxHealth = 10;
+
 unsigned Player::maxDashCount = 3;
 
 const float Player::defaultSpeed = 4000;
@@ -157,7 +159,7 @@ void Player::manageRotation() {
 
 Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) : Entity2D(name, position), cam(camera) {
 
-  healthManager = new HealthManager(10, BarManager(&Position, distance, Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)));
+  healthManager = new HealthManager(maxHealth, BarManager(&Position, distance, Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)));
   addChild(healthManager);
 
   Velocity = (Vector2){0,0};

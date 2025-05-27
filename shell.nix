@@ -1,21 +1,9 @@
-{ pkgs ? import <nixpkgs> {}, ...}: let 
-  # *this is for raylib*
-  raylibPackages = with pkgs; [
-    libGL
+{ pkgs ? import <nixpkgs> {}, ...}: pkgs.mkShell {
+  packages = with pkgs; [
+    gnumake # build backend
+    gcc # the compiler used
 
-    # X11 dependencies
-    xorg.libX11
-    xorg.libX11.dev
-    xorg.libXcursor
-    xorg.libXi
-    xorg.libXinerama
-    xorg.libXrandr
+    # libraries
+    raylib # (visual backend)
   ];
-in pkgs.mkShell {
-    packages = with pkgs; [
-      # make
-      gnumake
-      gcc # gcc
-    ] ++ raylibPackages;
-
-  }
+}
