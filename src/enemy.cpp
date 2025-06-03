@@ -158,10 +158,9 @@ EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, float dmg, 
 Vector2 getHealthPackVel(Vector2 enVel) {
   float r = 2 * rand() / (float)RAND_MAX - 1; // range = (-1, 1)
   float weight = r * r * r * r; // r^4
-  float aOfEn = atan2f(enVel.x, -enVel.y);
-  float nT = weight * M_PI + aOfEn;
-  Vector2 n = (Vector2){ cos(nT), sin(nT) };
-  return Vector2Scale(n, Vector2Length(enVel) * Vector2DotProduct(n, enVel));
+  float aOfEn = atan2f(enVel.x, -enVel.y); // find the angle of the enemies velocity
+  float nT = weight * M_PI + aOfEn; // add the random weighted angle to the actual angle of the velocity
+  return (Vector2){ cos(nT), sin(nT) }; // un-angle it w/ trig
 }
 
 // if not provided uses droppedHealthHP

@@ -58,6 +58,11 @@ void Spiraler::manageStates(float delta) {
   }
 }
 
+void Spiraler::dropHealth() {
+  Entity* root = getRoot();
+  dropHealthPack();
+}
+
 Vector2 Spiraler::getTargetPosition() {
   return targetPosition;
 }

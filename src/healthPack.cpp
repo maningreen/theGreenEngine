@@ -21,7 +21,8 @@ HealthPack::HealthPack(Vector2 p, Vector2 v, float h) : Entity2D("HealthPack", p
 HealthPack::~HealthPack() {}
 
 float HealthPack::getRadiusForHealth() {
-  return std::sqrt(health) * 10;
+  const float baseScalar = 20;
+  return std::sqrt(health) * baseScalar;
 }
 
 bool HealthPack::getIsAttracted() { return isAttracted; }

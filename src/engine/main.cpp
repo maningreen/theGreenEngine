@@ -31,7 +31,7 @@ void PreRendering(std::vector<Entity*>* entities);
 void PostRendering(std::vector<Entity*>* entities);
 
 int main() {
-  Entity* Root = new Entity("Root", 0);
+  Entity* Root = new Entity("Root", nullptr);
 
   Entity::setRoot(Root);
 
@@ -42,7 +42,7 @@ int main() {
   Init(Root);
 
   float delta = 1.0f / 60.0f;
-  while(!WindowShouldClose()) {
+  while(!WindowShouldClose() && Root->getValid()) {
 
     manageChildrenProcess(&Root->Children, delta);
 

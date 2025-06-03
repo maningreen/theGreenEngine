@@ -22,22 +22,27 @@ class Dasher : public Enemy {
     static float dashSpeed;
     static float damage;
 
+    static float healthDropChance;
+
   public:
 
     //process
     void manageStates(float delta) override;
+    // drop health
+    void dropHealth() override;
 
     //getters
-    float getSpeed();
-    float getWindupTime();
-    float getWindupSpeed();
-    float getDefaultHealth();
-    float getDashTime();
-    float getDashSpeed();
-    float getRecoverTime();
-    float getRecoverSpeedThreshold();
-    float getDamage();
-    Color getColour();
+    static float getSpeed();
+    static float getWindupTime();
+    static float getWindupSpeed();
+    static float getDefaultHealth();
+    static float getDashTime();
+    static float getDashSpeed();
+    static float getRecoverTime();
+    static float getRecoverSpeedThreshold();
+    static float getDamage();
+    static float getHealthDropChance();
+    static Color getColour();
 
     //constructors
     Dasher(Vector2 pos);
