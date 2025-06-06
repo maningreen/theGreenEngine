@@ -19,6 +19,7 @@ float Dasher::defaultHealth = 1;
 float Dasher::dashTime = .5;
 float Dasher::dashSpeed = 200000;
 float Dasher::damage = 4;
+float Dasher::healthDropChance = 3;
 
 Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
@@ -57,6 +58,10 @@ float Dasher::getRecoverTime() {
 
 float Dasher::getRecoverSpeedThreshold() {
   return recoverSpeedThreshold;
+}
+
+float Dasher::getHealthDropChance() {
+  return healthDropChance;
 }
 
 void Dasher::manageStates(float delta) {
@@ -111,4 +116,12 @@ void Dasher::manageStates(float delta) {
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
   // :D
+}
+
+void Dasher::dropHealth() {
+  // step one:
+  // random number
+  int r = rand() % (int)(healthDropChance);
+  if(r == 0) // means, it's healthDropChance deep deep down
+    dropHealthPack();
 }

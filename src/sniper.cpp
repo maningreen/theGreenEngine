@@ -1,6 +1,8 @@
 #include "sniper.hpp"
 #include "enemy.hpp"
 #include "border.hpp"
+#include "engine/entity.hpp"
+#include "healthPack.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdio.h>
@@ -83,4 +85,8 @@ void Sniper::manageStates(float delta) {
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());
   }
+}
+
+void Sniper::dropHealth() {
+  dropHealthPack();
 }

@@ -1,7 +1,9 @@
-{ pkgs ? import <nixpkgs> {}, ...}: 
-pkgs.mkShell {
-  # most useless ass shell.nix
+{ pkgs ? import <nixpkgs> {}, ...}: pkgs.mkShell {
   packages = with pkgs; [
-    raylib
+    gnumake # build backend
+    gcc # the compiler used
+
+    # libraries
+    raylib # (visual backend)
   ];
 }

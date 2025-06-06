@@ -2,6 +2,7 @@
 #include "enemy.hpp"
 #include "healthManager.hpp"
 #include "border.hpp"
+#include "sniper.hpp"
 #include <cmath>
 #include <cstdlib>
 
@@ -55,6 +56,10 @@ void Spiraler::manageStates(float delta) {
       setState(spinning);
     }
   }
+}
+
+void Spiraler::dropHealth() {
+  dropHealthPack();
 }
 
 Vector2 Spiraler::getTargetPosition() {

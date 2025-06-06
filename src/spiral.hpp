@@ -17,6 +17,7 @@ class Spiraler : public Enemy {
     float shotTime;
 
     void manageStates(float delta) override; //yeah that's a good idea
+    void dropHealth() override;
 
     Vector2 getTargetPosition();
 

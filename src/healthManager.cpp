@@ -33,6 +33,10 @@ void HealthManager::applyDamage(float d) {
   setHealth(health - d);
 }
 
+void HealthManager::applyHealing(float h) {
+  setHealth(health + h);
+}
+
 bool HealthManager::isDead() {
   return health <= 0;
 }

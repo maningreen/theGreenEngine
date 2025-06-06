@@ -4,9 +4,12 @@
 #include "engine/core.h"
 #include "healthManager.hpp"
 #include "enemyBullet.hpp"
+#include "healthPack.hpp"
 #include "playerBullet.hpp"
 #include "bars.hpp"
 #include "include.h"
+#include <raylib.h>
+#include <raymath.h>
 #include <vector>
 #include <cmath>
 
@@ -14,6 +17,8 @@ float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
 float Enemy::friction = 58;
 Player* Enemy::plr = nullptr;
+
+float Enemy::droppedHealthHP = 1;
 
 #define barDimensions (Vector2){Radius * 2, 10}
 
@@ -32,6 +37,10 @@ Enemy::~Enemy() {
   for(int i = 0; i < PlayerBullet::enemies.size(); i++)
     if(PlayerBullet::enemies[i] == this) //the most beautiful nesting you'll ever see
       PlayerBullet::enemies.erase(PlayerBullet::enemies.begin() + i);
+}
+
+void Enemy::Death() {
+  dropHealth();
 }
 
 void Enemy::Init() {
@@ -144,4 +153,28 @@ EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, float dmg, 
   EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime, s, dmg);
   getRoot()->addChild(bul);
   return bul;
+}
+
+Vector2 getHealthPackVel(Vector2 enVel) {
+  float r = 2 * rand() / (float)RAND_MAX - 1; // range = (-1, 1)
+  float weight = r * r * r * r; // r^4
+  float aOfEn = atan2f(enVel.x, -enVel.y); // find the angle of the enemies velocity
+  float nT = weight * M_PI + aOfEn; // add the random weighted angle to the actual angle of the velocity
+  return (Vector2){ cos(nT), sin(nT) }; // un-angle it w/ trig
+}
+
+// if not provided uses droppedHealthHP
+// otherwise, same as the more verbose overload
+void Enemy::dropHealthPack() {
+  // :p
+  Vector2 v = getHealthPackVel(Velocity);
+  Entity* root = getRoot();
+  HealthPack* h = new HealthPack(Position, Velocity, droppedHealthHP);
+  root->addChild(h);
+}
+
+void Enemy::dropHealthPack(float hp, Entity* root) {
+  Vector2 v = getHealthPackVel(Velocity);
+  HealthPack* h = new HealthPack(Position, Velocity, hp);
+  root->addChild(h);
 }

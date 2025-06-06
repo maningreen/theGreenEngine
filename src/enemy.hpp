@@ -42,9 +42,14 @@ class Enemy : public Entity2D {
 
     void Process(float delta) override;
     void Render() override;
+    void Death() override;
     void Init() override;
 
     virtual void manageStates(float delta) {};
+    virtual void dropHealth() {};
+
+    void dropHealthPack();
+    void dropHealthPack(float hp, Entity* root);
 
     Enemy(Vector2 position);
     ~Enemy();
@@ -56,6 +61,8 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
     static float friction;
+
+    static float droppedHealthHP;
     Color Colour;
 };
 
