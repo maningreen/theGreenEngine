@@ -88,7 +88,5 @@ void Sniper::manageStates(float delta) {
 }
 
 void Sniper::dropHealth() {
-  Entity* root = getRoot();
-  HealthPack* p = new HealthPack(Position, droppedHealthHP);
-  root->addChild(p);
+  dropHealthPack();
 }

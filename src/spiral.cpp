@@ -59,7 +59,6 @@ void Spiraler::manageStates(float delta) {
 }
 
 void Spiraler::dropHealth() {
-  Entity* root = getRoot();
   dropHealthPack();
 }
 
