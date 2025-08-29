@@ -4,10 +4,10 @@
 #include "engine/core.h"
 #include "border.hpp"
 #include "healthManager.hpp"
-#include "playerBullet.hpp"
 #include "afterimage.hpp"
 #include "bars.hpp"
 #include "particle.hpp"
+#include "enemy.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <raylib.h>
@@ -20,9 +20,6 @@ int Player::upKey = KEY_W;
 int Player::downKey = KEY_S;
 int Player::leftKey = KEY_A;
 int Player::rightKey = KEY_D;
-
-int Player::shootKey = 0;
-int Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
 int Player::dashKey = KEY_SPACE;
 float Player::dashTime = .4;
@@ -119,18 +116,10 @@ void Player::Process(float delta) {
     timeSinceDash = 0;
   } else if(dashProgress <= maxDashCount)
     dashProgress += delta / dashCooldown;
-  if((IsKeyPressed(shootKey) || IsMouseButtonPressed(shootKeyMouse)) && !dashing)
-    SpawnBullet();
   if(healthManager->isDead())
     killDefered();
   manageBars();
   manageRotation();
-}
-
-void Player::SpawnBullet() {
-  const float offsetAhead = 30;
-  Bullet* bul = new PlayerBullet(Vector2Add(Position, (Vector2){cosf(Rotation) * offsetAhead, -sinf(Rotation) * offsetAhead}), Rotation);
-  getRoot()->addChild(bul);
 }
 
 void Player::manageBars() {

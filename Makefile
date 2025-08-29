@@ -26,12 +26,14 @@ engine: $(ENGINEOUT)
 $(ENGINEOUT): $(ENGINEOBJS) # -c makes it not link
 	ar rcs $(ENGINEOUT) $(ENGINEOBJS)
 
-build/%.o: src/%.cpp
+$(BUILDDIR)%.o: src/%.cpp $(BUILDDIR)
 	$(CC) -c $< -o $@
 
-
-$(BUILDDIR)%.o: src/engine/%.cpp
+$(BUILDDIR)%.o: src/engine/%.cpp $(BUILDDIR)
 	$(CC) -c $< -o $@
+
+$(BUILDDIR):
+	mkdir $(BUILDDIR)
 
 clean:
 	rm -r $(BUILDDIR)*

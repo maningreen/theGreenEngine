@@ -4,7 +4,6 @@
 #include "spiral.hpp"
 #include "dasher.hpp"
 #include "particle.hpp"
-#include "playerBullet.hpp"
 #include "sniper.hpp"
 #include "store.hpp"
 #include "engine/entity.hpp"
@@ -16,14 +15,12 @@ unsigned WaveManager::upgradeCount = 4;
 float* WaveManager::floatUpgrades[] = {
   &Player::dashSpeed,
   &Player::dashControl,
-  &PlayerBullet::DefaultMaxLifetime,
   &Particle::MaxLifetime
 };
 
 std::string WaveManager::upgradeNames[] = {
   "Dash Speed",
   "Dash Control",
-  "Bullet Lifetime",
   "Particle Lifetime"
 };
 

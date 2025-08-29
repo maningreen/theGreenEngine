@@ -5,7 +5,6 @@
 #include "healthManager.hpp"
 #include "enemyBullet.hpp"
 #include "healthPack.hpp"
-#include "playerBullet.hpp"
 #include "bars.hpp"
 #include "include.h"
 #include <raylib.h>
@@ -30,13 +29,12 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   healthManager->getBar()->ShouldRender = true;
   addChild(healthManager);
   addTag("Enemy");
-  PlayerBullet::enemies.push_back(this);
 }
 
 Enemy::~Enemy() {
-  for(int i = 0; i < PlayerBullet::enemies.size(); i++)
-    if(PlayerBullet::enemies[i] == this) //the most beautiful nesting you'll ever see
-      PlayerBullet::enemies.erase(PlayerBullet::enemies.begin() + i);
+  // for(int i = 0; i < PlayerBullet::enemies.size(); i++)
+    // if(PlayerBullet::enemies[i] == this) //the most beautiful nesting you'll ever see
+      // PlayerBullet::enemies.erase(PlayerBullet::enemies.begin() + i);
 }
 
 void Enemy::Death() {

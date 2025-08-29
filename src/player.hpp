@@ -74,8 +74,6 @@ public:
 
   void setCam(CameraEntity* cam);
 
-  void SpawnBullet();
-
   HealthManager* getHealthManager();
 
   float getLifetime();

@@ -32,7 +32,6 @@ void PostRendering(std::vector<Entity*>* entities);
 
 int main() {
   Entity* Root = new Entity("Root", nullptr);
-
   Entity::setRoot(Root);
 
   SetTargetFPS(60);
