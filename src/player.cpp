@@ -24,16 +24,16 @@ int Player::rightKey = KEY_D;
 int Player::dashKey = KEY_SPACE;
 float Player::dashTime = .4;
 float Player::dashSpeed = 2500;
-float Player::dashControl = 2;
 
 float Player::maxHealth = 10;
-
-unsigned Player::maxDashCount = 3;
 
 const float Player::defaultSpeed = 4000;
 const float Player::defaultFriction = 58;
 
+float Player::dashControl = 2;
 float Player::dashCooldown = 1.5;
+float Player::dashRegenDelay = .7;
+unsigned Player::maxDashCount = 3;
 
 float Player::particleSpawnTime = 1.0f / 30.0f;
 
@@ -108,17 +108,22 @@ void Player::Process(float delta) {
 
     if(timeSinceDash > dashTime)
       dashing = false;
-  }
-  if(IsKeyPressed(dashKey) && !dashing && dashProgress > 1) {
+  } else if(IsKeyPressed(dashKey) && dashProgress > 1) {
     dashing = true;
     dashProgress--;
     dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
     addChild(new DashNode(Position));
-  } else if(dashProgress <= maxDashCount)
+  } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
   if(healthManager->isDead())
     killDefered();
+
+  if(maxDashCount - dashCount >= 3) {
+    // this means our attack should be used :)
+    // TODO: whatever here :)
+  }
+
   manageBars();
   manageRotation();
 }

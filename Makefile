@@ -15,13 +15,11 @@ ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
 LDFLAGS = -lraylib
 
 # target
-OUT = engine
+OUT = build/engine
 BUILDDIR = build/
 
-game: $(ENGINEOUT) $(OBJECTS) $(BUILDDIR)
-	$(CC) $(OBJECTS) -o $(BUILDDIR)$(OUT) $(LDFLAGS) $(ENGINEFLAGS)
-
-engine: $(ENGINEOUT)
+$(OUT): $(ENGINEOUT) $(OBJECTS) $(BUILDDIR)
+	$(CC) $(OBJECTS) -o $(OUT) $(LDFLAGS) $(ENGINEFLAGS)
 
 $(ENGINEOUT): $(ENGINEOBJS)
 	ar rcs $(ENGINEOUT) $(ENGINEOBJS)
@@ -38,5 +36,5 @@ $(BUILDDIR):
 clean:
 	rm -r $(BUILDDIR)*
 
-run: $(ENGINEOUT) $(OBJECTS) game
-	$(BUILDDIR)$(OUT)
+run: $(ENGINEOUT) $(OBJECTS) $(OUT)
+	$(OUT)

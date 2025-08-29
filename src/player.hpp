@@ -53,6 +53,7 @@ public:
   static float dashSpeed;
   static float dashTime;
   static float dashControl;
+  static float dashRegenDelay;
 
   static unsigned maxDashCount;
 

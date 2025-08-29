@@ -19,15 +19,15 @@ void Init(Entity* root) {
 }
 
 void PreRendering(std::vector<Entity*>* entities) {
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-  BeginTextureMode(data->Texture);
+  // PostProcessingData* data = (PostProcessingData*)entities->front();
+  // BeginTextureMode(data->Texture);
 }
 
 void PostRendering(std::vector<Entity*>* entities) {
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-  EndTextureMode();
-  BeginShaderMode(data->getShader());
-  DrawTextureRec(data->Texture.texture, (Rectangle){0, 0, (float)data->Texture.texture.width, -(float)data->Texture.texture.height}, (Vector2){0, 0}, WHITE);
-  EndShaderMode();
-  DrawFPS(0, 0);
+  // PostProcessingData* data = (PostProcessingData*)entities->front();
+  // EndTextureMode();
+  // BeginShaderMode(data->getShader());
+  // DrawTextureRec(data->Texture.texture, (Rectangle){0, 0, (float)data->Texture.texture.width, -(float)data->Texture.texture.height}, (Vector2){0, 0}, WHITE);
+  // EndShaderMode();
+  // DrawFPS(0, 0);
 }

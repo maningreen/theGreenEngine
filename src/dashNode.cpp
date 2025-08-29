@@ -1,6 +1,7 @@
 #include "dashNode.hpp"
 #include "engine/entity.hpp"
 #include "player.hpp"
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -13,12 +14,12 @@ float DashNode::ease(float x) {
 }
 
 void DashNode::Render() {
-  float r = lifetime >= Player::dashCooldown ? (1 - ease(lifetime - Player::dashCooldown)) * radius : radius;
+  float r = lifetime >= Player::dashCooldown ? (1 - ease(lifetime - Player::dashCooldown - Player::dashRegenDelay)) * radius : radius;
   DrawCircleLinesV(Position, r, WHITE);
 }
 
 void DashNode::Process(float delta) {
   lifetime += delta;
-  if(lifetime > Player::dashCooldown + 1)
+  if(lifetime >= Player::dashCooldown + Player::dashRegenDelay + 1)
     killDefered();
 }
