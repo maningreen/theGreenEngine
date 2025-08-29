@@ -1,7 +1,6 @@
 #include "player.hpp"
 #include "dashNode.hpp"
 #include "engine/entity.hpp"
-#include "engine/core.h"
 #include "border.hpp"
 #include "healthManager.hpp"
 #include "afterimage.hpp"
