@@ -1,5 +1,5 @@
 #include "player.hpp"
-#include "camera.hpp"
+#include "dashNode.hpp"
 #include "engine/entity.hpp"
 #include "engine/core.h"
 #include "border.hpp"
@@ -114,6 +114,7 @@ void Player::Process(float delta) {
     dashProgress--;
     dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
+    addChild(new DashNode(Position));
   } else if(dashProgress <= maxDashCount)
     dashProgress += delta / dashCooldown;
   if(healthManager->isDead())

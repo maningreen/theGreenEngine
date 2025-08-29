@@ -21,8 +21,7 @@ void PostProcessingData::Process(float delta) {
   }
 }
 
-void PostProcessingData::Render() {
-}
+void PostProcessingData::Render() {}
 
 PostProcessingData::~PostProcessingData() {
   UnloadRenderTexture(Texture);

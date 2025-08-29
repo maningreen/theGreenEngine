@@ -15,7 +15,7 @@ void Init(Entity* root) {
   root->Children[0]->addChild(new CameraEntity("Camera", &((Player*)(root->Children)[1])->Position));
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
-  root->addChild(new WaveManager());
+  // root->addChild(new WaveManager());
 }
 
 void PreRendering(std::vector<Entity*>* entities) {
@@ -29,6 +29,5 @@ void PostRendering(std::vector<Entity*>* entities) {
   BeginShaderMode(data->getShader());
   DrawTextureRec(data->Texture.texture, (Rectangle){0, 0, (float)data->Texture.texture.width, -(float)data->Texture.texture.height}, (Vector2){0, 0}, WHITE);
   EndShaderMode();
-
   DrawFPS(0, 0);
 }
