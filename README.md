@@ -4,30 +4,48 @@ this is a game engine i have written by hand and for hand /shrug
 
 # required packages
 
+packages :)
 
 # build process (make)
 
 assuming you have all the required packages (those being)
 * g++/gcc
+* raylib
 * make
 
 execute
 
-`make all`
+`make`
 
 and to run
 
 `./build/engine`
 
-# build process (nix flakes)
+# Using Nix
 
 this is a lot easier if you have nix
+This project uses nix as the package backend.
 
-you need nix flakes enabled then do a little
+### With Flakes
 
-`nix build`
-to build
+To build:
+```bash
+nix build
+```
 
-and
-`nix run`
-to run
+To develop:
+```bash
+nix develop
+```
+
+### Without Flakes
+
+To build:
+```bash
+nix-build
+```
+
+To develop:
+```bash
+nix-shell
+```

@@ -1,10 +1,12 @@
 #include "postprocessing.hpp"
+#include "camera.hpp"
 #include "engine/entity.hpp"
+#include "border.hpp"
 #include "include.h"
 
 PostProcessingData::PostProcessingData() : Entity("Data") {
   ScreenDems = (Vector2){(float)GetScreenWidth(), (float)GetScreenHeight()};
-  Texture = LoadRenderTexture(ScreenDems.x, ScreenDems.y);
+  Texture = LoadRenderTexture(2 * Border::Length, 2 * Border::Length);
   pixelShader = LoadShader(0, "resources/shaders/pixel.glsl");
   pixelShaderScreenDimensionsLoc = GetShaderLocation(pixelShader, "screenDems");
   SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &ScreenDems, SHADER_UNIFORM_VEC2);
@@ -12,13 +14,13 @@ PostProcessingData::PostProcessingData() : Entity("Data") {
 }
 
 void PostProcessingData::Process(float delta) {
-  Vector2 currentDems = {(float)GetScreenWidth(), (float)GetScreenHeight()};
-  if(*(long*)&currentDems != *(long*)&ScreenDems) { //fancy way to not do an ||
-    ScreenDems = currentDems;
-    UnloadRenderTexture(Texture);
-    Texture = LoadRenderTexture(ScreenDems.x, ScreenDems.y);
-    SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &ScreenDems, SHADER_UNIFORM_VEC2);
-  }
+  // Vector2 currentDems = {(float)GetScreenWidth(), (float)GetScreenHeight()};
+  // if(*(long*)&currentDems != *(long*)&ScreenDems) { //fancy way to not do an ||
+    // ScreenDems = currentDems;
+    // UnloadRenderTexture(Texture);
+    // Texture = LoadRenderTexture(ScreenDems.x, ScreenDems.y);
+    // SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &ScreenDems, SHADER_UNIFORM_VEC2);
+  // }
 }
 
 void PostProcessingData::Render() {}

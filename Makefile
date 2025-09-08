@@ -10,11 +10,11 @@ ENGINEOUT = build/libengine.a
 # define misc
 CC = g++
 
-# flags
+# Flags
 ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
 LDFLAGS = -lraylib
 
-# target
+# Target
 OUT = build/engine
 BUILDDIR = build/
 

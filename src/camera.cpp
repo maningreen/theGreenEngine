@@ -5,27 +5,26 @@
 #include <string>
 
 float CameraEntity::Smoothing = 10;
-float CameraEntity::DefaultZoom = .5;
+float CameraEntity::DefaultZoom = .3;
 
-#define mouseLean .3
+#define mouseLean .1
 
 void CameraEntity::ManageCameraShake(float delta) {
-  Camera.target = Vector2Add(Target, Vector2Scale(Vector2Subtract(GetMousePosition(), Camera.offset), mouseLean));
+  Vector2 baseOff = (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+  Camera.offset = Vector2Add(baseOff, Vector2Scale(Vector2Subtract(GetMousePosition(), Camera.offset), -mouseLean));
 }
 
 void CameraEntity::ManageCameraMotion(float delta) {
   if(Follow != nullptr)
-    Target = Vector2Lerp(Target, *Follow, Smoothing * delta);
+    Camera.target = *Follow;
 }
 
 void CameraEntity::Process(float delta) {
   ManageCameraMotion(delta);
   ManageCameraShake(delta);
-  Camera.offset = (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
 }
 
 void CameraEntity::Render() {
-  BeginMode2D(Camera);
   ClearBackground(BLACK);
 }
 
@@ -36,5 +35,4 @@ CameraEntity::CameraEntity(std::string name, Vector2* target) : Entity(name) {
   Camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
   Jitterness = 0;
   ShakeVector = (Vector2){0, 0};
-  Target = (Vector2){0, 0};
 }

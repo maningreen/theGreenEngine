@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+bool checkCollisionCircleTriangle(Vector2 circleCenter, float radius, Vector2 triangleVertexA, Vector2 triangleVertexB, Vector2 triangleVertexC);
+
 namespace Engine {
   //returns -1 if no such entity is in the vector
   int getEntityIndex(std::vector<Entity*> entities, Entity* entity);

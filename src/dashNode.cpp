@@ -2,12 +2,11 @@
 #include "engine/entity.hpp"
 #include "laser.hpp"
 #include "player.hpp"
+#include "border.hpp"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
-
-float laserWidth = 5;
 
 float DashNode::defaultRadius = 30;
 float DashNode::lifetimeAfterAttack = 1.5;
@@ -43,21 +42,28 @@ void DashNode::Render() {
 
 void DashNode::Process(float delta) {
   lifetime += delta;
-  radius = lifetime >= Player::dashCooldown ? (1 - ease(lifetime - Player::dashCooldown - Player::dashRegenDelay)) * defaultRadius : radius;
+
+  if(lifetime >= Player::dashCooldown * 2)
+    radius = (1 - ease(lifetime - (2 * Player::dashCooldown))) * defaultRadius;
+  else if(lifetime <= 1)
+    radius = (1 - ease(1 - lifetime)) * defaultRadius;
+
   if(nodes.size() >= 3) {
     int index = getIndex();
     DashNode* next = nodes[(index + 1) % nodes.size()];
+    Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
     if(!las->shouldRender) {
       las->shouldRender = true;
-      lifetime = Player::dashCooldown + Player::dashRegenDelay - lifetimeAfterAttack;
+      lifetime = Player::dashCooldown + - lifetimeAfterAttack;
+      // we gotta turn "next" into local positions
+      las->lookAt(next->Position);
     }
-    Vector2 vectorToNext = Vector2Subtract(next->Position, Position);
     las->length = Vector2Length(vectorToNext) - (next->radius + radius);
-    las->width = laserWidth * radius / defaultRadius;
-    las->rotation = atan2f(vectorToNext.y, vectorToNext.x);
+    las->width = sqrt(radius);
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the las->position yeah
     las->Position = Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
   }
-  if(lifetime >= Player::dashCooldown + Player::dashRegenDelay + 1) 
+
+  if(lifetime >= 2 * Player::dashCooldown) 
     killDefered();
 }

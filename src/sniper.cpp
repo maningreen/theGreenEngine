@@ -55,13 +55,7 @@ Vector2 Sniper::getTargetPosition() const { return targetPosition; }
 
 void Sniper::manageStates(float delta) {
   //so here it's pretty easy
-  {
-    //this scope manages rotation
-    float plrAngle = getAngleToPlayer();
-    rotation = plrAngle;
-    las->rotation = plrAngle;
-    las->length = Vector2Length(getShortestVectorToPlayer());
-  }
+  las->lookAt(getPlayer()->Position);
   las->Position = Position;
   if(getState() == positioning) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));

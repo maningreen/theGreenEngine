@@ -13,15 +13,19 @@ uniform vec2 screenDems;
 // Output fragment color
 out vec4 finalColor;
 
-uniform float pixelLength = 3;
+uniform float pixelLength = .002;
+
+vec4 to4Bit(vec4 i) {
+  return floor(i * 4) / 4;
+}
 
 void main()
 {
-    vec2 pos = fragTexCoord * screenDems;
+    vec2 pos = fragTexCoord;
 
     pos = vec2(floor(pos.x / pixelLength) * pixelLength, floor(pos.y / pixelLength) * pixelLength);
 
-    pos = pos / screenDems;
+    vec4 col = texture(texture0, pos);
 
-    finalColor = texture(texture0, pos);
+    finalColor = vec4(to4Bit(col));
 }

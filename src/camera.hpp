@@ -8,7 +8,6 @@
 class CameraEntity : public Entity {
   public:
     Camera2D Camera;
-    Vector2 Target;
     Vector2* Follow;
     Vector2 ShakeVector;
     float Jitterness;
