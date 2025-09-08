@@ -16,7 +16,8 @@ out vec4 finalColor;
 uniform float pixelLength = .002;
 
 vec4 to4Bit(vec4 i) {
-  return floor(i * 4) / 4;
+  // we do 15 becase 2^4 - 1 is 15, so there're 15 shades of any colour in 4 bit
+  return floor(i * 15) / 15;
 }
 
 void main()
