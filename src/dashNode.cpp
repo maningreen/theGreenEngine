@@ -26,7 +26,7 @@ DashNode::~DashNode() {
 }
 
 float DashNode::ease(float x) {
-  return x * x * x * x;
+  return 1 - (x * x * x * x);
 }
 
 int DashNode::getIndex() {
@@ -36,6 +36,10 @@ int DashNode::getIndex() {
   return -1;
 }
 
+float DashNode::getMaxLifetime() {
+  return 2 * Player::dashCooldown;
+}
+
 void DashNode::Render() {
   DrawCircleLinesV(Position, radius, WHITE);
 }
@@ -43,10 +47,10 @@ void DashNode::Render() {
 void DashNode::Process(float delta) {
   lifetime += delta;
 
-  if(lifetime >= Player::dashCooldown * 2)
-    radius = (1 - ease(lifetime - (2 * Player::dashCooldown))) * defaultRadius;
+  if(lifetime >= getMaxLifetime())
+    radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
   else if(lifetime <= 1)
-    radius = (1 - ease(1 - lifetime)) * defaultRadius;
+    radius = ease(1 - lifetime) * defaultRadius;
 
   if(nodes.size() >= 3) {
     int index = getIndex();
@@ -64,6 +68,6 @@ void DashNode::Process(float delta) {
     las->Position = Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
   }
 
-  if(lifetime >= 2 * Player::dashCooldown) 
+  if(lifetime >= getMaxLifetime() + 1) 
     killDefered();
 }

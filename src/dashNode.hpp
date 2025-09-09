@@ -22,6 +22,9 @@ public:
   void Render() override;
   void Process(float delta) override;
 
+  // returns the effective lifetime.
+  float getMaxLifetime();
+
   static float defaultRadius;
 
   DashNode(Vector2 position);
