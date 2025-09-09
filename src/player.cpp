@@ -40,6 +40,8 @@ const float distance = 50;
 
 float Player::hitboxRadius = 25;
 
+std::vector<Enemy*> Player::enemies;
+
 #define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {
@@ -193,4 +195,26 @@ HealthManager* Player::getHealthManager() {
 
 bool Player::getDashing() {
   return dashing;
+}
+
+int Player::getEnemyInEnemies(Enemy* en) {
+  for(int i = 0; i < enemies.size(); i++)
+    if(en == enemies[i])
+      return i;
+  return -1;
+}
+
+bool Player::addEnemy(Enemy* en) {
+  if(getEnemyInEnemies(en) != -1)
+    return false;
+  enemies.push_back(en);
+  return true;
+}
+
+bool Player::removeEnemy(Enemy* en) {
+  int i = getEnemyInEnemies(en);
+  if(i == -1)
+    return false;
+  enemies.erase(enemies.begin() + i);
+  return true;
 }

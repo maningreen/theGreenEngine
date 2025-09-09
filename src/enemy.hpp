@@ -2,7 +2,6 @@
 #define enemy_h
 
 #include "engine/entity.hpp"
-#include "player.hpp"
 #include "healthManager.hpp"
 #include "include.h"
 #include "enemyBullet.hpp"
@@ -12,7 +11,7 @@ class Enemy : public Entity2D {
     unsigned char state;
 
     float stateTime;
-    static Player* plr;
+    static Entity2D* plr;
 
     HealthManager* healthManager;
     void manageHealthBar(float radius);
@@ -55,8 +54,8 @@ class Enemy : public Entity2D {
     ~Enemy();
 
     static void setPlayer();
-    static void setPlayer(Player* address);
-    static Player* getPlayer();
+    static void setPlayer(Entity2D* address);
+    static Entity2D* getPlayer();
 
     static float DefaultRadius;
     static float Speed;

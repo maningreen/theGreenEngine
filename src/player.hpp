@@ -5,7 +5,7 @@
 #include "bars.hpp"
 #include "camera.hpp"
 #include "healthManager.hpp"
-#include "include.h"
+#include "enemy.hpp"
 
 class Player : public Entity2D {
 private:
@@ -26,6 +26,9 @@ private:
   void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
 
   void manageRotation();
+
+  static std::vector<Enemy*> enemies;
+  static int getEnemyInEnemies(Enemy*);
 
 public:
   Vector2 Velocity;
@@ -66,6 +69,10 @@ public:
   void Process(float delta) override;
   void Render() override;
   void Init() override;
+
+  static bool addEnemy(Enemy*);
+  static bool removeEnemy(Enemy*);
+  static std::vector<Enemy*> getEnemies();
 
   Player(const std::string& name, Vector2 position, CameraEntity* cam);
   ~Player();

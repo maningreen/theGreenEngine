@@ -15,7 +15,7 @@
 float Enemy::DefaultRadius= 30;
 float Enemy::Speed = 4000;
 float Enemy::friction = 58;
-Player* Enemy::plr = nullptr;
+Entity2D* Enemy::plr = nullptr;
 
 float Enemy::droppedHealthHP = 1;
 
@@ -32,9 +32,7 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
 }
 
 Enemy::~Enemy() {
-  // for(int i = 0; i < PlayerBullet::enemies.size(); i++)
-    // if(PlayerBullet::enemies[i] == this) //the most beautiful nesting you'll ever see
-      // PlayerBullet::enemies.erase(PlayerBullet::enemies.begin() + i);
+  Player::removeEnemy(this);
 }
 
 void Enemy::Death() {
@@ -58,7 +56,7 @@ void Enemy::Process(float delta) {
 void Enemy::Render() {
   //hmm what do we want for our enemies???
   //hear me out:
-  //circle
+  //circle :3
   DrawCircleV(Position, Radius, Colour); //WHOOOOOO
 }
 
@@ -78,7 +76,7 @@ void Enemy::setPlayer() {
   plr = (Player*)Engine::searchTreeForEntity(&getRoot()->Children, "Player");
 }
 
-void Enemy::setPlayer(Player* p) {
+void Enemy::setPlayer(Entity2D* p) {
   plr = p;
 }
 
@@ -123,7 +121,7 @@ float Enemy::getStateTime() const {
   return stateTime;
 }
 
-Player* Enemy::getPlayer() {
+Entity2D* Enemy::getPlayer() {
   return plr;
 }
 
