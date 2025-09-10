@@ -22,11 +22,11 @@ vec4 to4Bit(vec4 i) {
 
 void main()
 {
-    vec2 pos = fragTexCoord;
+  vec2 pos = fragTexCoord;
 
-    pos = vec2(floor(pos.x / pixelLength) * pixelLength, floor(pos.y / pixelLength) * pixelLength);
+  pos = vec2(floor(pos.x / pixelLength) * pixelLength, floor(pos.y / pixelLength) * pixelLength);
 
-    vec4 col = texture(texture0, pos);
+  vec4 col = texture(texture0, pos);
 
-    finalColor = vec4(to4Bit(col));
+  finalColor = vec4(to4Bit(col));
 }

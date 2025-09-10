@@ -8,27 +8,28 @@
 class DashNode : public Entity2D {
 private:
   float lifetime;
-  Laser* las;
-
   float radius;
 
-  int getIndex();
+  Laser* las;
 
   float ease(float x);
   static std::vector<DashNode*> nodes;
 public:
-  static float lifetimeAfterAttack;
-
   void Render() override;
   void Process(float delta) override;
+
+  int getIndex();
+
+  DashNode(Vector2 position);
+  ~DashNode();
 
   // returns the effective lifetime.
   float getMaxLifetime();
 
   static float defaultRadius;
+  static float lifetimeAfterAttack;
 
-  DashNode(Vector2 position);
-  ~DashNode();
+  static std::vector<DashNode*> getNodes();
 };
 
 #endif

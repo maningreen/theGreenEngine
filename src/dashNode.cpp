@@ -40,6 +40,11 @@ float DashNode::getMaxLifetime() {
   return 2 * Player::dashCooldown;
 }
 
+
+std::vector<DashNode*> DashNode::getNodes() {
+  return nodes;
+}
+
 void DashNode::Render() {
   DrawCircleLinesV(Position, radius, WHITE);
 }
