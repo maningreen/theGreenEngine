@@ -9,6 +9,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#define shader
+
 void Init(Entity* root) {
   srand(time(0));
   root->addChild(new PostProcessingData());
@@ -32,13 +34,17 @@ void PostRendering(std::vector<Entity*>* entities) {
   CameraEntity* cameraEnt = (CameraEntity*)Engine::searchTreeForEntity(entities, "Camera");
   EndTextureMode();
 
+#ifdef shader
   BeginShaderMode(data->getShader());
+#endif
   BeginMode2D((Camera2D){.offset = cameraEnt->Camera.offset, .target = Vector2Subtract(cameraEnt->Camera.target, (Vector2){-Border::Length, -Border::Length}), .rotation = 0, .zoom = cameraEnt->Camera.zoom});
 
   DrawTexturePro(data->Texture.texture, (Rectangle){0, 0, 3 * (float)data->Texture.texture.width, 3 * -(float)data->Texture.texture.height}, (Rectangle){-(float)data->Texture.texture.width, -(float)data->Texture.texture.height, 3 * (float)data->Texture.texture.width, 3 * (float)data->Texture.texture.height}, {0, 0}, 0, WHITE);
 
   EndMode2D();
+#ifdef shader
   EndShaderMode();
+#endif
 
   DrawFPS(0, 0);
 }
