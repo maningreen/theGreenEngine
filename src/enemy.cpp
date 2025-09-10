@@ -27,12 +27,12 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   Radius = DefaultRadius;
   healthManager = new HealthManager(10,BarManager(&Position, Radius * 1.5f, Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
   healthManager->getBar()->ShouldRender = true;
+  Colour = PINK;
   addChild(healthManager);
   addTag("Enemy");
 }
 
 Enemy::~Enemy() {
-  Player::removeEnemy(this);
 }
 
 void Enemy::Death() {

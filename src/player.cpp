@@ -1,15 +1,20 @@
 #include "player.hpp"
-#include "dashNode.hpp"
-#include "engine/entity.hpp"
-#include "border.hpp"
-#include "healthManager.hpp"
 #include "afterimage.hpp"
+#include "engine/core.h"
 #include "bars.hpp"
-#include "particle.hpp"
+#include "border.hpp"
+#include "dashNode.hpp"
 #include "enemy.hpp"
+#include "engine/entity.hpp"
+#include "healthManager.hpp"
+#include "particle.hpp"
+#include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <raylib.h>
+#include <raymath.h>
 #include <string>
 
 #define max(a, b) (a < b ? b : a)
@@ -40,34 +45,37 @@ const float distance = 50;
 
 float Player::hitboxRadius = 25;
 
-std::vector<Enemy*> Player::enemies;
 
 #define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {
-  return Player::getInput(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey);
+  return Player::getInput(Player::upKey, Player::downKey, Player::leftKey,
+                          Player::rightKey);
 }
 
 Vector2 Player::getInput(int u, int d, int l, int r) {
-  Vector2 out = (Vector2){(float)IsKeyDown(r) - (float)IsKeyDown(l), (float)IsKeyDown(d) - (float)IsKeyDown(u)};
+  Vector2 out = (Vector2){(float)IsKeyDown(r) - (float)IsKeyDown(l),
+                          (float)IsKeyDown(d) - (float)IsKeyDown(u)};
   return Vector2Normalize(out);
 }
 
 void Player::Render() {
-  //get the mouse position (in cartesian)
-  //draw our triangle
-  DrawTriangle(
-    Position,
-    Vector2Add(Position, (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance, -sinf(Rotation + 4 * M_PI / 3) * distance}),
-    Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
-    YELLOW
-  );
-  DrawTriangle(
-    Position,
-    Vector2Add(Position, (Vector2){cosf(Rotation) * distance, -sinf(Rotation) * distance}),
-    Vector2Add(Position, (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance, -sinf(Rotation + 2 * M_PI / 3) * distance}),
-    YELLOW
-  );
+  // get the mouse position (in cartesian)
+  // draw our triangle
+  DrawTriangle(Position,
+               Vector2Add(Position,
+                          (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance,
+                                    -sinf(Rotation + 4 * M_PI / 3) * distance}),
+               Vector2Add(Position, (Vector2){cosf(Rotation) * distance,
+                                              -sinf(Rotation) * distance}),
+               YELLOW);
+  DrawTriangle(Position,
+               Vector2Add(Position, (Vector2){cosf(Rotation) * distance,
+                                              -sinf(Rotation) * distance}),
+               Vector2Add(Position,
+                          (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance,
+                                    -sinf(Rotation + 2 * M_PI / 3) * distance}),
+               YELLOW);
 
   // we draw them darn sqrs
   const float height = 10;
@@ -75,8 +83,9 @@ void Player::Render() {
   // maxDashCount is the amount we draw
   float offsetY = dashCooldownBar->Dimensions.y / maxDashCount;
 
-  for(int i = 0; i < maxDashCount; i++) {
-    DrawRectangleV((Vector2){dashCooldownBar->Position.x, dashCooldownBar->Position.y + (i * offsetY)}, 
+  for (int i = 0; i < maxDashCount; i++) {
+    DrawRectangleV((Vector2){dashCooldownBar->Position.x,
+                             dashCooldownBar->Position.y + (i * offsetY)},
                    dems, dashCooldownBar->EmptyCol);
   }
 
@@ -94,15 +103,24 @@ void Player::Process(float delta) {
 
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
-      getRoot()->addChild(new Particle(Position, Vector2Scale(Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)), -1)));
+      getRoot()->addChild(new Particle(
+          Position,
+          Vector2Scale(
+              Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)),
+              -1)));
 
   timeSinceDash += delta;
   if(dashing) {
     Velocity = dashDirection;
-    //i wanna do something funny.
-    //that funny is changing the dashDirection.
-    //based on the playerInput.
-    dashDirection = Vector2Scale(Vector2Normalize(Vector2Add(dashDirection, Vector2Scale(inputDirection, (delta / dashTime) * dashSpeed * dashControl))), dashSpeed);
+    // i wanna do something funny.
+    // that funny is changing the dashDirection.
+    // based on the playerInput.
+    dashDirection = Vector2Scale(
+        Vector2Normalize(Vector2Add(
+            dashDirection,
+            Vector2Scale(inputDirection,
+                         (delta / dashTime) * dashSpeed * dashControl))),
+        dashSpeed);
 
     if(fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
       getRoot()->addChild(new Afterimage(Position, Rotation));
@@ -112,18 +130,20 @@ void Player::Process(float delta) {
   } else if(IsKeyPressed(dashKey) && dashProgress > 1) {
     dashing = true;
     dashProgress--;
-    dashDirection = Vector2Length(inputDirection) > 0 ? Vector2Scale(inputDirection, dashSpeed) : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
+    dashDirection = Vector2Length(inputDirection) > 0
+                        ? Vector2Scale(inputDirection, dashSpeed)
+                        : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
     addChild(new DashNode(Position));
   } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
+
+  if(DashNode::getNodes().size() >= 3) {
+    manageAttack();
+  }
+
   if(healthManager->isDead())
     killDefered();
-
-  if(maxDashCount - dashCount >= 3) {
-    // this means our attack should be used :)
-    // TODO: whatever here :)
-  }
 
   manageBars();
   manageRotation();
@@ -133,13 +153,17 @@ void Player::manageBars() {
   manageBar(dashCooldownBar, 1, dashProgress / maxDashCount, true);
 }
 
-void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
-  //so basically, math :thumbsup:
-  //bool for verticle b->growVert
-  float offsetX = /*this one is either constant or index dependant depending on growVert*/ !b->ShrinkY ?
-    -b->Dimensions.x / 2.0f : distance + b->Dimensions.x * index;
-  float offsetY = /*just the opposite of ^*/ b->ShrinkY ?
-    -b->Dimensions.y / 2.0f : distance + b->Dimensions.y * index;
+void Player::manageBar(Bar *b, int index, float p, bool shouldRender) {
+  // so basically, math :thumbsup:
+  // bool for verticle b->growVert
+  float offsetX =
+      /*this one is either constant or index dependant depending on growVert*/
+          !b->ShrinkY
+          ? -b->Dimensions.x / 2.0f
+          : distance + b->Dimensions.x * index;
+  float offsetY = /*just the opposite of ^*/ b->ShrinkY
+                      ? -b->Dimensions.y / 2.0f
+                      : distance + b->Dimensions.y * index;
   Vector2 finalPosition = {Position.x + offsetX, Position.y + offsetY};
   b->Position = finalPosition;
   b->ShouldRender = shouldRender;
@@ -147,18 +171,27 @@ void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
 }
 
 void Player::manageRotation() {
-  Vector2 mousePos = Vector2Scale(Vector2Subtract(GetMousePosition(), cam->Camera.offset), 1.0f / cam->Camera.zoom);
-  //then we also have to globalize the mouse position good thing we have a cam field
+  Vector2 mousePos =
+      Vector2Scale(Vector2Subtract(GetMousePosition(), cam->Camera.offset),
+                   1.0f / cam->Camera.zoom);
+  // then we also have to globalize the mouse position good thing we have a cam
+  // field
   mousePos = Vector2Add(mousePos, cam->Camera.target);
-  Rotation = atan2f(-(mousePos.y - Position.y), mousePos.x - Position.x); // then it's as simple as b - a
+  Rotation = atan2f(-(mousePos.y - Position.y),
+                    mousePos.x - Position.x); // then it's as simple as b - a
 }
 
-Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) : Entity2D(name, position), cam(camera) {
+Player::Player(const std::string &name, Vector2 position, CameraEntity *camera)
+    : Entity2D(name, position), cam(camera) {
 
-  healthManager = new HealthManager(maxHealth, BarManager(&Position, distance, Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)));
+  healthManager = new HealthManager(
+      maxHealth,
+      BarManager(&Position, distance,
+                 Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED,
+                     DARKGRAY, false)));
   addChild(healthManager);
 
-  Velocity = (Vector2){0,0};
+  Velocity = (Vector2){0, 0};
   Speed = defaultSpeed;
   Friction = defaultFriction;
 
@@ -167,7 +200,8 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera) 
   dashProgress = 0;
   timeSinceDash = 0;
 
-  dashCooldownBar = new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
+  dashCooldownBar =
+      new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashCooldownBar);
   Enemy::setPlayer();
 }
@@ -177,44 +211,68 @@ Player::~Player() {
   cam->Follow = nullptr;
 }
 
-void Player::Init() {
-  Enemy::setPlayer();
-};
+void Player::Init() { Enemy::setPlayer(); };
 
-void Player::setCam(CameraEntity* camra) {
-  cam = camra;
-}
+void Player::setCam(CameraEntity *camra) { cam = camra; }
 
-float Player::getLifetime() {
-  return lifetime;
-}
+float Player::getLifetime() { return lifetime; }
 
-HealthManager* Player::getHealthManager() {
-  return healthManager;
-}
+HealthManager *Player::getHealthManager() { return healthManager; }
 
-bool Player::getDashing() {
-  return dashing;
-}
+bool Player::getDashing() { return dashing; }
 
-int Player::getEnemyInEnemies(Enemy* en) {
-  for(int i = 0; i < enemies.size(); i++)
-    if(en == enemies[i])
-      return i;
-  return -1;
-}
+void Player::manageAttack() {
+  // i am going to use a lot of lambdas here, cuz i just learned that they exist in c++ and i just wrote a ton of haskell
 
-bool Player::addEnemy(Enemy* en) {
-  if(getEnemyInEnemies(en) != -1)
-    return false;
-  enemies.push_back(en);
-  return true;
-}
+  // if we don't have enough to attack, we don't manage the attack
+  std::vector<DashNode*> nodes = DashNode::getNodes();
 
-bool Player::removeEnemy(Enemy* en) {
-  int i = getEnemyInEnemies(en);
-  if(i == -1)
-    return false;
-  enemies.erase(enemies.begin() + i);
-  return true;
+  // sort the nodes via ~~magic~~ distance
+  std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
+    return Vector2DistanceSqr(Position, a->Position) < Vector2DistanceSqr(Position, b->Position);
+  });
+  nodes.pop_back(); // pop the back
+
+  // get m
+  float m = -(nodes.front()->Position.x - nodes.back()->Position.x) / (nodes.front()->Position.y - nodes.back()->Position.y);
+
+  // we figure out the function for the actual slope thingy
+  std::function<float(float)> g = [nodes, m](float x){
+    return -(x - nodes.front()->Position.x) / m + nodes.front()->Position.y;
+  };
+
+  // LINEAR ALGEBRA, this function is to be mapped to the vector
+  std::function<void(Enemy*)> f = [this, nodes, g, m](Enemy* en){
+    // check if this equation will even work
+    Vector2 endP;
+    if(m == 0) { // if this is true then m is zero, and everything explodes :)
+      if(nodes.front()->Position.y == nodes.back()->Position.y) // this means that we can confirm the endP.y is en's y
+        endP = {
+          .x = nodes.front()->Position.x,
+          .y = en->Position.y
+        };
+      else // this means that we can confirm the endP.x is en's x
+        endP = {
+          .x = en->Position.x,
+          .y = nodes.front()->Position.y
+        };
+    } else {
+      float x = (nodes.front()->Position.x + m * (m * en->Position.x - en->Position.y + nodes.front()->Position.y)) / (m * m + 1); // i don't wanna talk abt it :(
+      endP = {
+        .x = x,
+        .y = g(x)
+      };
+    }
+    // SICK
+    // we now have endP
+    // all we have to do now is check distance :)
+    float d = Vector2Distance(endP, en->Position);
+    if(d <= en->Radius)
+      en->killDefered();
+  };
+
+  std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
+
+  for(Entity* en : enemies)
+    f((Enemy*)en);
 }

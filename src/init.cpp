@@ -4,6 +4,7 @@
 #include "postprocessing.hpp"
 #include "player.hpp"
 #include "border.hpp"
+#include "spiral.hpp"
 #include "time.h"
 #include <raylib.h>
 #include <raymath.h>
@@ -16,7 +17,7 @@ void Init(Entity* root) {
   root->Children[0]->addChild(new CameraEntity("Camera", &plr->Position));
   ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
-  // root->addChild(new WaveManager());
+  root->addChild(new Enemy({1000, 1000}));
 }
 
 void PreRendering(std::vector<Entity*>* entities) { 
