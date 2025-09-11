@@ -16,6 +16,7 @@ DashNode::DashNode(Vector2 p) : Entity2D("DashNode", p), lifetime(0), radius(def
   las = new Laser(Position, 0, 500, WHITE);
   las->shouldRender = false;
   addChild(las);
+  index = nodes.size();
   nodes.push_back(this);
 }
 
@@ -30,10 +31,7 @@ float DashNode::ease(float x) {
 }
 
 int DashNode::getIndex() {
-  for(int i = 0; i < nodes.size(); i++)
-    if(nodes[i] == this)
-      return i;
-  return -1;
+  return index;
 }
 
 float DashNode::getMaxLifetime() {
@@ -45,21 +43,70 @@ std::vector<DashNode*> DashNode::getNodes() {
   return nodes;
 }
 
+DashNode* DashNode::getPrev() {
+  return nodes[((index + nodes.size() - 1) % nodes.size())];
+}
+
+DashNode* DashNode::getNext() {
+  return nodes[((index + 1) % nodes.size())];
+}
+
+float DashNode::getLasAngle() {
+  return las->rotation;
+}
+
+bool DashNode::getBreakInLas() {
+  return las->getBreaks();
+}
+
+int DashNode::getBreakInPolygon() {
+  if(nodes.size() < 3) return false;
+
+  for(DashNode* n : nodes) {
+    if(n->getBreakInLas()) {
+      // k, if it breaks, lets check if the previous one breaks
+      if(n->getPrev()->getBreakInLas())
+        return n->getIndex();
+      else
+        return n->getNext()->getIndex();
+      // there's an edgecase here that the if accounts for, that is if the break-ee is index 0
+    }
+  }
+  return -1;
+}
+
+float DashNode::getInternalAngle() {
+  if(nodes.size() < 3) return 0;
+  float prevA = 180 + (getPrev()->getLasAngle() * 180 / M_PI);
+  prevA -= floor(prevA / 360) * 360;
+  float angleDeg = las->rotation * 180 / M_PI;
+  float diff = angleDeg - prevA;
+  diff -= floor(diff / 360) * 360;
+  return diff;
+}
+
 void DashNode::Render() {
-  DrawCircleLinesV(Position, radius, WHITE);
+  DrawCircleGradient(Position.x, Position.y , radius, BLANK, WHITE);
+  // DrawCircleGradient(int centerX, int centerY, float radius, Color inner, Color outer)
+  // DrawCircleLinesV(Vector2 center, float radius, Color color)
+  if(nodes.size() >= 3) {
+    float angleDeg = las->rotation * 180 / M_PI;
+    float prevA = fmodf(180 + getPrev()->getLasAngle() * 180 / M_PI, 360);
+    DrawCircleSector(Position, 100, prevA, angleDeg, 100, RED);
+  }
 }
 
 void DashNode::Process(float delta) {
   lifetime += delta;
 
-  if(lifetime >= getMaxLifetime())
-    radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
-  else if(lifetime <= 1)
+  // if(lifetime >= getMaxLifetime())
+    // radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
+  // else
+  if(lifetime <= 1)
     radius = ease(1 - lifetime) * defaultRadius;
 
   if(nodes.size() >= 3) {
-    int index = getIndex();
-    DashNode* next = nodes[(index + 1) % nodes.size()];
+    DashNode* next = getNext();
     Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
     if(!las->shouldRender) {
       las->shouldRender = true;
@@ -73,6 +120,6 @@ void DashNode::Process(float delta) {
     las->Position = Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
   }
 
-  if(lifetime >= getMaxLifetime() + 1) 
-    killDefered();
+  // if(lifetime >= getMaxLifetime() + 1) 
+  // killDefered();
 }

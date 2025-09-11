@@ -90,6 +90,8 @@ void Player::Render() {
   }
 
   DrawCircleV(Position, 5, WHITE);
+
+  manageAttack();
 }
 
 void Player::Process(float delta) {
@@ -137,10 +139,6 @@ void Player::Process(float delta) {
     addChild(new DashNode(Position));
   } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
-
-  if(DashNode::getNodes().size() >= 3) {
-    manageAttack();
-  }
 
   if(healthManager->isDead())
     killDefered();
@@ -227,6 +225,22 @@ void Player::manageAttack() {
   // if we don't have enough to attack, we don't manage the attack
   std::vector<DashNode*> nodes = DashNode::getNodes();
 
+  if(nodes.size() < 3) return;
+
+  //get if it's a regular triangle
+  float theta = 0;
+  for(DashNode* n : nodes) {
+    float a = n->getInternalAngle();
+    printf("%f\n", a);
+    theta += a;
+  }
+  if(theta - 180 < 1) { // ITS A REGULAR TRIGLE!
+    DrawTriangle(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position, RED);
+    return;
+  }
+
+  std::function<void(Enemy*)> f;
+
   // sort the nodes via ~~magic~~ distance
   std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
     return Vector2DistanceSqr(Position, a->Position) < Vector2DistanceSqr(Position, b->Position);
@@ -242,7 +256,7 @@ void Player::manageAttack() {
   };
 
   // LINEAR ALGEBRA, this function is to be mapped to the vector
-  std::function<void(Enemy*)> f = [this, nodes, g, m](Enemy* en){
+  f = [this, nodes, g, m](Enemy* en){
     // check if this equation will even work
     Vector2 endP;
     if(m == 0) { // if this is true then m is zero, and everything explodes :)

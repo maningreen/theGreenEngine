@@ -4,7 +4,6 @@
 #include "postprocessing.hpp"
 #include "player.hpp"
 #include "border.hpp"
-#include "spiral.hpp"
 #include "time.h"
 #include <raylib.h>
 #include <raymath.h>

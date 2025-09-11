@@ -10,7 +10,12 @@ private:
   float lifetime;
   float radius;
 
+  int index;
+
   Laser* las;
+
+  DashNode* getNext();
+  DashNode* getPrev();
 
   float ease(float x);
   static std::vector<DashNode*> nodes;
@@ -26,8 +31,17 @@ public:
   // returns the effective lifetime.
   float getMaxLifetime();
 
+  float getLasAngle();
+  bool getBreakInLas();
+  // returns 0 if invalid
+  float getInternalAngle();
+
   static float defaultRadius;
   static float lifetimeAfterAttack;
+
+  // returns the index of the first vertex that has a break 
+  // returns -1 if there's no break, or if the polygon is invalid
+  static int getBreakInPolygon();
 
   static std::vector<DashNode*> getNodes();
 };
