@@ -1,7 +1,8 @@
 { pkgs ? import <nixpkgs> {}, ...}: pkgs.mkShell {
   packages = with pkgs; [
     gnumake # build backend
-    gcc # the compiler used
+    gcc # c++ compiler package
+    ghc # haskell compiler
 
     # libraries
     raylib # (visual backend)
