@@ -4,6 +4,7 @@
 #include "spiral.hpp"
 #include "dasher.hpp"
 #include "particle.hpp"
+#include "player.hpp"
 #include "sniper.hpp"
 #include "store.hpp"
 #include "engine/entity.hpp"
