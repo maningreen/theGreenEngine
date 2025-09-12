@@ -17,6 +17,10 @@
 #include <raymath.h>
 #include <string>
 
+extern "C" {
+  extern float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY, float cX, float cY);
+};
+
 #define max(a, b) (a < b ? b : a)
 #define min(a, b) (a < b ? a : b)
 
@@ -234,32 +238,43 @@ void Player::manageAttack() {
     printf("%f\n", a);
     theta += a;
   }
+  float area;
   if(theta - 180 < 1) { // ITS A REGULAR TRIGLE!
-    DrawTriangle(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position, RED);
+    // we wanna figure out the area
+    // which is bh/2
+    // base, easy peasy, lemon squeazy
+    float b = Border::getDistance(nodes[0]->Position, nodes[1]->Position);
+    // height?... transformation matrix... :(
+    // lets say node[0] to node[1] is the base, and node[2] is gonna be the rest
+    // we can assume node[0]->getLasAngle() will have the angle to node[1]
+    float theta = nodes[0]->getLasAngle();
+    Vector2 shortestVector = Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
+    Vector2 localVectorToPeak = {
+      .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta),
+      .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),
+    };
+    float h = localVectorToPeak.y;
+    // sick, then we just do bh/2
+    area = b * h / 2;
     return;
-  }
-
-  std::function<void(Enemy*)> f;
+  } else
+    area = 0;
 
   // sort the nodes via ~~magic~~ distance
   std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
     return Vector2DistanceSqr(Position, a->Position) < Vector2DistanceSqr(Position, b->Position);
   });
-  nodes.pop_back(); // pop the back
 
   // get m
-  float m = -(nodes.front()->Position.x - nodes.back()->Position.x) / (nodes.front()->Position.y - nodes.back()->Position.y);
-
-  // we figure out the function for the actual slope thingy
-  std::function<float(float)> g = [nodes, m](float x){
-    return -(x - nodes.front()->Position.x) / m + nodes.front()->Position.y;
-  };
+  float m = (nodes.front()->Position.y - nodes.back()->Position.y) / (nodes.front()->Position.x - nodes.back()->Position.x);
+  float mInverse = -1.0f / m;
 
   // LINEAR ALGEBRA, this function is to be mapped to the vector
-  f = [this, nodes, g, m](Enemy* en){
+  // i wish i could curry, then this wouldn't be an issue, but this is c++; and not haskell :(
+  auto f = [this, nodes, mInverse, m, area](Enemy* en, std::function<float(float, float, Entity2D*, Entity2D*)> g, Entity2D* a, Entity2D* b){
     // check if this equation will even work
     Vector2 endP;
-    if(m == 0) { // if this is true then m is zero, and everything explodes :)
+    if(mInverse == 0) { // if this is true then m is zero, and everything explodes :)
       if(nodes.front()->Position.y == nodes.back()->Position.y) // this means that we can confirm the endP.y is en's y
         endP = {
           .x = nodes.front()->Position.x,
@@ -271,22 +286,51 @@ void Player::manageAttack() {
           .y = nodes.front()->Position.y
         };
     } else {
-      float x = (nodes.front()->Position.x + m * (m * en->Position.x - en->Position.y + nodes.front()->Position.y)) / (m * m + 1); // i don't wanna talk abt it :(
+      float x = (nodes.front()->Position.x + mInverse * (mInverse * en->Position.x - en->Position.y + nodes.front()->Position.y)) / (mInverse * mInverse + 1); // i don't wanna talk abt it :(
       endP = {
         .x = x,
-        .y = g(x)
+        .y = g(m, x, nodes.front(), nodes.back())
       };
     }
     // SICK
     // we now have endP
     // all we have to do now is check distance :)
-    float d = Vector2Distance(endP, en->Position);
-    if(d <= en->Radius)
-      en->killDefered();
+    return Vector2Distance(endP, en->Position);
   };
 
   std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Entity* en : enemies)
-    f((Enemy*)en);
+  for(Entity* en : enemies) {
+    // we figure out the function for the actual slope thingy
+    if(area == 0) {
+      float minDist = 100000000000000000000.0f;
+      for(int i = 0; i < 3; i++) {
+        float d = getDistanceFromLineAndPoint(nodes[i]->Position.x, nodes[i]->Position.y, 
+                                              nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y, 
+                                              ((Entity2D*)en)->Position.x, ((Entity2D*)en)->Position.y);
+        minDist = minDist > d ? d : minDist;
+      }
+      if(minDist <= ((Enemy*)en)->Radius && area == 0)
+        en->killDefered();
+    } else {
+      int i = DashNode::getBreakInPolygon();
+      if(i == -1) {
+        // then we can use a regular collision
+        // checking collision circle triangle, easy peasy, lemon squezy
+        Vector2 avg = Vector2Zero();
+        for(int i = 0; i < 3; i++)
+          avg = Vector2Add(avg, nodes[i]->Position);
+        avg = Vector2Scale(avg, 1.0f / 3.0f);
+
+        Vector2 vecToAvg = Vector2Subtract(avg, ((Enemy*)en)->Position);
+        float dist = Vector2Length(vecToAvg);
+        float r = ((Enemy*)en)->Radius;
+
+        float min = dist < r ? r : dist;
+        Vector2 p = Vector2Add(Position, Vector2Scale(vecToAvg, dist / min));
+        if(CheckCollisionPointTriangle(p, nodes[0]->Position, nodes[1]->Position, nodes[2]->Position))
+          ((Enemy*)en)->getHealthManager()->applyDamage(1.0f / area);
+      } 
+    }
+  }
 }

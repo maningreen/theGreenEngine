@@ -59,30 +59,28 @@ bool DashNode::getBreakInLas() {
   return las->getBreaks();
 }
 
-int DashNode::getBreakInPolygon() {
-  if(nodes.size() < 3) return false;
+float DashNode::getInternalAngle() {
+  if(nodes.size() < 3) return 0;
+  float prevA = fmodf(180 + (getPrev()->getLasAngle() * 180 / M_PI), 360);
+  prevA -= floor(prevA / 360);
+  float angleDeg = las->rotation * 180 / M_PI;
+  float diff = prevA - angleDeg;
+  diff -= floor(diff / 360);
+  return diff;
+}
 
-  for(DashNode* n : nodes) {
-    if(n->getBreakInLas()) {
-      // k, if it breaks, lets check if the previous one breaks
-      if(n->getPrev()->getBreakInLas())
-        return n->getIndex();
+int DashNode::getBreakInPolygon() {
+  for(int i = 0; i < nodes.size(); i++) {
+    if(nodes[i]->getBreakInLas()) {
+      // THERE IS A SINGULAR EDGE CASE
+      // that's if the first index is the one that's breaking it
+      if(nodes[i]->getPrev()->getBreakInLas())
+        return i;
       else
-        return n->getNext()->getIndex();
-      // there's an edgecase here that the if accounts for, that is if the break-ee is index 0
+        return i + 1;
     }
   }
   return -1;
-}
-
-float DashNode::getInternalAngle() {
-  if(nodes.size() < 3) return 0;
-  float prevA = 180 + (getPrev()->getLasAngle() * 180 / M_PI);
-  prevA -= floor(prevA / 360) * 360;
-  float angleDeg = las->rotation * 180 / M_PI;
-  float diff = angleDeg - prevA;
-  diff -= floor(diff / 360) * 360;
-  return diff;
 }
 
 void DashNode::Render() {

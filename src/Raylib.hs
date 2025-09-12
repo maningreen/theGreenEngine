@@ -1,4 +1,4 @@
-module Raylib where
+module Raylib (Vector2(Vector2), HasXY(getX, getY), Vector2Type(Vector2Type)) where
 
 import Foreign
 import Foreign.C.Types

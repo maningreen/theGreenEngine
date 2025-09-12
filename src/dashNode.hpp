@@ -14,9 +14,6 @@ private:
 
   Laser* las;
 
-  DashNode* getNext();
-  DashNode* getPrev();
-
   float ease(float x);
   static std::vector<DashNode*> nodes;
 public:
@@ -24,6 +21,9 @@ public:
   void Process(float delta) override;
 
   int getIndex();
+
+  DashNode* getNext();
+  DashNode* getPrev();
 
   DashNode(Vector2 position);
   ~DashNode();

@@ -8,9 +8,14 @@
 #include <raylib.h>
 #include <raymath.h>
 
-#define shader
+extern "C" {
+  extern void hs_init(int argc, char** argv);
+};
+
+// #define shader
 
 void Init(Entity* root) {
+  hs_init(0, 0);
   srand(time(0));
   root->addChild(new PostProcessingData());
   Player* plr = new Player("Player", (Vector2){0, 0,}, nullptr);
