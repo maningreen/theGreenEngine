@@ -22,6 +22,8 @@ LDFLAGS = -lraylib -lstdc++ -no-hs-main
 OUT = build/engine
 BUILDDIR = build/
 
+HSDEPS = $(BUILDDIR)hsDeps.mk
+
 $(OUT): $(ENGINEOUT) $(OBJECTS) $(HSOBJECTS) $(BUILDDIR)
 	$(HC) $(ENGINEFLAGS) $(OBJECTS) $(HSOBJECTS) -o $(OUT) $(LDFLAGS) 
 
@@ -34,8 +36,14 @@ build/%.o : src/engine/%.cpp
 build/%.o : src/%.cpp
 	$(CC) -c $< -o $@
 
-$(BUILDDIR)hs_%.o : src/%.hs
-	$(HC) -c $< -o $@ -outputdir $(BUILDDIR) -Isrc
+$(BUILDDIR)hs_%.o : src/%.hs $(HSDEPS) | $(BUILDDIR)
+	$(HC) -isrc -c $< -hidir $(BUILDDIR) -o $@
+
+$(HSDEPS): $(HSSRC) | $(BUILDDIR)
+	$(HC) -isrc -M $(HSSRC) -odir $(BUILDDIR) -hidir $(BUILDDIR) -dep-makefile $(HSDEPS)
+	sed -e 's!$(BUILDDIR)!$(BUILDDIR)hs_!g'\
+			-e 's!\.hi!\.o!g' $(HSDEPS) > $(HSDEPS).tmp
+	mv $(HSDEPS).tmp $(HSDEPS)
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
@@ -45,3 +53,5 @@ clean:
 
 run: $(OUT)
 	$(OUT)
+
+include $(HSDEPS)
