@@ -3,6 +3,7 @@
     gnumake # build backend
     gcc # c++ compiler package
     ghc # haskell compiler
+    haskell-language-server
 
     # libraries
     raylib # (visual backend)

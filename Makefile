@@ -5,7 +5,7 @@ ENGINESRC := $(wildcard src/engine/*.cpp)
 
 # OBJECTS
 OBJECTS = $(SRC:src/%.cpp=$(BUILDDIR)%.o) 
-HSOBJECTS = $(HSSRC:src/%.hs=$(BUILDDIR)%.o) 
+HSOBJECTS = $(HSSRC:src/%.hs=$(BUILDDIR)hs_%.o) 
 
 ENGINEOBJS = $(ENGINESRC:src/engine/%.cpp=$(BUILDDIR)%.o)
 ENGINEOUT = $(BUILDDIR)libengine.a
@@ -34,8 +34,8 @@ build/%.o : src/engine/%.cpp
 build/%.o : src/%.cpp
 	$(CC) -c $< -o $@
 
-$(BUILDDIR)%.o : src/%.hs
-	$(HC) -c $< -o $@ -outputdir $(BUILDDIR)
+$(BUILDDIR)hs_%.o : src/%.hs
+	$(HC) -c $< -o $@ -outputdir $(BUILDDIR) -isrc
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
