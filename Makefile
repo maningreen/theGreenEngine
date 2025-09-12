@@ -1,6 +1,6 @@
 # SRC
 SRC = $(wildcard src/*.cpp) 
-HSSRC = $(wildcard src/*.hs)
+HSSRC = src/Raylib.hs src/Player.hs
 ENGINESRC := $(wildcard src/engine/*.cpp)
 
 # OBJECTS
@@ -35,7 +35,7 @@ build/%.o : src/%.cpp
 	$(CC) -c $< -o $@
 
 $(BUILDDIR)hs_%.o : src/%.hs
-	$(HC) -c $< -o $@ -outputdir $(BUILDDIR) -isrc
+	$(HC) -c $< -o $@ -outputdir $(BUILDDIR) -Isrc
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
