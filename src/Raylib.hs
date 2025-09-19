@@ -1,4 +1,4 @@
-module Raylib (Vector2(Vector2), HasXY(getX, getY), Vector2Type(Vector2Type)) where
+module Raylib (Vector2(Vector2), HasXY(getX, getY), Vector2Type(Vector2Type), dist) where
 
 import Foreign
 import Foreign.C.Types
@@ -12,6 +12,9 @@ class HasXY a where
   getX :: Floating b => a -> b 
   getY :: Floating b => a -> b 
   -- just defining basic things for the Vector2 class 
+
+dist :: Floating a => Vector2 -> Vector2 -> a
+dist (Vector2 x1 y1) (Vector2 x2 y2) = sqrt $ (realToFrac x1 - realToFrac x2) ** 2 + (realToFrac y1 - realToFrac y2) ** 2
 
 instance Storable Vector2Type where 
   sizeOf _ = 8 

@@ -61,11 +61,11 @@ bool DashNode::getBreakInLas() {
 
 float DashNode::getInternalAngle() {
   if(nodes.size() < 3) return 0;
-  float prevA = fmodf(180 + (getPrev()->getLasAngle() * 180 / M_PI), 360);
-  prevA -= floor(prevA / 360);
+  float prevA = 180 + (getPrev()->getLasAngle() * 180 / M_PI);
+  prevA -= floor(prevA / 360) * 360;
   float angleDeg = las->rotation * 180 / M_PI;
   float diff = prevA - angleDeg;
-  diff -= floor(diff / 360);
+  diff -= floor(diff / 360) * 360;
   return diff;
 }
 
@@ -97,10 +97,10 @@ void DashNode::Render() {
 void DashNode::Process(float delta) {
   lifetime += delta;
 
-  // if(lifetime >= getMaxLifetime())
-    // radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
-  // else
-  if(lifetime <= 1)
+  if(lifetime >= getMaxLifetime())
+    radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
+  else
+    if(lifetime <= 1)
     radius = ease(1 - lifetime) * defaultRadius;
 
   if(nodes.size() >= 3) {
@@ -118,6 +118,6 @@ void DashNode::Process(float delta) {
     las->Position = Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
   }
 
-  // if(lifetime >= getMaxLifetime() + 1) 
-  // killDefered();
+  if(lifetime >= getMaxLifetime() + 1) 
+    killDefered();
 }

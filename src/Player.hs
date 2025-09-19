@@ -8,11 +8,11 @@ import GHC.Exts
 import GHC.Float
 import Raylib
 
-getLinFuncFromPoints :: Vector2 -> Vector2 -> CFloat -> CFloat
+getLinFuncFromPoints :: Floating a => Vector2 -> Vector2 -> a -> a
 getLinFuncFromPoints a b = (+) c . (*) m
  where
-  m = CFloat (getSlopeBetweenPoints a b)
-  c = CFloat (getY a) + CFloat (getX a) / m
+  m = getSlopeBetweenPoints a b
+  c = getY a + getX a / m
 
 getSlopeBetweenPoints :: (Floating a) => Vector2 -> Vector2 -> a
 getSlopeBetweenPoints a b = (getY a - getY b) / (getX a - getX b)

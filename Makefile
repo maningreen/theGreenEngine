@@ -1,7 +1,7 @@
 # SRC
 SRC = $(wildcard src/*.cpp) 
-HSSRC = src/Raylib.hs src/Player.hs
-ENGINESRC := $(wildcard src/engine/*.cpp)
+HSSRC = $(wildcard src/*.hs)
+ENGINESRC = $(wildcard src/engine/*.cpp)
 
 # OBJECTS
 OBJECTS = $(SRC:src/%.cpp=$(BUILDDIR)%.o) 
@@ -37,7 +37,7 @@ build/%.o : src/%.cpp
 	$(CC) -c $< -o $@
 
 $(BUILDDIR)hs_%.o : src/%.hs $(HSDEPS) | $(BUILDDIR)
-	$(HC) -isrc -c $< -hidir $(BUILDDIR) -o $@
+	$(HC) -isrc -c $< -hidir $(BUILDDIR) -outputdir $(BUILDDIR) -o $@
 
 $(HSDEPS): $(HSSRC) | $(BUILDDIR)
 	$(HC) -isrc -M $(HSSRC) -odir $(BUILDDIR) -hidir $(BUILDDIR) -dep-makefile $(HSDEPS)
@@ -49,7 +49,7 @@ $(BUILDDIR):
 	mkdir $(BUILDDIR)
 
 clean:
-	rm -r $(BUILDDIR)*
+	rm -r $(BUILDDIR)
 
 run: $(OUT)
 	$(OUT)

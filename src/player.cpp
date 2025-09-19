@@ -10,6 +10,7 @@
 #include "particle.hpp"
 #include <algorithm>
 #include <cmath>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
@@ -238,8 +239,10 @@ void Player::manageAttack() {
     printf("%f\n", a);
     theta += a;
   }
+  printf("theta: %f\n", theta);
   float area;
   if(theta - 180 < 1) { // ITS A REGULAR TRIGLE!
+    puts("WE GOT A REGULAR TRIGGLE");
     // we wanna figure out the area
     // which is bh/2
     // base, easy peasy, lemon squeazy
@@ -250,15 +253,15 @@ void Player::manageAttack() {
     float theta = nodes[0]->getLasAngle();
     Vector2 shortestVector = Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
     Vector2 localVectorToPeak = {
-      .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta),
-      .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),
+      .x = shortestVector.x * cos(theta * (float)M_PI / 180.0f) + shortestVector.y * sin(theta * (float)M_PI / 180.0f),
+      .y = -shortestVector.x * sin(theta * (float)M_PI / 180.0f) + shortestVector.y * cos(theta * (float)M_PI / 180.0f),
     };
     float h = localVectorToPeak.y;
     // sick, then we just do bh/2
     area = b * h / 2;
-    return;
   } else
     area = 0;
+  printf("area: %f\n", area);
 
   // sort the nodes via ~~magic~~ distance
   std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
@@ -300,18 +303,23 @@ void Player::manageAttack() {
 
   std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Entity* en : enemies) {
+  for(Entity* enButEnt : enemies) {
+    Enemy* en = (Enemy*)enButEnt;
     // we figure out the function for the actual slope thingy
     if(area == 0) {
       float minDist = 100000000000000000000.0f;
       for(int i = 0; i < 3; i++) {
+        if(en->Position.x - nodes[i]->Position.x < nodes[i]->getNext()->Position.x - nodes[i]->Position.x)
+          continue;
         float d = getDistanceFromLineAndPoint(nodes[i]->Position.x, nodes[i]->Position.y, 
                                               nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y, 
-                                              ((Entity2D*)en)->Position.x, ((Entity2D*)en)->Position.y);
-        minDist = minDist > d ? d : minDist;
+                                              en->Position.x, en->Position.y);
+        minDist = min(minDist, d);
       }
-      if(minDist <= ((Enemy*)en)->Radius && area == 0)
-        en->killDefered();
+      printf("dist: %f\n", minDist);
+      DrawCircleV(en->Position, minDist, GREEN);
+      // if(minDist <= en->Radius)
+        // en->killDefered();
     } else {
       int i = DashNode::getBreakInPolygon();
       if(i == -1) {
@@ -322,14 +330,14 @@ void Player::manageAttack() {
           avg = Vector2Add(avg, nodes[i]->Position);
         avg = Vector2Scale(avg, 1.0f / 3.0f);
 
-        Vector2 vecToAvg = Vector2Subtract(avg, ((Enemy*)en)->Position);
+        Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
         float dist = Vector2Length(vecToAvg);
-        float r = ((Enemy*)en)->Radius;
+        float r = en->Radius;
 
-        float min = dist < r ? r : dist;
-        Vector2 p = Vector2Add(Position, Vector2Scale(vecToAvg, dist / min));
+        float min = dist < r ? dist : r;
+        Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
         if(CheckCollisionPointTriangle(p, nodes[0]->Position, nodes[1]->Position, nodes[2]->Position))
-          ((Enemy*)en)->getHealthManager()->applyDamage(1.0f / area);
+          ((Enemy*)en)->getHealthManager()->applyDamage(.5);
       } 
     }
   }
