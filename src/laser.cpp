@@ -3,9 +3,8 @@
 #include "border.hpp"
 #include <cmath>
 #include <raymath.h>
-#include <stdio.h>
 
-#define cot(x) (cos(x) / sin(x))
+#define cot(x) (1 / tan(x))
 
 Color Laser::defaultColour = WHITE;
 float Laser::defaultLength = 100;

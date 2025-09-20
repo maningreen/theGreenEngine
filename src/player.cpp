@@ -13,7 +13,6 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
-#include <functional>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -234,14 +233,12 @@ void Player::manageAttack() {
 
   //get if it's a regular triangle
   float theta = 0;
-  for(DashNode* n : nodes) {
-    float a = n->getInternalAngle();
-    printf("%f\n", a);
-    theta += a;
-  }
-  printf("theta: %f\n", theta);
+  for(DashNode* n : nodes)
+    theta += n->getInternalAngle();
+  theta = fmodf(theta / 360, 1) * 360;
   float area;
-  if(theta - 180 < 1) { // ITS A REGULAR TRIGLE!
+  printf("theta: %f\n", theta);
+  if(abs(theta - 180) < 1) { // ITS A REGULAR TRIGLE!
     puts("WE GOT A REGULAR TRIGGLE");
     // we wanna figure out the area
     // which is bh/2
@@ -258,10 +255,9 @@ void Player::manageAttack() {
     };
     float h = localVectorToPeak.y;
     // sick, then we just do bh/2
-    area = b * h / 2;
+    area = abs(b * h / 2); // sometimes it goes negative :p
   } else
     area = 0;
-  printf("area: %f\n", area);
 
   // sort the nodes via ~~magic~~ distance
   std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
@@ -274,38 +270,13 @@ void Player::manageAttack() {
 
   // LINEAR ALGEBRA, this function is to be mapped to the vector
   // i wish i could curry, then this wouldn't be an issue, but this is c++; and not haskell :(
-  auto f = [this, nodes, mInverse, m, area](Enemy* en, std::function<float(float, float, Entity2D*, Entity2D*)> g, Entity2D* a, Entity2D* b){
-    // check if this equation will even work
-    Vector2 endP;
-    if(mInverse == 0) { // if this is true then m is zero, and everything explodes :)
-      if(nodes.front()->Position.y == nodes.back()->Position.y) // this means that we can confirm the endP.y is en's y
-        endP = {
-          .x = nodes.front()->Position.x,
-          .y = en->Position.y
-        };
-      else // this means that we can confirm the endP.x is en's x
-        endP = {
-          .x = en->Position.x,
-          .y = nodes.front()->Position.y
-        };
-    } else {
-      float x = (nodes.front()->Position.x + mInverse * (mInverse * en->Position.x - en->Position.y + nodes.front()->Position.y)) / (mInverse * mInverse + 1); // i don't wanna talk abt it :(
-      endP = {
-        .x = x,
-        .y = g(m, x, nodes.front(), nodes.back())
-      };
-    }
-    // SICK
-    // we now have endP
-    // all we have to do now is check distance :)
-    return Vector2Distance(endP, en->Position);
-  };
 
   std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
   for(Entity* enButEnt : enemies) {
     Enemy* en = (Enemy*)enButEnt;
     // we figure out the function for the actual slope thingy
+    printf("area: %f\n", area);
     if(area == 0) {
       float minDist = 100000000000000000000.0f;
       for(int i = 0; i < 3; i++) {
@@ -314,14 +285,17 @@ void Player::manageAttack() {
         float d = getDistanceFromLineAndPoint(nodes[i]->Position.x, nodes[i]->Position.y, 
                                               nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y, 
                                               en->Position.x, en->Position.y);
+        // there's a problem: these funky dunky functions don't actually have any limits!
         minDist = min(minDist, d);
       }
-      printf("dist: %f\n", minDist);
-      DrawCircleV(en->Position, minDist, GREEN);
-      // if(minDist <= en->Radius)
-        // en->killDefered();
+      // DrawCircleV(en->Position, minDist, GREEN);
+      if(minDist <= en->Radius)
+        en->killDefered();
     } else {
       int i = DashNode::getBreakInPolygon();
+
+      printf("%d\n", i);
+
       if(i == -1) {
         // then we can use a regular collision
         // checking collision circle triangle, easy peasy, lemon squezy
@@ -338,7 +312,9 @@ void Player::manageAttack() {
         Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
         if(CheckCollisionPointTriangle(p, nodes[0]->Position, nodes[1]->Position, nodes[2]->Position))
           ((Enemy*)en)->getHealthManager()->applyDamage(.5);
-      } 
+      } else {
+        // we got a break so then we should handle that break by schooching it over to the other side :)
+      }
     }
   }
 }
