@@ -62,7 +62,7 @@ int DashNode::getBreakInPolygon() {
       // that's if the first index is the one that's breaking it
       if (nodes[i]->getPrev()->getBreakInLas())
         return i;
-      else
+      else if (nodes[i]->getNext()->getBreakInLas())
         return i + 1;
     }
   }
