@@ -18,6 +18,12 @@ in
         gcc # c++ compiler package
         ghc # haskell compiler
         haskell-language-server
+
       ]
       ++ raylibPackages;
+    shellHook = ''
+      rm compile_commands.json
+      make clean
+      ${pkgs.lib.getExe pkgs.bear} -- make -j $(nproc)
+    '';
   }

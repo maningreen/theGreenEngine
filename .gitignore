@@ -1,4 +1,5 @@
 # ignore engine output
 .cache/
+compile_commands.json
 build/
 result/
