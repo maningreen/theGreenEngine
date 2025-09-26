@@ -14,9 +14,12 @@ ENGINEOUT = $(BUILDDIR)libengine.a
 CC = g++
 HC = ghc
 
+RAYLIB = ./external
+
 # Flags
 ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
 LDFLAGS = -lraylib -lstdc++ -no-hs-main
+RAYLIBFLAGS = -I$(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 # Target
 OUT = build/engine
@@ -25,16 +28,16 @@ BUILDDIR = build/
 HSDEPS = $(BUILDDIR)hsDeps.mk
 
 $(OUT): $(ENGINEOUT) $(OBJECTS) $(HSOBJECTS) $(BUILDDIR)
-	$(HC) $(ENGINEFLAGS) $(OBJECTS) $(HSOBJECTS) -o $(OUT) $(LDFLAGS) 
+	$(HC) $(ENGINEFLAGS) $(OBJECTS) $(HSOBJECTS) -o $(OUT) $(LDFLAGS) $(RAYLIBFLAGS)
 
 $(ENGINEOUT): $(ENGINEOBJS)
 	ar rcs $(ENGINEOUT) $(ENGINEOBJS)
 
 build/%.o : src/engine/%.cpp
-	$(CC) -c $< -o $@
+	$(CC) -c $< -o $@ -I$(RAYLIB)
 
 build/%.o : src/%.cpp
-	$(CC) -c $< -o $@
+	$(CC) -c $< -o $@ -I$(RAYLIB)
 
 $(BUILDDIR)hs_%.o : src/%.hs $(HSDEPS) | $(BUILDDIR)
 	$(HC) -isrc -c $< -hidir $(BUILDDIR) -outputdir $(BUILDDIR) -o $@
