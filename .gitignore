@@ -1,4 +1,4 @@
 # ignore engine output
+.cache/
 build/
 result/
-result/*
