@@ -18,12 +18,15 @@ in
         gcc # c++ compiler package
         ghc # haskell compiler
         haskell-language-server
-
       ]
       ++ raylibPackages;
     shellHook = ''
       rm compile_commands.json
-      make clean
-      ${pkgs.lib.getExe pkgs.bear} -- make -j $(nproc)
+      echo "Creating compile_commands.json (for clangd)"
+      echo "Cleaning..."
+      make clean --quiet
+      echo "Building..."
+      ${pkgs.lib.getExe pkgs.bear} -- make -j $(nproc) --quiet
+      echo "compile_commands.json created!"
     '';
   }
