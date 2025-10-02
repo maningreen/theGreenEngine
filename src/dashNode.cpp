@@ -1,12 +1,15 @@
 #include "dashNode.hpp"
 #include "border.hpp"
 #include "engine/entity.hpp"
+#include "include.h"
 #include "laser.hpp"
 #include "player.hpp"
+#include "raylib.h"
 #include <cmath>
-#include <raylib.h>
-#include <raymath.h>
 #include <vector>
+
+#define min(a, b) (a < b ? a : b)
+#define max(a, b) (a > b ? a : b)
 
 float DashNode::defaultRadius = 30;
 float DashNode::lifetimeAfterAttack = 1.5;
@@ -48,11 +51,13 @@ bool DashNode::getBreakInLas() { return las->getBreaks(); }
 float DashNode::getInternalAngle() {
   if (nodes.size() < 3)
     return 0;
-  float prevA = 180 + (getPrev()->getLasAngle() * 180 / M_PI);
-  float angleDeg = las->rotation * 180 / M_PI;
-  float diff = prevA - angleDeg;
-  diff = fmodf(diff / 360, 1) * 360;
-  return diff;
+  float thetaA = getLasAngle();
+  float thetaB = fmodf(getPrev()->getLasAngle() + PI, PI * 2);
+  float deltaTheta = fmodf(thetaB - thetaA, PI * 2);
+  if (deltaTheta < PI)
+    return deltaTheta;
+  else
+    return 2 * PI - deltaTheta;
 }
 
 int DashNode::getBreakInPolygon() {
@@ -74,9 +79,9 @@ void DashNode::Render() {
   // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
   // Color outer) DrawCircleLinesV(Vector2 center, float radius, Color color)
   if (nodes.size() >= 3) {
-    float angleDeg = las->rotation * 180 / M_PI;
-    float prevA = fmodf(180 + getPrev()->getLasAngle() * 180 / M_PI, 360);
-    DrawCircleSector(Position, 100, prevA, angleDeg, 100, RED);
+    float angleDeg = las->rotation * RAD2DEG;
+    DrawCircleSector(Position, 100, angleDeg - getInternalAngle() * RAD2DEG, angleDeg, 100, RED);
+    DrawText(TextFormat("%f", getInternalAngle() * RAD2DEG), Position.x, Position.y, 100, GREEN);
   }
 }
 
@@ -94,7 +99,6 @@ void DashNode::Process(float delta) {
     if (!las->shouldRender) {
       las->shouldRender = true;
       lifetime = Player::dashCooldown + -lifetimeAfterAttack;
-      // we gotta turn "next" into local positions
       las->lookAt(next->Position);
     }
     las->length = Vector2Length(vectorToNext) - (next->radius + radius);

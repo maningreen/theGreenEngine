@@ -1,24 +1,25 @@
 #include "player.hpp"
 #include "afterimage.hpp"
-#include "engine/core.h"
 #include "bars.hpp"
 #include "border.hpp"
 #include "dashNode.hpp"
 #include "enemy.hpp"
+#include "engine/core.h"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
+#include "include.h"
 #include "particle.hpp"
 #include <algorithm>
 #include <cmath>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
-#include <raylib.h>
-#include <raymath.h>
+#include <iostream>
 #include <string>
 
 extern "C" {
-  extern float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY, float cX, float cY);
+extern float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY,
+                                         float cX, float cY);
 };
 
 #define max(a, b) (a < b ? b : a)
@@ -49,7 +50,6 @@ const float distance = 50;
 
 float Player::hitboxRadius = 25;
 
-
 #define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {
@@ -67,18 +67,17 @@ void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
   DrawTriangle(Position,
-               Vector2Add(Position,
-                          (Vector2){cosf(Rotation + 4 * M_PI / 3) * distance,
-                                    -sinf(Rotation + 4 * M_PI / 3) * distance}),
-               Vector2Add(Position, (Vector2){cosf(Rotation) * distance,
-                                              -sinf(Rotation) * distance}),
+               Position + (Vector2){cosf(Rotation + 4 * PI / 3) * distance,
+                                    -sinf(Rotation + 4 * PI / 3) * distance},
+               Position + (Vector2){cosf(Rotation) * distance,
+                                    -sinf(Rotation) * distance},
                YELLOW);
   DrawTriangle(Position,
                Vector2Add(Position, (Vector2){cosf(Rotation) * distance,
                                               -sinf(Rotation) * distance}),
                Vector2Add(Position,
-                          (Vector2){cosf(Rotation + 2 * M_PI / 3) * distance,
-                                    -sinf(Rotation + 2 * M_PI / 3) * distance}),
+                          (Vector2){cosf(Rotation + 2 * PI / 3) * distance,
+                                    -sinf(Rotation + 2 * PI / 3) * distance}),
                YELLOW);
 
   // we draw them darn sqrs
@@ -101,14 +100,14 @@ void Player::Render() {
 void Player::Process(float delta) {
   lifetime += delta;
   Vector2 inputDirection = getInput();
-  Velocity = Vector2Add(Vector2Scale(inputDirection, delta * Speed), Velocity);
-  Position = Vector2Add(Position, Vector2Scale(Velocity, delta));
-  Velocity = Vector2Scale(Velocity, delta * Friction);
+  Velocity = inputDirection * delta * Speed + Velocity;
+  Position = Position + Velocity * delta;
+  Velocity = Velocity * delta * Friction;
 
   Border::wrapEntity(this);
 
-  if(dashing || Vector2LengthSqr(inputDirection))
-    if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
+  if (dashing || Vector2LengthSqr(inputDirection))
+    if (fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
       getRoot()->addChild(new Particle(
           Position,
           Vector2Scale(
@@ -116,7 +115,7 @@ void Player::Process(float delta) {
               -1)));
 
   timeSinceDash += delta;
-  if(dashing) {
+  if (dashing) {
     Velocity = dashDirection;
     // i wanna do something funny.
     // that funny is changing the dashDirection.
@@ -128,12 +127,12 @@ void Player::Process(float delta) {
                          (delta / dashTime) * dashSpeed * dashControl))),
         dashSpeed);
 
-    if(fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
+    if (fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
       getRoot()->addChild(new Afterimage(Position, Rotation));
 
-    if(timeSinceDash > dashTime)
+    if (timeSinceDash > dashTime)
       dashing = false;
-  } else if(IsKeyPressed(dashKey) && dashProgress > 1) {
+  } else if (IsKeyPressed(dashKey) && dashProgress > 1) {
     dashing = true;
     dashProgress--;
     dashDirection = Vector2Length(inputDirection) > 0
@@ -141,10 +140,10 @@ void Player::Process(float delta) {
                         : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
     timeSinceDash = 0;
     addChild(new DashNode(Position));
-  } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
+  } else if (dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
 
-  if(healthManager->isDead())
+  if (healthManager->isDead())
     killDefered();
 
   manageBars();
@@ -160,9 +159,8 @@ void Player::manageBar(Bar *b, int index, float p, bool shouldRender) {
   // bool for verticle b->growVert
   float offsetX =
       /*this one is either constant or index dependant depending on growVert*/
-          !b->ShrinkY
-          ? -b->Dimensions.x / 2.0f
-          : distance + b->Dimensions.x * index;
+      !b->ShrinkY ? -b->Dimensions.x / 2.0f
+                  : distance + b->Dimensions.x * index;
   float offsetY = /*just the opposite of ^*/ b->ShrinkY
                       ? -b->Dimensions.y / 2.0f
                       : distance + b->Dimensions.y * index;
@@ -224,22 +222,22 @@ HealthManager *Player::getHealthManager() { return healthManager; }
 bool Player::getDashing() { return dashing; }
 
 void Player::manageAttack() {
-  // i am going to use a lot of lambdas here, cuz i just learned that they exist in c++ and i just wrote a ton of haskell
+  // i am going to use a lot of lambdas here, cuz i just learned that they exist
+  // in c++ and i just wrote a ton of haskell
 
   // if we don't have enough to attack, we don't manage the attack
-  std::vector<DashNode*> nodes = DashNode::getNodes();
+  std::vector<DashNode *> nodes = DashNode::getNodes();
 
-  if(nodes.size() < 3) return;
+  if (nodes.size() < 3)
+    return;
 
-  //get if it's a regular triangle
+  // get if it's a regular triangle
   float theta = 0;
-  for(DashNode* n : nodes)
-    theta += n->getInternalAngle();
-  theta = fmodf(theta / 360, 1) * 360;
+  for (DashNode *n : nodes)
+    theta += abs(n->getInternalAngle());
   float area;
-  printf("theta: %f\n", theta);
-  if(abs(theta - 180) < 1) { // ITS A REGULAR TRIGLE!
-    puts("WE GOT A REGULAR TRIGGLE");
+  printf("theta: %f\n", theta * RAD2DEG);
+  if (abs(theta - PI) < 1 * DEG2RAD) { // ITS A REGULAR TRIGLE!
     // we wanna figure out the area
     // which is bh/2
     // base, easy peasy, lemon squeazy
@@ -248,10 +246,11 @@ void Player::manageAttack() {
     // lets say node[0] to node[1] is the base, and node[2] is gonna be the rest
     // we can assume node[0]->getLasAngle() will have the angle to node[1]
     float theta = nodes[0]->getLasAngle();
-    Vector2 shortestVector = Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
+    Vector2 shortestVector =
+        Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
     Vector2 localVectorToPeak = {
-      .x = shortestVector.x * cos(theta * (float)M_PI / 180.0f) + shortestVector.y * sin(theta * (float)M_PI / 180.0f),
-      .y = -shortestVector.x * sin(theta * (float)M_PI / 180.0f) + shortestVector.y * cos(theta * (float)M_PI / 180.0f),
+        .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta),
+        .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),
     };
     float h = localVectorToPeak.y;
     // sick, then we just do bh/2
@@ -260,61 +259,88 @@ void Player::manageAttack() {
     area = 0;
 
   // sort the nodes via ~~magic~~ distance
-  std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b){
-    return Vector2DistanceSqr(Position, a->Position) < Vector2DistanceSqr(Position, b->Position);
+  std::sort(nodes.begin(), nodes.end(), [this](DashNode *a, DashNode *b) {
+    return Vector2DistanceSqr(Position, a->Position) <
+           Vector2DistanceSqr(Position, b->Position);
   });
 
   // get m
-  float m = (nodes.front()->Position.y - nodes.back()->Position.y) / (nodes.front()->Position.x - nodes.back()->Position.x);
+  float m = (nodes.front()->Position.y - nodes.back()->Position.y) /
+            (nodes.front()->Position.x - nodes.back()->Position.x);
   float mInverse = -1.0f / m;
 
   // LINEAR ALGEBRA, this function is to be mapped to the vector
-  // i wish i could curry, then this wouldn't be an issue, but this is c++; and not haskell :(
+  // i wish i could curry, then this wouldn't be an issue, but this is c++; and
+  // not haskell :(
 
-  std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
+  std::vector<Entity *> enemies =
+      Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Entity* enButEnt : enemies) {
-    Enemy* en = (Enemy*)enButEnt;
+  for (Entity *enButEnt : enemies) {
+    Enemy *en = (Enemy *)enButEnt;
     // we figure out the function for the actual slope thingy
     printf("area: %f\n", area);
-    if(area == 0) {
+    if (area == 0) {
       float minDist = 100000000000000000000.0f;
-      for(int i = 0; i < 3; i++) {
-        if(en->Position.x - nodes[i]->Position.x < nodes[i]->getNext()->Position.x - nodes[i]->Position.x)
+      for (int i = 0; i < 3; i++) {
+        if (en->Position.x - nodes[i]->Position.x <
+            nodes[i]->getNext()->Position.x - nodes[i]->Position.x)
           continue;
-        float d = getDistanceFromLineAndPoint(nodes[i]->Position.x, nodes[i]->Position.y, 
-                                              nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y, 
-                                              en->Position.x, en->Position.y);
-        // there's a problem: these funky dunky functions don't actually have any limits!
+        float d = getDistanceFromLineAndPoint(
+            nodes[i]->Position.x, nodes[i]->Position.y,
+            nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y,
+            en->Position.x, en->Position.y);
+        // there's a problem: these funky dunky functions don't actually have
+        // any limits!
         minDist = min(minDist, d);
       }
       // DrawCircleV(en->Position, minDist, GREEN);
-      if(minDist <= en->Radius)
+      if (minDist <= en->Radius)
         en->killDefered();
     } else {
+      // we got a break so then we should handle that break by schooching it
+      // over to the other side :) we're gonna use quadrants for this tomfoolery
+      // (relative to other two)
+      // -x, -y -> what do?
+      // (True, False) -> reflect x
+      // (False, True) -> reflect y
+      // (True, True) -> reflect x, reflect x
+      // but um what if there are two breakers?
+      // we can use this loop-ily (idk the term)
+      std::vector<DashNode> effectiveNodes;
+      for (DashNode *n : nodes)
+        effectiveNodes.push_back(*n);
+
       int i = DashNode::getBreakInPolygon();
-
-      printf("%d\n", i);
-
-      if(i == -1) {
-        // then we can use a regular collision
-        // checking collision circle triangle, easy peasy, lemon squezy
-        Vector2 avg = Vector2Zero();
-        for(int i = 0; i < 3; i++)
-          avg = Vector2Add(avg, nodes[i]->Position);
-        avg = Vector2Scale(avg, 1.0f / 3.0f);
-
-        Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
-        float dist = Vector2Length(vecToAvg);
-        float r = en->Radius;
-
-        float min = dist < r ? dist : r;
-        Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
-        if(CheckCollisionPointTriangle(p, nodes[0]->Position, nodes[1]->Position, nodes[2]->Position))
-          ((Enemy*)en)->getHealthManager()->applyDamage(.5);
-      } else {
-        // we got a break so then we should handle that break by schooching it over to the other side :)
+      if (i != -1) {
+        if (effectiveNodes[i].Position.x > 0 &&
+            effectiveNodes[i].getPrev()->Position.x > 0)
+          effectiveNodes[i].Position.x += effectiveNodes[i].Position.x > 0
+                                              ? -2 * Border::Length
+                                              : 2 * Border::Length;
+        if (effectiveNodes[i].Position.y > 0 &&
+            effectiveNodes[i].getPrev()->Position.y > 0)
+          effectiveNodes[i].Position.y += effectiveNodes[i].Position.y > 0
+                                              ? -2 * Border::Length
+                                              : 2 * Border::Length;
       }
+      // then we can use a regular collision
+      // checking collision circle triangle, easy peasy, lemon squezy
+      Vector2 avg = Vector2Zero();
+      for (int i = 0; i < 3; i++)
+        avg = Vector2Add(avg, effectiveNodes[i].Position);
+      avg = Vector2Scale(avg, 1.0f / 3.0f);
+
+      Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
+      float dist = Vector2Length(vecToAvg);
+      float r = en->Radius;
+
+      float min = dist < r ? dist : r;
+      Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
+      if (CheckCollisionPointTriangle(p, effectiveNodes[0].Position,
+                                      effectiveNodes[1].Position,
+                                      effectiveNodes[2].Position))
+        ((Enemy *)en)->getHealthManager()->applyDamage(.5);
     }
   }
 }

@@ -34,6 +34,7 @@ public:
   float getLasAngle();
   bool getBreakInLas();
   // returns 0 if invalid
+  // RADIANS
   float getInternalAngle();
 
   static float defaultRadius;
