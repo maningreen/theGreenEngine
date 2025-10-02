@@ -5,8 +5,7 @@
 #include "player.hpp"
 #include "border.hpp"
 #include "time.h"
-#include <raylib.h>
-#include <raymath.h>
+#include "include.h"
 
 extern "C" {
   extern void hs_init(int argc, char** argv);

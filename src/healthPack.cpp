@@ -1,10 +1,8 @@
 #include "healthPack.hpp"
 #include "player.hpp"
 #include "engine/entity.hpp"
-#include "engine/core.h"
 #include <cmath>
-#include <raylib.h>
-#include <raymath.h>
+#include "engine/core.h"
 
 const Color HealthPack::col = RED;
 const float HealthPack::friction = 50;

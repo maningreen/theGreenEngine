@@ -3,7 +3,6 @@
 
 #include "engine/entity.hpp"
 #include "player.hpp"
-#include <raylib.h>
 
 class HealthPack : public Entity2D {
 private:

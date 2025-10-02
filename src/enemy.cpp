@@ -6,10 +6,6 @@
 #include "enemyBullet.hpp"
 #include "healthPack.hpp"
 #include "bars.hpp"
-#include "include.h"
-#include <raylib.h>
-#include <raymath.h>
-#include <vector>
 #include <cmath>
 
 float Enemy::DefaultRadius= 30;
