@@ -61,19 +61,20 @@ Vector2 Player::getInput() {
 void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
-  DrawTriangle(Position,
-               Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
-                                    -sinf(rotation + 4 * PI / 3) * distance},
-               Position + (Vector2){cosf(rotation) * distance,
-                                    -sinf(rotation) * distance},
-               YELLOW);
-  DrawTriangle(Position,
-               Vector2Add(Position, (Vector2){cosf(rotation) * distance,
-                                              -sinf(rotation) * distance}),
-               Vector2Add(Position,
-                          (Vector2){cosf(rotation + 2 * PI / 3) * distance,
-                                    -sinf(rotation + 2 * PI / 3) * distance}),
-               YELLOW);
+  DrawTriangle(
+    Position,
+    Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
+                        -sinf(rotation + 4 * PI / 3) * distance},
+    Position + (Vector2){cosf(rotation) * distance,
+                        -sinf(rotation) * distance},
+    YELLOW);
+  DrawTriangle(
+    Position,
+    Position + (Vector2){cosf(rotation) * distance,
+                          -sinf(rotation) * distance},
+    Position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
+                         -sinf(rotation + 2 * PI / 3) * distance},
+    YELLOW);
 
   // we draw them darn sqrs
   const float height = 10;
