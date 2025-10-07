@@ -10,7 +10,6 @@ in pkgs.stdenv.mkDerivation {
     ];
 
     buildPhase = ''
-      mkdir -p build
       make -j$(nproc)
     '';
 
