@@ -184,10 +184,13 @@ Player::Player(const std::string &name, Vector2 position, CameraEntity *camera)
     : Entity2D(name, position), cam(camera) {
 
   healthManager = new HealthManager(
-      maxHealth,
-      BarManager(&Position, distance,
-                 Bar(Position, (Vector2){barDimensions.y, barDimensions.x}, RED,
-                     DARKGRAY, false)));
+    maxHealth,
+    BarManager(&Position, distance,
+      Bar(Position, 
+        (Vector2){barDimensions.y, barDimensions.x}, 
+          RED,
+          DARKGRAY, 
+          false)));
   addChild(healthManager);
 
   Velocity = (Vector2){0, 0};
@@ -202,17 +205,18 @@ Player::Player(const std::string &name, Vector2 position, CameraEntity *camera)
   dashCooldownBar =
       new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashCooldownBar);
+
+  cam = new CameraEntity("Camera", this);
+  addChild(cam);
+
   Enemy::setPlayer();
 }
 
 Player::~Player() {
   Enemy::setPlayer(nullptr);
-  cam->Follow = nullptr;
 }
 
 void Player::Init() { Enemy::setPlayer(); };
-
-void Player::setCam(CameraEntity *camra) { cam = camra; }
 
 float Player::getLifetime() { return lifetime; }
 

@@ -11,16 +11,14 @@ extern "C" {
   extern void hs_init(int argc, char** argv);
 };
 
-// #define shader
+#define shader
 
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
   root->addChild(new PostProcessingData());
-  Player* plr = new Player("Player", (Vector2){0, 0,}, nullptr);
+  Player* plr = new Player("Player", (Vector2){0, 0}, nullptr);
   root->addChild(plr);
-  root->Children[0]->addChild(new CameraEntity("Camera", &plr->Position));
-  ((Player*)(root->Children)[1])->setCam((CameraEntity*)Engine::searchTreeForEntity(&root->Children, "Camera"));
   root->addChild(new Border());
   root->addChild(new Enemy({1000, 1000}));
 }

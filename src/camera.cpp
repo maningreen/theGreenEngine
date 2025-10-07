@@ -16,7 +16,7 @@ void CameraEntity::ManageCameraShake(float delta) {
 
 void CameraEntity::ManageCameraMotion(float delta) {
   if(Follow != nullptr)
-    Camera.target = *Follow;
+    Camera.target = Follow->Position;
 }
 
 void CameraEntity::Process(float delta) {
@@ -30,7 +30,7 @@ void CameraEntity::Render() {
 
 CameraEntity::~CameraEntity() {}
 
-CameraEntity::CameraEntity(std::string name, Vector2* target) : Entity(name) {
+CameraEntity::CameraEntity(std::string name, Entity2D* target) : Entity(name) {
   Follow = target;
   Camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
   Jitterness = 0;

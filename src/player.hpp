@@ -76,8 +76,6 @@ public:
   Vector2 getInput();
   Vector2 getInput(int u, int d, int l, int r);
 
-  void setCam(CameraEntity* cam);
-
   HealthManager* getHealthManager();
 
   float getLifetime();
