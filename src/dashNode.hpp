@@ -26,6 +26,7 @@ public:
   DashNode* getPrev();
 
   DashNode(Vector2 position);
+  DashNode(Vector2 position, bool addToList);
   ~DashNode();
 
   // returns the effective lifetime.
@@ -36,6 +37,10 @@ public:
   // returns 0 if invalid
   // RADIANS
   float getInternalAngle();
+
+  // unwraps the current node relative to the previous node.
+  // if they're already unwrapped returns the same DashNode
+  DashNode unwrapRelative();
 
   static float defaultRadius;
   static float lifetimeAfterAttack;

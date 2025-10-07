@@ -24,6 +24,13 @@ DashNode::DashNode(Vector2 p)
   nodes.push_back(this);
 }
 
+DashNode::DashNode(Vector2 p, bool x)
+    : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
+  las = new Laser(Position, 0, 500, WHITE);
+  las->shouldRender = false;
+  addChild(las);
+}
+
 DashNode::~DashNode() {
   for (int i = 0; i < nodes.size(); i++)
     if (nodes[i] == this)
@@ -74,6 +81,23 @@ int DashNode::getBreakInPolygon() {
   return -1;
 }
 
+DashNode DashNode::unwrapRelative() {
+  DashNode x = *this;
+  if(abs(x.Position.x - getPrev()->Position.x) > Border::Length) {
+    if(x.Position.x > 0)
+      x.Position.x -= Border::Length * 2;
+    else
+      x.Position.x += Border::Length * 2;
+  }
+  if(abs(x.Position.y - getPrev()->Position.y) > Border::Length) {
+    if(x.Position.y > 0)
+      x.Position.y -= Border::Length * 2;
+    else
+      x.Position.y += Border::Length * 2;
+  }
+  return x;
+}
+
 void DashNode::Render() {
   DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
   // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
@@ -106,7 +130,7 @@ void DashNode::Process(float delta) {
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
     // las->position yeah
     las->Position =
-        Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
+      Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
   }
 
   if (lifetime >= getMaxLifetime() + 1)

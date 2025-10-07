@@ -14,12 +14,11 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
 #include <string>
 
 extern "C" {
-extern float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY,
-                                         float cX, float cY);
+  float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY, float cX, float cY);
+  void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c, Vector2* out);
 };
 
 #define max(a, b) (a < b ? b : a)
@@ -236,8 +235,8 @@ void Player::manageAttack() {
   for (DashNode *n : nodes)
     theta += abs(n->getInternalAngle());
   float area;
-  printf("theta: %f\n", theta * RAD2DEG);
-  if (abs(theta - PI) < 1 * DEG2RAD) { // ITS A REGULAR TRIGLE!
+  // printf("theta: %f\n", theta * RAD2DEG);
+  if (abs(theta - PI) < DEG2RAD) { // ITS A REGULAR TRIGLE!
     // we wanna figure out the area
     // which is bh/2
     // base, easy peasy, lemon squeazy
@@ -264,37 +263,29 @@ void Player::manageAttack() {
            Vector2DistanceSqr(Position, b->Position);
   });
 
-  // get m
-  float m = (nodes.front()->Position.y - nodes.back()->Position.y) /
-            (nodes.front()->Position.x - nodes.back()->Position.x);
-  float mInverse = -1.0f / m;
-
-  // LINEAR ALGEBRA, this function is to be mapped to the vector
-  // i wish i could curry, then this wouldn't be an issue, but this is c++; and
-  // not haskell :(
-
   std::vector<Entity *> enemies =
       Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
   for (Entity *enButEnt : enemies) {
     Enemy *en = (Enemy *)enButEnt;
     // we figure out the function for the actual slope thingy
-    printf("area: %f\n", area);
+    // printf("area: %f\n", area);
     if (area == 0) {
-      float minDist = 100000000000000000000.0f;
+      float minDist = INFINITY;
+      // printf("Looping over all items\n");
       for (int i = 0; i < 3; i++) {
-        if (en->Position.x - nodes[i]->Position.x <
-            nodes[i]->getNext()->Position.x - nodes[i]->Position.x)
-          continue;
-        float d = getDistanceFromLineAndPoint(
-            nodes[i]->Position.x, nodes[i]->Position.y,
-            nodes[i]->getNext()->Position.x, nodes[i]->getNext()->Position.y,
-            en->Position.x, en->Position.y);
-        // there's a problem: these funky dunky functions don't actually have
-        // any limits!
-        minDist = min(minDist, d);
+        DashNode unwrappedNext = nodes[i]->getNext()->unwrapRelative();
+        Vector2 closestPoint;
+        // DrawLineEx(Vector2Lerp(nodes[i]->Position, unwrappedNext.Position, -10), unwrappedNext.Position, 20, GREEN);
+        getClosestPointFromLineAndPoint(&nodes[i]->Position, &unwrappedNext.Position, &en->Position, &closestPoint);
+        float d = Vector2Distance(closestPoint, en->Position);
+        minDist = min(d, minDist);
+        DrawCircleV(closestPoint, 30, PURPLE);
       }
-      // DrawCircleV(en->Position, minDist, GREEN);
+      // DrawCircleV(*x, 10, BLUE);
+      // free(x);
+      // if (minDist != 100000000000000000000.0f)
+        // DrawCircleV(en->Position, minDist, GREEN);
       if (minDist <= en->Radius)
         en->killDefered();
     } else {
@@ -309,21 +300,7 @@ void Player::manageAttack() {
       // we can use this loop-ily (idk the term)
       std::vector<DashNode> effectiveNodes;
       for (DashNode *n : nodes)
-        effectiveNodes.push_back(*n);
-
-      int i = DashNode::getBreakInPolygon();
-      if (i != -1) {
-        if (effectiveNodes[i].Position.x > 0 &&
-            effectiveNodes[i].getPrev()->Position.x > 0)
-          effectiveNodes[i].Position.x += effectiveNodes[i].Position.x > 0
-                                              ? -2 * Border::Length
-                                              : 2 * Border::Length;
-        if (effectiveNodes[i].Position.y > 0 &&
-            effectiveNodes[i].getPrev()->Position.y > 0)
-          effectiveNodes[i].Position.y += effectiveNodes[i].Position.y > 0
-                                              ? -2 * Border::Length
-                                              : 2 * Border::Length;
-      }
+        effectiveNodes.push_back(n->unwrapRelative());
       // then we can use a regular collision
       // checking collision circle triangle, easy peasy, lemon squezy
       Vector2 avg = Vector2Zero();
