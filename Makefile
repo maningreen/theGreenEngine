@@ -58,3 +58,6 @@ run: $(OUT)
 	$(OUT)
 
 include $(HSDEPS)
+
+.PHONY: clean run
+
