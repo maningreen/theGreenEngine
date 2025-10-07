@@ -7,7 +7,6 @@
 #include "engine/core.h"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
-#include "include.h"
 #include "particle.hpp"
 #include <algorithm>
 #include <cmath>
@@ -52,31 +51,28 @@ float Player::hitboxRadius = 25;
 #define barDimensions (Vector2){10, 100}
 
 Vector2 Player::getInput() {
-  return Player::getInput(Player::upKey, Player::downKey, Player::leftKey,
-                          Player::rightKey);
-}
-
-Vector2 Player::getInput(int u, int d, int l, int r) {
-  Vector2 out = (Vector2){(float)IsKeyDown(r) - (float)IsKeyDown(l),
-                          (float)IsKeyDown(d) - (float)IsKeyDown(u)};
-  return Vector2Normalize(out);
+  return getInputVector(
+    Player::upKey, 
+    Player::downKey, 
+    Player::leftKey,
+    Player::rightKey);
 }
 
 void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
   DrawTriangle(Position,
-               Position + (Vector2){cosf(Rotation + 4 * PI / 3) * distance,
-                                    -sinf(Rotation + 4 * PI / 3) * distance},
-               Position + (Vector2){cosf(Rotation) * distance,
-                                    -sinf(Rotation) * distance},
+               Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
+                                    -sinf(rotation + 4 * PI / 3) * distance},
+               Position + (Vector2){cosf(rotation) * distance,
+                                    -sinf(rotation) * distance},
                YELLOW);
   DrawTriangle(Position,
-               Vector2Add(Position, (Vector2){cosf(Rotation) * distance,
-                                              -sinf(Rotation) * distance}),
+               Vector2Add(Position, (Vector2){cosf(rotation) * distance,
+                                              -sinf(rotation) * distance}),
                Vector2Add(Position,
-                          (Vector2){cosf(Rotation + 2 * PI / 3) * distance,
-                                    -sinf(Rotation + 2 * PI / 3) * distance}),
+                          (Vector2){cosf(rotation + 2 * PI / 3) * distance,
+                                    -sinf(rotation + 2 * PI / 3) * distance}),
                YELLOW);
 
   // we draw them darn sqrs
@@ -99,9 +95,9 @@ void Player::Render() {
 void Player::Process(float delta) {
   lifetime += delta;
   Vector2 inputDirection = getInput();
-  Velocity = inputDirection * delta * Speed + Velocity;
-  Position = Position + Velocity * delta;
-  Velocity = Velocity * delta * Friction;
+  velocity = inputDirection * delta * speed + velocity;
+  Position = Position + velocity * delta;
+  velocity = velocity * delta * friction;
 
   Border::wrapEntity(this);
 
@@ -110,12 +106,12 @@ void Player::Process(float delta) {
       getRoot()->addChild(new Particle(
           Position,
           Vector2Scale(
-              Vector2Add(Velocity, Vector2Scale(inputDirection, Speed * delta)),
+              Vector2Add(velocity, Vector2Scale(inputDirection, speed * delta)),
               -1)));
 
   timeSinceDash += delta;
   if (dashing) {
-    Velocity = dashDirection;
+    velocity = dashDirection;
     // i wanna do something funny.
     // that funny is changing the dashDirection.
     // based on the playerInput.
@@ -127,7 +123,7 @@ void Player::Process(float delta) {
         dashSpeed);
 
     if (fmodf(timeSinceDash, .1) < 1.0f / 120.0f)
-      getRoot()->addChild(new Afterimage(Position, Rotation));
+      getRoot()->addChild(new Afterimage(Position, rotation));
 
     if (timeSinceDash > dashTime)
       dashing = false;
@@ -136,7 +132,7 @@ void Player::Process(float delta) {
     dashProgress--;
     dashDirection = Vector2Length(inputDirection) > 0
                         ? Vector2Scale(inputDirection, dashSpeed)
-                        : Vector2Scale(Vector2Normalize(Velocity), dashSpeed);
+                        : Vector2Scale(Vector2Normalize(velocity), dashSpeed);
     timeSinceDash = 0;
     addChild(new DashNode(Position));
   } else if (dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
@@ -176,7 +172,7 @@ void Player::manageRotation() {
   // then we also have to globalize the mouse position good thing we have a cam
   // field
   mousePos = Vector2Add(mousePos, cam->Camera.target);
-  Rotation = atan2f(-(mousePos.y - Position.y),
+  rotation = atan2f(-(mousePos.y - Position.y),
                     mousePos.x - Position.x); // then it's as simple as b - a
 }
 
@@ -193,9 +189,9 @@ Player::Player(const std::string &name, Vector2 position, CameraEntity *camera)
           false)));
   addChild(healthManager);
 
-  Velocity = (Vector2){0, 0};
-  Speed = defaultSpeed;
-  Friction = defaultFriction;
+  velocity = (Vector2){0, 0};
+  speed = defaultSpeed;
+  friction = defaultFriction;
 
   dashDirection = Vector2Zero();
   dashing = false;

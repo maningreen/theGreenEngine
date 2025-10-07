@@ -28,12 +28,15 @@ class Player : public Entity2D {
 
   void manageAttack();
 public:
-  Vector2 Velocity;
+  Player(const std::string& name, Vector2 position, CameraEntity* cam);
+  ~Player();
 
-  float Speed;
-  float Friction;
+  Vector2 velocity;
 
-  float Rotation;
+  float speed;
+  float friction;
+
+  float rotation;
 
   unsigned dashCount;
   float dashProgress;
@@ -70,11 +73,7 @@ public:
   static bool addEnemy(Enemy*);
   static bool removeEnemy(Enemy*);
 
-  Player(const std::string& name, Vector2 position, CameraEntity* cam);
-  ~Player();
-
   Vector2 getInput();
-  Vector2 getInput(int u, int d, int l, int r);
 
   HealthManager* getHealthManager();
 
