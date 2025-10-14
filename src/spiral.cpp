@@ -30,7 +30,7 @@ Spiraler::Spiraler(Vector2 position) : Enemy(position) {
   getHealthManager()->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
   targetPosition = getClosestPointToPlayerWithDistance(500);
-  Colour = defaultColour;
+  colour = defaultColour;
 }
 
 void Spiraler::manageStates(float delta) {
@@ -38,7 +38,7 @@ void Spiraler::manageStates(float delta) {
   if(getState() == spinning) {
     if(fmodf(spinTime, shotTime) < 1.0f / 60.0f)
       for(int i = 0; i < bulletsPerShot; i++)
-        fireBullet(spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), bulletLifetime + spinTime * bulletLifetimeGrowth, Colour);
+        fireBullet(spinTime * spiralSpeed + (2 * M_PI * i / bulletsPerShot), bulletLifetime + spinTime * bulletLifetimeGrowth, colour);
     if(spinTime > SpinLength) {
       swapToApproaching();
       setState(approaching);

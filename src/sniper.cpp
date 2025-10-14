@@ -29,7 +29,7 @@ Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position, 0
   getHealthManager()->setHealth(defaultHealth);
   las->length = 1000;
   Radius = getRadius();
-  Colour = PURPLE;
+  colour = PURPLE;
 }
 
 Sniper::~Sniper() {}
@@ -74,7 +74,7 @@ void Sniper::manageStates(float delta) {
     if(getStateTime() > aimTime) {
       setState(positioning);
       Velocity = Vector2Add(Velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
-      fireBullet(rotation, 5, bulletSpeed, bulletDamage, Colour);
+      fireBullet(rotation, 5, bulletSpeed, bulletDamage, colour);
     }
   } else {
     printf("Current state is invalid with value %d on Sniper", getState());

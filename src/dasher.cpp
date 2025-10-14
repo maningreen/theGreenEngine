@@ -1,7 +1,5 @@
 #include "dasher.hpp"
 #include "enemy.hpp"
-#include "include.h"
-#include "border.hpp"
 #include "player.hpp"
 #include <cstdlib>
 #include <iostream>
@@ -24,97 +22,89 @@ float Dasher::healthDropChance = 3;
 Dasher::Dasher(Vector2 p) : Enemy(p) {
   setState(approaching);
   getHealthManager()->setMaxHealth(defaultHealth);
-  Colour = BROWN;
+  colour = BROWN;
 }
 
-float Dasher::getDefaultHealth() {
-  return defaultHealth;
-}
+float Dasher::getDefaultHealth() { return defaultHealth; }
 
+Color Dasher::getColour() { return defaultCol; }
 
-Color Dasher::getColour() {
-  return defaultCol;
-}
+float Dasher::getWindupTime() { return windupTime; }
 
-float Dasher::getWindupTime() {
-  return windupTime;
-}
+float Dasher::getWindupSpeed() { return windupSpeed; }
 
-float Dasher::getWindupSpeed() {
-  return windupSpeed;
-}
+float Dasher::getSpeed() { return speed; }
 
-float Dasher::getSpeed() {
-  return speed;
-}
+float Dasher::getDamage() { return damage; }
 
-float Dasher::getDamage() {
-  return damage;
-}
+float Dasher::getRecoverTime() { return recoveryTime; }
 
-float Dasher::getRecoverTime() {
-  return recoveryTime;
-}
+float Dasher::getRecoverSpeedThreshold() { return recoverSpeedThreshold; }
 
-float Dasher::getRecoverSpeedThreshold() {
-  return recoverSpeedThreshold;
-}
-
-float Dasher::getHealthDropChance() {
-  return healthDropChance;
-}
+float Dasher::getHealthDropChance() { return healthDropChance; }
 
 void Dasher::manageStates(float delta) {
-  //oh god here we goooooo
+  // oh god here we goooooo
   if(getState() == approaching) {
-    //so here what do
-    //move the fuck forward.
-    //i kid :p
-    //we get the vector to the player
+    // so here what do
+    // move the fuck forward.
+    // i kid :p
+    // we get the vector to the player
     Vector2 closestVecToPlr = getClosestPointToPlayerWithDistance(targetDist);
-    //step two we cap the bagnibude
-    Vector2 velToAdd = Vector2Scale(Vector2Normalize(Vector2Subtract(closestVecToPlr, Position)), delta * speed);
-    //step c
-    //add this to vel
+    // step two we cap the bagnibude
+    Vector2 velToAdd = Vector2Scale(
+        Vector2Normalize(Vector2Subtract(closestVecToPlr, Position)),
+        delta * speed);
+    // step c
+    // add this to vel
     Velocity = Vector2Add(Velocity, velToAdd);
-    //step 5
-    //if we close enough we swap states
-    if(Vector2DistanceSqr(getPlayer()->Position, Position) <= maximumDist * maximumDist)
-      //we close enough :D
+    // step 5
+    // if we close enough we swap states
+    if(Vector2DistanceSqr(getPlayer()->Position, Position) <=
+        maximumDist * maximumDist)
+      // we close enough :D
       setState(winding);
   } else if(getState() == recovery) {
-    //we wait :p
-    if(Vector2LengthSqr(Velocity) >= recoverSpeedThreshold * recoverSpeedThreshold)
+    // we wait :p
+    if(Vector2LengthSqr(Velocity) >=
+        recoverSpeedThreshold * recoverSpeedThreshold)
       resetStateTime();
     if(getStateTime() > recoveryTime)
       setState(approaching);
   } else if(getState() == winding) {
-    //then we set our state vector
+    // then we set our state vector
     stateVector = Vector2Normalize(getShortestVectorToPlayer());
-    //so sniper what we wanna do, get the shortest vector to player
-    //then we scale this to windupSpeed
-    Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector), -getStateTime() * windupSpeed), Velocity);
+    // so sniper what we wanna do, get the shortest vector to player
+    // then we scale this to windupSpeed
+    Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector),
+                              -getStateTime() * windupSpeed),
+        Velocity);
     if(getStateTime() > windupTime) {
       setState(dashing);
       Velocity = Vector2Zero();
     }
   } else if(getState() == dashing) {
-    //we... dash?
+    // we... dash?
     Velocity = Vector2Scale(stateVector, dashSpeed * delta);
     if(getStateTime() > dashTime)
       setState(recovery);
-    //we also gotta check some collision shtuff
-    if(Vector2DistanceSqr(Position, getPlayer()->Position) < (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
-      //for psuedo i-frames
+    // we also gotta check some collision shtuff
+    if(Vector2DistanceSqr(Position, getPlayer()->Position) <
+        (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
+      // for psuedo i-frames
       ((Player*)getPlayer())->getHealthManager()->applyDamage(damage);
       setState(recovery);
-      //then we do a bounce
-      Vector2 scaledOffset = Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
-      scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x, scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
-      Velocity = (Vector2){scaledOffset.x * Velocity.x, scaledOffset.y * Velocity.y};
+      // then we do a bounce
+      Vector2 scaledOffset =
+          Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
+      scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x,
+          scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
+      Velocity =
+          (Vector2) {scaledOffset.x * Velocity.x, scaledOffset.y * Velocity.y};
     }
   } else
-    std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO THIS\n(dasher)";
+    std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO "
+              << "THIS\n(dasher)";
   // :D
 }
 

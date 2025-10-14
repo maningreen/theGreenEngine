@@ -206,10 +206,11 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
   cam = new CameraEntity("Camera", this);
   addChild(cam);
 
-  Enemy::setPlayer();
 }
 
-Player::~Player() { Enemy::setPlayer(nullptr); }
+Player::~Player() { 
+  Enemy::setPlayer(nullptr);
+}
 
 void Player::Init() { Enemy::setPlayer(); };
 

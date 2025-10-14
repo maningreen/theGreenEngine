@@ -62,7 +62,7 @@ class Enemy : public Entity2D {
     static float friction;
 
     static float droppedHealthHP;
-    Color Colour;
+    Color colour;
 };
 
 #endif
