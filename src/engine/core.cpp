@@ -41,6 +41,8 @@ std::vector<Entity*> Engine::getAllChildrenWithTagRecursive(Entity* en, std::str
   std::vector<Entity*> out;
   for(Entity* child : en->Children) {
     std::vector<Entity*> buff = getAllChildrenWithTagRecursive(child, tag);
+    if(child->hasTag(tag))
+      buff.push_back(child);
     out.insert(out.end(), buff.begin(), buff.end());
   }
   return out;

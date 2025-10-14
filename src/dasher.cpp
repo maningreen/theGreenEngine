@@ -2,6 +2,7 @@
 #include "enemy.hpp"
 #include "include.h"
 #include "border.hpp"
+#include "player.hpp"
 #include <cstdlib>
 #include <iostream>
 
@@ -105,7 +106,7 @@ void Dasher::manageStates(float delta) {
     //we also gotta check some collision shtuff
     if(Vector2DistanceSqr(Position, getPlayer()->Position) < (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       //for psuedo i-frames
-      getPlayer()->getHealthManager()->applyDamage(damage);
+      ((Player*)getPlayer())->getHealthManager()->applyDamage(damage);
       setState(recovery);
       //then we do a bounce
       Vector2 scaledOffset = Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));

@@ -1,14 +1,13 @@
 #ifndef player_h
 #define player_h
 
-#include "engine/entity.hpp"
 #include "bars.hpp"
 #include "camera.hpp"
-#include "healthManager.hpp"
 #include "enemy.hpp"
+#include "engine/entity.hpp"
+#include "healthManager.hpp"
 
 class Player : public Entity2D {
-private:
   bool dashing;
   bool canDash;
   float timeSinceDash;
@@ -27,16 +26,17 @@ private:
 
   void manageRotation();
 
-  static std::vector<Enemy*> enemies;
-  static int getEnemyInEnemies(Enemy*);
-
+  void manageAttack();
 public:
-  Vector2 Velocity;
+  Player(const std::string& name, Vector2 position, CameraEntity* cam);
+  ~Player();
 
-  float Speed;
-  float Friction;
+  Vector2 velocity;
 
-  float Rotation;
+  float speed;
+  float friction;
+
+  float rotation;
 
   unsigned dashCount;
   float dashProgress;
@@ -72,15 +72,8 @@ public:
 
   static bool addEnemy(Enemy*);
   static bool removeEnemy(Enemy*);
-  static std::vector<Enemy*> getEnemies();
-
-  Player(const std::string& name, Vector2 position, CameraEntity* cam);
-  ~Player();
 
   Vector2 getInput();
-  Vector2 getInput(int u, int d, int l, int r);
-
-  void setCam(CameraEntity* cam);
 
   HealthManager* getHealthManager();
 

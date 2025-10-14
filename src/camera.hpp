@@ -8,7 +8,7 @@
 class CameraEntity : public Entity {
   public:
     Camera2D Camera;
-    Vector2* Follow;
+    Entity2D* Follow;
     Vector2 ShakeVector;
     float Jitterness;
 
@@ -18,7 +18,7 @@ class CameraEntity : public Entity {
     void Process(float delta);
     void Render();
 
-    CameraEntity(std::string name, Vector2* target);
+    CameraEntity(std::string name, Entity2D* target);
     ~CameraEntity();
 
     static float Smoothing;

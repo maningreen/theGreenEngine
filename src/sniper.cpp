@@ -7,8 +7,8 @@
 #include <cmath>
 #include <stdio.h>
 
-float Sniper::minDist = Border::Length / 1.6f;
-float Sniper::maxDist = Border::Length * 1.4;
+float Sniper::minDist = Border::length / 1.6f;
+float Sniper::maxDist = Border::length * 1.4;
 float Sniper::rotationSpeed = M_PI;
 float Sniper::speed = 2600;
 float Sniper::defaultHealth = 2;
