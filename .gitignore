@@ -1,5 +1,6 @@
 # ignore engine output
 .cache/
+.clangd_format
 compile_commands.json
 build/
 result/
