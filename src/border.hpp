@@ -3,6 +3,10 @@
 
 #include "engine/entity.hpp"
 
+// this class is used to represent the wrapping of geometry on a taurus (3D donut).
+// since it's a taurus there's some... funky geometry... (Shortest paths are still shortest paths, just with wrapping applied)
+// it's a static class* *(exception being rendering)
+// and so most of the functions and values in here are static.
 class Border : public Entity2D {
   public:
     static float length;

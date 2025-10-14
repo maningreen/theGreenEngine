@@ -104,20 +104,6 @@ void DashNode::Render() {
   DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
   // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
   // Color outer) DrawCircleLinesV(Vector2 center, float radius, Color color)
-  if(nodes.size() >= 3) {
-    float angleDeg = las->rotation * RAD2DEG;
-    DrawCircleSector(Position,
-        100,
-        angleDeg - getInternalAngle() * RAD2DEG,
-        angleDeg,
-        100,
-        RED);
-    DrawText(TextFormat("%f", getInternalAngle() * RAD2DEG),
-        Position.x,
-        Position.y,
-        100,
-        GREEN);
-  }
 }
 
 void DashNode::Process(float delta) {

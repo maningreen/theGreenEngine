@@ -234,26 +234,25 @@ void Player::manageAttack() {
   for(DashNode* n: nodes)
     theta += abs(n->getInternalAngle());
   float area;
-  // printf("theta: %f\n", theta * RAD2DEG);
-  if(abs(theta - PI) < DEG2RAD) { // ITS A REGULAR TRIGLE!
-    // we wanna figure out the area
-    // which is bh/2
-    // base, easy peasy, lemon squeazy
-    float b = Border::getDistance(nodes[0]->Position, nodes[1]->Position);
-    // height?... transformation matrix... :(
-    // lets say node[0] to node[1] is the base, and node[2] is gonna be the rest
-    // we can assume node[0]->getLasAngle() will have the angle to node[1]
-    float theta = nodes[0]->getLasAngle();
-    Vector2 shortestVector =
+  if(abs(theta - PI) < DEG2RAD) { 
+    // ITS A REGULAR TRIGLE! (if theta == 180 then it's a triangle, or in radians if theta == PI, then it's a triangle)
+    // of course we give it some leeway because floating point imprecision.
+    // here we want to calculate the area of the triggle,
+    // A = b * h / 2
+    float b = Border::getDistance(nodes[0]->Position, nodes[1]->Position); // distance between two points...
+    // we can't just get the distance between two points again, so we're gonna take point C and turn it into local coord space w/ a transformation matrix,
+    // then we just take the Y for the height of the triggle
+    float theta = nodes[0]->getLasAngle(); // getting theta for the operation...
+    Vector2 shortestVector = // getting the shortest vector so that way we can rotate it
         Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
-    Vector2 localVectorToPeak = {
-        .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta),
-        .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),
+    Vector2 localVectorToPeak = { // here we apply a simple transformation matrix, iirc
+        .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta), // [ cos(theta), 0 ]
+        .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),// [ 0, sin(theta) ]
     };
     float h = localVectorToPeak.y;
-    // sick, then we just do bh/2
-    area = abs(b * h / 2); // sometimes it goes negative :p
-  } else
+    // sick, then we just plug & chug
+    area = abs(b * h / 2); // sometimes it goes negative so we abs (area can't be negative!)
+  } else // if the sum of the angles isn't 180 (ie: not a valid triggle), it doesn't *have* an area
     area = 0;
 
   // sort the nodes via ~~magic~~ distance
@@ -284,15 +283,8 @@ void Player::manageAttack() {
       if(minDist <= en->Radius)
         en->killDefered();
     } else {
-      // we got a break so then we should handle that break by schooching it
-      // over to the other side :) we're gonna use quadrants for this tomfoolery
-      // (relative to other two)
-      // -x, -y -> what do?
-      // (True, False) -> reflect x
-      // (False, True) -> reflect y
-      // (True, True) -> reflect x, reflect x
-      // but um what if there are two breakers?
-      // we can use this loop-ily (idk the term)
+      // so in this the triangle is regular, so we want to treat it like one; however, sometimes it needs to be unwrapped, otherwise it's considered having a much larger
+      // area than it should
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
         effectivePos[i] = Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
@@ -312,12 +304,11 @@ void Player::manageAttack() {
 
       float min = dist < r ? dist : r;
       Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
-      DrawTriangle(effectivePos[0], effectivePos[1], effectivePos[2], BLUE);
       if(CheckCollisionPointTriangle(p,
              effectivePos[0],
              effectivePos[1],
              effectivePos[2]))
-        ((Enemy*)en)->getHealthManager()->applyDamage(.5);
+        ((Enemy*)en)->getHealthManager()->applyDamage( 60000 / area);
     }
   }
 }
