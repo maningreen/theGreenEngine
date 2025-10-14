@@ -1,13 +1,10 @@
 #include "dashNode.hpp"
 #include "border.hpp"
 #include "engine/entity.hpp"
-#include "include.h"
 #include "laser.hpp"
 #include "player.hpp"
 #include "raylib.h"
-#include <algorithm>
 #include <cmath>
-#include <functional>
 #include <vector>
 
 #define min(a, b) (a < b ? a : b)
