@@ -58,10 +58,10 @@ Vector2 Laser::getBreakingPoint() {
   float slope = (endPos.y - Position.y) / (endPos.x - Position.x);
   float xLen, yLen;
   if(getBreaksX()) {
-    xLen = Border::Length - abs(Position.x);
+    xLen = Border::length - abs(Position.x);
     yLen = xLen * slope + Position.y;
   } else if(getBreaksY()) {
-    yLen = Border::Length - abs(Position.y);
+    yLen = Border::length - abs(Position.y);
     xLen = xLen / slope + Position.y;
   }
   return (Vector2){ Position.x + xLen, Position.y + yLen};
@@ -91,18 +91,18 @@ void Laser::Render() {
 
       Vector2 collisionPosition;
       float slope = tan(rotation);
-      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::Length  : -Border::Length) - rayOrigin.x));
-      float xPosAtBorder = rayOrigin.x + (1 / slope) * ((top ? Border::Length : -Border::Length) - rayOrigin.y);
-      bool swapX = abs(yPosAtBorder) <= Border::Length;
-      bool swapY = abs(xPosAtBorder) <= Border::Length;
+      float yPosAtBorder = rayOrigin.y + (slope * ((left ? Border::length  : -Border::length) - rayOrigin.x));
+      float xPosAtBorder = rayOrigin.x + (1 / slope) * ((top ? Border::length : -Border::length) - rayOrigin.y);
+      bool swapX = abs(yPosAtBorder) <= Border::length;
+      bool swapY = abs(xPosAtBorder) <= Border::length;
       //so the gist with this variable is if we collide on x we set it to be the y it collides on and vise versa
       if(swapX) {
         collisionPosition.y = yPosAtBorder;
-        collisionPosition.x = left ? Border::Length : -Border::Length;
+        collisionPosition.x = left ? Border::length : -Border::length;
       } 
       if(swapY) {
         collisionPosition.x = xPosAtBorder;
-        collisionPosition.y = top ? Border::Length : -Border::Length;
+        collisionPosition.y = top ? Border::length : -Border::length;
       }
       Vector2 vectorToCol = Vector2Subtract(collisionPosition, rayOrigin);
       localOffset = Vector2Subtract(localOffset, vectorToCol);

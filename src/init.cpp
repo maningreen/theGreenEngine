@@ -5,6 +5,7 @@
 #include "player.hpp"
 #include "border.hpp"
 #include "time.h"
+#include "waveManager.hpp"
 
 extern "C" {
   extern void hs_init(int argc, char** argv);
@@ -20,13 +21,14 @@ void Init(Entity* root) {
   root->addChild(plr);
   root->addChild(new Border());
   root->addChild(new Enemy({1000, 1000}));
+  // root->addChild(new WaveManager());
 }
 
 void PreRendering(std::vector<Entity*>* entities) { 
   PostProcessingData* data = (PostProcessingData*)entities->front();
 
   BeginTextureMode(data->Texture);
-  BeginMode2D((Camera2D){.offset = Vector2Zero(), .target = {-Border::Length, -Border::Length}, .rotation = 0, .zoom = 1});
+  BeginMode2D((Camera2D){.offset = Vector2Zero(), .target = {-Border::length, -Border::length}, .rotation = 0, .zoom = 1});
 }
 
 void PostRendering(std::vector<Entity*>* entities) {
@@ -37,7 +39,7 @@ void PostRendering(std::vector<Entity*>* entities) {
 #ifdef shader
   BeginShaderMode(data->getShader());
 #endif
-  BeginMode2D((Camera2D){.offset = cameraEnt->Camera.offset, .target = Vector2Subtract(cameraEnt->Camera.target, (Vector2){-Border::Length, -Border::Length}), .rotation = 0, .zoom = cameraEnt->Camera.zoom});
+  BeginMode2D((Camera2D){.offset = cameraEnt->Camera.offset, .target = Vector2Subtract(cameraEnt->Camera.target, (Vector2){-Border::length, -Border::length}), .rotation = 0, .zoom = cameraEnt->Camera.zoom});
 
   DrawTexturePro(data->Texture.texture, (Rectangle){0, 0, 3 * (float)data->Texture.texture.width, 3 * -(float)data->Texture.texture.height}, (Rectangle){-(float)data->Texture.texture.width, -(float)data->Texture.texture.height, 3 * (float)data->Texture.texture.width, 3 * (float)data->Texture.texture.height}, {0, 0}, 0, WHITE);
 

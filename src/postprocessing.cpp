@@ -6,7 +6,7 @@
 
 PostProcessingData::PostProcessingData() : Entity("Data") {
   ScreenDems = (Vector2){(float)GetScreenWidth(), (float)GetScreenHeight()};
-  Texture = LoadRenderTexture(2 * Border::Length, 2 * Border::Length);
+  Texture = LoadRenderTexture(2 * Border::length, 2 * Border::length);
   pixelShader = LoadShader(0, "resources/shaders/pixel.glsl");
   pixelShaderScreenDimensionsLoc = GetShaderLocation(pixelShader, "screenDems");
   SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &ScreenDems, SHADER_UNIFORM_VEC2);

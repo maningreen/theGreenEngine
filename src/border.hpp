@@ -5,10 +5,9 @@
 
 class Border : public Entity2D {
   public:
-    static float Length;
+    static float length;
 
     virtual void Render();
-    virtual void Process(float delta);
 
     Border();
     ~Border();
@@ -21,6 +20,11 @@ class Border : public Entity2D {
     static Vector2 getShortestPathToPoint(const Vector2 pos1, const Vector2 pos2);
     static Vector2 getRandomPosInBorder();
     static float getDistance(Vector2 a, Vector2 b);
+
+    // where alpha is the one to be unwrapped relative to
+    // if alpha is in quadrant 1, and beta is in quadrant 3, 
+    // beta will be translated to quadrant 1, outside of the border
+    static Vector2 unwrapPositionRelative(Vector2 alpha, Vector2 beta);
 };
 
 #endif
