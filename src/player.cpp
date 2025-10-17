@@ -2,7 +2,7 @@
 #include "afterimage.hpp"
 #include "bars.hpp"
 #include "border.hpp"
-#include "dashNode.hpp"
+#include "attackNode.hpp"
 #include "enemy.hpp"
 #include "engine/core.h"
 #include "engine/entity.hpp"
@@ -134,8 +134,8 @@ void Player::Process(float delta) {
                         ? Vector2Scale(inputDirection, dashSpeed)
                         : Vector2Scale(Vector2Normalize(velocity), dashSpeed);
     timeSinceDash = 0;
-    if(DashNode::getNodes().size() < 3)
-      addChild(new DashNode(Position));
+    if(AttackNode::getNodes().size() < 3)
+      addChild(new AttackNode(Position));
   } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
 
@@ -225,14 +225,14 @@ void Player::manageAttack() {
   // in c++ and i just wrote a ton of haskell
 
   // if we don't have enough to attack, we don't manage the attack
-  std::vector<DashNode*> nodes = DashNode::getNodes();
+  std::vector<AttackNode*> nodes = AttackNode::getNodes();
 
   if(nodes.size() < 3)
     return;
 
   // get if it's a regular triangle
   float theta = 0;
-  for(DashNode* n: nodes)
+  for(AttackNode* n: nodes)
     theta += abs(n->getInternalAngle());
   float area;
   if(abs(theta - PI) < DEG2RAD) { 
@@ -257,7 +257,7 @@ void Player::manageAttack() {
     area = 0;
 
   // sort the nodes via ~~magic~~ distance
-  std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b) {
+  std::sort(nodes.begin(), nodes.end(), [this](AttackNode* a, AttackNode* b) {
     return Vector2DistanceSqr(Position, a->Position) <
            Vector2DistanceSqr(Position, b->Position);
   });

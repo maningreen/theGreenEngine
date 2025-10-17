@@ -1,4 +1,4 @@
-#include "dashNode.hpp"
+#include "attackNode.hpp"
 #include "border.hpp"
 #include "engine/entity.hpp"
 #include "laser.hpp"
@@ -10,11 +10,11 @@
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)
 
-float DashNode::defaultRadius = 30;
-float DashNode::lifetimeAfterAttack = 1.5;
-std::vector<DashNode*> DashNode::nodes;
+float AttackNode::defaultRadius = 30;
+float AttackNode::lifetimeAfterAttack = 1.5;
+std::vector<AttackNode*> AttackNode::nodes;
 
-DashNode::DashNode(Vector2 p)
+AttackNode::AttackNode(Vector2 p)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
   las = new Laser(Position, 0, 500, WHITE);
   las->shouldRender = false;
@@ -23,38 +23,38 @@ DashNode::DashNode(Vector2 p)
   nodes.push_back(this);
 }
 
-DashNode::DashNode(Vector2 p, bool x)
+AttackNode::AttackNode(Vector2 p, bool x)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
   las = new Laser(Position, 0, 500, WHITE);
   las->shouldRender = false;
   addChild(las);
 }
 
-DashNode::~DashNode() {
+AttackNode::~AttackNode() {
   for(int i = 0; i < nodes.size(); i++)
     if(nodes[i] == this)
       nodes.erase(nodes.begin() + i);
 }
 
-float DashNode::ease(float x) { return 1 - (x * x * x * x); }
+float AttackNode::ease(float x) { return 1 - (x * x * x * x); }
 
-int DashNode::getIndex() { return index; }
+int AttackNode::getIndex() { return index; }
 
-float DashNode::getMaxLifetime() { return 2 * Player::dashCooldown; }
+float AttackNode::getMaxLifetime() { return 2 * Player::dashCooldown; }
 
-std::vector<DashNode*> DashNode::getNodes() { return nodes; }
+std::vector<AttackNode*> AttackNode::getNodes() { return nodes; }
 
-DashNode* DashNode::getPrev() {
+AttackNode* AttackNode::getPrev() {
   return nodes[((index + nodes.size() - 1) % nodes.size())];
 }
 
-DashNode* DashNode::getNext() { return nodes[((index + 1) % nodes.size())]; }
+AttackNode* AttackNode::getNext() { return nodes[((index + 1) % nodes.size())]; }
 
-float DashNode::getLasAngle() { return las->rotation; }
+float AttackNode::getLasAngle() { return las->rotation; }
 
-bool DashNode::getBreakInLas() { return las->getBreaks(); }
+bool AttackNode::getBreakInLas() { return las->getBreaks(); }
 
-float DashNode::getInternalAngle() {
+float AttackNode::getInternalAngle() {
   if(nodes.size() < 3)
     return 0;
   float thetaA = getLasAngle();
@@ -66,7 +66,7 @@ float DashNode::getInternalAngle() {
     return 2 * PI - deltaTheta;
 }
 
-int DashNode::getBreakInPolygon() {
+int AttackNode::getBreakInPolygon() {
   for(int i = 0; i < nodes.size(); i++) {
     if(nodes[i]->getBreakInLas()) {
       // THERE IS A SINGULAR EDGE CASE
@@ -80,8 +80,8 @@ int DashNode::getBreakInPolygon() {
   return -1;
 }
 
-DashNode DashNode::unwrapRelative() {
-  DashNode x = *this;
+AttackNode AttackNode::unwrapRelative() {
+  AttackNode x = *this;
   if(abs(x.Position.x - getPrev()->Position.x) > Border::length) {
     if(x.Position.x > 0)
       x.Position.x -= Border::length * 2;
@@ -97,13 +97,13 @@ DashNode DashNode::unwrapRelative() {
   return x;
 }
 
-void DashNode::Render() {
+void AttackNode::Render() {
   DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
   // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
   // Color outer) DrawCircleLinesV(Vector2 center, float radius, Color color)
 }
 
-void DashNode::Process(float delta) {
+void AttackNode::Process(float delta) {
   lifetime += delta;
 
   if(lifetime >= getMaxLifetime())
@@ -112,7 +112,7 @@ void DashNode::Process(float delta) {
     radius = ease(1 - lifetime) * defaultRadius;
 
   if(nodes.size() >= 3) {
-    DashNode* next = getNext();
+    AttackNode* next = getNext();
     Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
     if(!las->shouldRender) {
       las->shouldRender = true;

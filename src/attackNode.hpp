@@ -1,11 +1,11 @@
-#ifndef dashNode_h
-#define dashNode_h
+#ifndef attackNode_h
+#define attackNode_h
 
 #include "engine/entity.hpp"
 #include "laser.hpp"
 #include <vector>
 
-class DashNode : public Entity2D {
+class AttackNode : public Entity2D {
 private:
   float lifetime;
   float radius;
@@ -15,19 +15,19 @@ private:
   Laser* las;
 
   float ease(float x);
-  static std::vector<DashNode*> nodes;
+  static std::vector<AttackNode*> nodes;
 public:
   void Render() override;
   void Process(float delta) override;
 
   int getIndex();
 
-  DashNode* getNext();
-  DashNode* getPrev();
+  AttackNode* getNext();
+  AttackNode* getPrev();
 
-  DashNode(Vector2 position);
-  DashNode(Vector2 position, bool addToList);
-  ~DashNode();
+  AttackNode(Vector2 position);
+  AttackNode(Vector2 position, bool addToList);
+  ~AttackNode();
 
   // returns the effective lifetime.
   float getMaxLifetime();
@@ -40,7 +40,7 @@ public:
 
   // unwraps the current node relative to the previous node.
   // if they're already unwrapped returns the same DashNode
-  DashNode unwrapRelative();
+  AttackNode unwrapRelative();
 
   static float defaultRadius;
   static float lifetimeAfterAttack;
@@ -49,7 +49,7 @@ public:
   // returns -1 if there's no break, or if the polygon is invalid
   static int getBreakInPolygon();
 
-  static std::vector<DashNode*> getNodes();
+  static std::vector<AttackNode*> getNodes();
 };
 
 #endif
