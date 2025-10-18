@@ -39,7 +39,7 @@ public:
   float getInternalAngle();
 
   // unwraps the current node relative to the previous node.
-  // if they're already unwrapped returns the same DashNode
+  // if they're already unwrapped applies no operations to `this`
   AttackNode unwrapRelative();
 
   static float defaultRadius;
