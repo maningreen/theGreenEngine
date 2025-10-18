@@ -7,4 +7,6 @@
 Vector2 getInputVector(int u, int d, int l, int r);
 int getQuadrantOfVector(const Vector2 x);
 
+#define vecsToRec(a, b) (Rectangle){a.x, a.y, b.x, b.y}
+
 #endif
