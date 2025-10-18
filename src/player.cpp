@@ -279,23 +279,22 @@ void Player::manageAttack() {
             &closestPoint);
         float d = Vector2Distance(closestPoint, en->Position);
         minDist = min(d, minDist);
-        DrawCircleV(closestPoint, 30, PURPLE);
       }
       if(minDist <= en->Radius)
         en->killDefered();
     } else {
       // so in this the triangle is regular, so we want to treat it like one; however, sometimes it needs to be unwrapped, otherwise it's considered having a much larger
       // area than it should
+
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
         effectivePos[i] = Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
+
       // then we can use a regular collision
-      // checking collision circle triangle, easy peasy, lemon squezy
+      // checking collision circle triangle, easy peasy, lemon squeazy
       Vector2 avg = Vector2Zero();
-      for(int i = 0; i < 3; i++) {
+      for(int i = 0; i < 3; i++)
         avg = Vector2Add(avg, effectivePos[i]);
-        DrawCircleV((effectivePos[i]), 50, BLUE);
-      }
       avg = Vector2Scale(avg, 1.0f / 3.0f);
 
 
