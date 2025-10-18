@@ -220,40 +220,39 @@ HealthManager* Player::getHealthManager() { return healthManager; }
 
 bool Player::getDashing() { return dashing; }
 
-void Player::manageAttack() {
-  // i am going to use a lot of lambdas here, cuz i just learned that they exist
-  // in c++ and i just wrote a ton of haskell
+bool getTriangleIsValid(float angleSum) {
+  return angleSum - PI < DEG2RAD;
+}
 
-  // if we don't have enough to attack, we don't manage the attack
+// calculates the area of a triangle with three *unwrapped* coordinates
+float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
+
+  // formula for area of a triangle b * h / 2
+  float bLength = Border::getDistance(a, b);
+
+  float theta = atan2(b.y - a.y, b.x - a.x); // getting theta for the operation...
+  Vector2 shortestVector = c - a;
+
+  // we apply a transformation matrix, but only keep the y, as that's the relative height
+  float triangleHeight = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
+
+  return bLength * triangleHeight / 2;
+}
+
+void Player::manageAttack() {
   std::vector<AttackNode*> nodes = AttackNode::getNodes();
 
-  if(nodes.size() < 3)
+  if(nodes.size() < 3) // we can't make a polygon with less than 3 vertices
     return;
 
-  // get if it's a regular triangle
   float theta = 0;
   for(AttackNode* n: nodes)
     theta += abs(n->getInternalAngle());
+
   float area;
-  if(abs(theta - PI) < DEG2RAD) { 
-    // ITS A REGULAR TRIGLE! (if theta == 180 then it's a triangle, or in radians if theta == PI, then it's a triangle)
-    // of course we give it some leeway because floating point imprecision.
-    // here we want to calculate the area of the triggle,
-    // A = b * h / 2
-    float b = Border::getDistance(nodes[0]->Position, nodes[1]->Position); // distance between two points...
-    // we can't just get the distance between two points again, so we're gonna take point C and turn it into local coord space w/ a transformation matrix,
-    // then we just take the Y for the height of the triggle
-    float theta = nodes[0]->getLasAngle(); // getting theta for the operation...
-    Vector2 shortestVector = // getting the shortest vector so that way we can rotate it
-        Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
-    Vector2 localVectorToPeak = { // here we apply a simple transformation matrix, iirc
-        .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta), // [ cos(theta), 0 ]
-        .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),// [ 0, sin(theta) ]
-    };
-    float h = localVectorToPeak.y;
-    // sick, then we just plug & chug
-    area = abs(b * h / 2); // sometimes it goes negative so we abs (area can't be negative!)
-  } else // if the sum of the angles isn't 180 (ie: not a valid triggle), it doesn't *have* an area
+  if(getTriangleIsValid(theta))
+    area = calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+  else
     area = 0;
 
   // sort the nodes via ~~magic~~ distance
@@ -271,8 +270,11 @@ void Player::manageAttack() {
     if(area == 0) {
       float minDist = INFINITY;
       for(int i = 0; i < 3; i++) {
+
         Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
         Vector2 closestPoint;
+
+        // this is an external function written in haskell
         getClosestPointFromLineAndPoint(&nodes[i]->Position,
             &unwrappedNext,
             &en->Position,
