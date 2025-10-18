@@ -264,8 +264,7 @@ void Player::manageAttack() {
   std::vector<Entity*> enemies =
       Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Entity* enButEnt: enemies) {
-    Enemy* en = (Enemy*)enButEnt;
+  for(Enemy* en = (Enemy*)enemies.front(); en < enemies.back(); en++) {
     // we figure out the function for the actual slope thingy
     if(area == 0) {
       float minDist = INFINITY;
