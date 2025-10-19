@@ -1,7 +1,6 @@
 #ifndef camera_hpp
 #define camera_hpp
 
-#include "include.h"
 #include <string>
 #include "engine/entity.hpp"
 
@@ -11,6 +10,8 @@ class CameraEntity : public Entity {
     Entity2D* Follow;
     Vector2 ShakeVector;
     float Jitterness;
+
+    Vector2 getMousePosition();
 
     void ManageCameraShake(float delta);
     void ManageCameraMotion(float delta);

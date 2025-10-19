@@ -1,14 +1,17 @@
 #include "player.hpp"
 #include "afterimage.hpp"
+#include "attackNode.hpp"
 #include "bars.hpp"
 #include "border.hpp"
-#include "dashNode.hpp"
 #include "enemy.hpp"
 #include "engine/core.h"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
+#include "include.h"
+#include "nodeBullet.hpp"
 #include "particle.hpp"
 #include "raylib.h"
+#include "raymath.h"
 #include <algorithm>
 #include <cmath>
 #include <csignal>
@@ -64,16 +67,16 @@ void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
   DrawTriangle(Position,
-      Position + (Vector2) {cosf(rotation + 4 * PI / 3) * distance,
-                     -sinf(rotation + 4 * PI / 3) * distance},
       Position +
-          (Vector2) {cosf(rotation) * distance, -sinf(rotation) * distance},
+          (Vector2) {cosf(rotation) * distance, sinf(rotation) * distance},
+      Position + (Vector2) {cosf(rotation + 4 * PI / 3) * distance,
+                     sinf(rotation + 4 * PI / 3) * distance},
       YELLOW);
   DrawTriangle(Position,
-      Position +
-          (Vector2) {cosf(rotation) * distance, -sinf(rotation) * distance},
       Position + (Vector2) {cosf(rotation + 2 * PI / 3) * distance,
-                     -sinf(rotation + 2 * PI / 3) * distance},
+                     sinf(rotation + 2 * PI / 3) * distance},
+      Position +
+          (Vector2) {cosf(rotation) * distance, sinf(rotation) * distance},
       YELLOW);
 
   // we draw them darn sqrs
@@ -134,13 +137,18 @@ void Player::Process(float delta) {
                         ? Vector2Scale(inputDirection, dashSpeed)
                         : Vector2Scale(Vector2Normalize(velocity), dashSpeed);
     timeSinceDash = 0;
-    if(DashNode::getNodes().size() < 3)
-      addChild(new DashNode(Position));
+    if(AttackNode::getNodes().size() < 3)
+      addChild(new AttackNode(Position));
   } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
 
   if(healthManager->isDead())
     killDefered();
+
+  if(dashProgress >= 1 && IsKeyPressed(KEY_ENTER)) {
+    --dashProgress;
+    addChild(new NodeBullet(Position, cam->getMousePosition(), rotation));
+  }
 
   manageBars();
   manageRotation();
@@ -151,15 +159,11 @@ void Player::manageBars() {
 }
 
 void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
-  // so basically, math :thumbsup:
   // bool for verticle b->growVert
-  float offsetX =
-      /*this one is either constant or index dependant depending on growVert*/
-      !b->ShrinkY ? -b->Dimensions.x / 2.0f
-                  : distance + b->Dimensions.x * index;
-  float offsetY = /*just the opposite of ^*/ b->ShrinkY
-                      ? -b->Dimensions.y / 2.0f
-                      : distance + b->Dimensions.y * index;
+  float offsetX = !b->ShrinkY ? -b->Dimensions.x / 2.0f
+                              : distance + b->Dimensions.x * index;
+  float offsetY =
+      b->ShrinkY ? -b->Dimensions.y / 2.0f : distance + b->Dimensions.y * index;
   Vector2 finalPosition = {Position.x + offsetX, Position.y + offsetY};
   b->Position = finalPosition;
   b->ShouldRender = shouldRender;
@@ -167,13 +171,8 @@ void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
 }
 
 void Player::manageRotation() {
-  Vector2 mousePos =
-      Vector2Scale(Vector2Subtract(GetMousePosition(), cam->Camera.offset),
-          1.0f / cam->Camera.zoom);
-  // then we also have to globalize the mouse position good thing we have a cam
-  // field
-  mousePos = Vector2Add(mousePos, cam->Camera.target);
-  rotation = atan2f(-(mousePos.y - Position.y),
+  Vector2 mousePos = cam->getMousePosition();
+  rotation = atan2f((mousePos.y - Position.y),
       mousePos.x - Position.x); // then it's as simple as b - a
 }
 
@@ -205,12 +204,9 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
 
   cam = new CameraEntity("Camera", this);
   addChild(cam);
-
 }
 
-Player::~Player() { 
-  Enemy::setPlayer(nullptr);
-}
+Player::~Player() { Enemy::setPlayer(nullptr); }
 
 void Player::Init() { Enemy::setPlayer(); };
 
@@ -220,44 +216,48 @@ HealthManager* Player::getHealthManager() { return healthManager; }
 
 bool Player::getDashing() { return dashing; }
 
+// the law which states that the sum a triangle's angles will be 180 degrees (pi
+// radians)
+bool getTriangleIsValid(float angleSum) { return angleSum - PI < DEG2RAD; }
+
+// calculates the area of a triangle with three *unwrapped* coordinates
+float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
+
+  // formula for area of a triangle b * h / 2
+  float bLength = Border::getDistance(a, b);
+
+  float theta =
+      atan2(b.y - a.y, b.x - a.x); // getting theta for the operation...
+  Vector2 shortestVector = c - a;
+
+  // we apply a transformation matrix, but only keep the y, as that's the
+  // relative height
+  float triangleHeight =
+      -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
+
+  return bLength * triangleHeight / 2;
+}
+
 void Player::manageAttack() {
-  // i am going to use a lot of lambdas here, cuz i just learned that they exist
-  // in c++ and i just wrote a ton of haskell
+  std::vector<AttackNode*> nodes = AttackNode::getNodes();
 
-  // if we don't have enough to attack, we don't manage the attack
-  std::vector<DashNode*> nodes = DashNode::getNodes();
-
-  if(nodes.size() < 3)
+  if(nodes.size() < 3) // we can't make a polygon with less than 3 vertices
     return;
 
-  // get if it's a regular triangle
   float theta = 0;
-  for(DashNode* n: nodes)
+  for(AttackNode* n: nodes)
     theta += abs(n->getInternalAngle());
+
   float area;
-  if(abs(theta - PI) < DEG2RAD) { 
-    // ITS A REGULAR TRIGLE! (if theta == 180 then it's a triangle, or in radians if theta == PI, then it's a triangle)
-    // of course we give it some leeway because floating point imprecision.
-    // here we want to calculate the area of the triggle,
-    // A = b * h / 2
-    float b = Border::getDistance(nodes[0]->Position, nodes[1]->Position); // distance between two points...
-    // we can't just get the distance between two points again, so we're gonna take point C and turn it into local coord space w/ a transformation matrix,
-    // then we just take the Y for the height of the triggle
-    float theta = nodes[0]->getLasAngle(); // getting theta for the operation...
-    Vector2 shortestVector = // getting the shortest vector so that way we can rotate it
-        Border::getShortestPathToPoint(nodes[0]->Position, nodes[2]->Position);
-    Vector2 localVectorToPeak = { // here we apply a simple transformation matrix, iirc
-        .x = shortestVector.x * cos(theta) + shortestVector.y * sin(theta), // [ cos(theta), 0 ]
-        .y = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta),// [ 0, sin(theta) ]
-    };
-    float h = localVectorToPeak.y;
-    // sick, then we just plug & chug
-    area = abs(b * h / 2); // sometimes it goes negative so we abs (area can't be negative!)
-  } else // if the sum of the angles isn't 180 (ie: not a valid triggle), it doesn't *have* an area
+  if(getTriangleIsValid(theta))
+    area = calculateTriangleArea(nodes[0]->Position,
+        nodes[1]->Position,
+        nodes[2]->Position);
+  else
     area = 0;
 
   // sort the nodes via ~~magic~~ distance
-  std::sort(nodes.begin(), nodes.end(), [this](DashNode* a, DashNode* b) {
+  std::sort(nodes.begin(), nodes.end(), [this](AttackNode* a, AttackNode* b) {
     return Vector2DistanceSqr(Position, a->Position) <
            Vector2DistanceSqr(Position, b->Position);
   });
@@ -265,39 +265,42 @@ void Player::manageAttack() {
   std::vector<Entity*> enemies =
       Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Entity* enButEnt: enemies) {
-    Enemy* en = (Enemy*)enButEnt;
+  for(int i = 0; i < enemies.size(); i++) {
+    Enemy* en = (Enemy*)enemies[i];
     // we figure out the function for the actual slope thingy
     if(area == 0) {
-      float minDist = INFINITY;
+      float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
+
         Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
         Vector2 closestPoint;
+
+        // this is an external function written in haskell
         getClosestPointFromLineAndPoint(&nodes[i]->Position,
             &unwrappedNext,
             &en->Position,
             &closestPoint);
-        float d = Vector2Distance(closestPoint, en->Position);
-        minDist = min(d, minDist);
-        DrawCircleV(closestPoint, 30, PURPLE);
+        float distance = Vector2Distance(closestPoint, en->Position);
+        minimumDistance = min(distance, minimumDistance);
       }
-      if(minDist <= en->Radius)
+      if(minimumDistance <= en->Radius)
         en->killDefered();
     } else {
-      // so in this the triangle is regular, so we want to treat it like one; however, sometimes it needs to be unwrapped, otherwise it's considered having a much larger
-      // area than it should
+      // so in this the triangle is regular, so we want to treat it like one;
+      // however, sometimes it needs to be unwrapped, otherwise it's considered
+      // having a much larger area than it should
+
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
-        effectivePos[i] = Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
-      // then we can use a regular collision
-      // checking collision circle triangle, easy peasy, lemon squezy
-      Vector2 avg = Vector2Zero();
-      for(int i = 0; i < 3; i++) {
-        avg = Vector2Add(avg, effectivePos[i]);
-        DrawCircleV((effectivePos[i]), 50, BLUE);
-      }
-      avg = Vector2Scale(avg, 1.0f / 3.0f);
+        effectivePos[i] =
+            Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
 
+      // then we can use a regular collision
+      // checking collision circle triangle, easy peasy, lemon squeazy
+      Vector2 avg = Vector2Zero();
+      for(int i = 0; i < 3; i++)
+        avg = Vector2Add(avg, effectivePos[i]);
+      avg = Vector2Scale(avg, 1.0f / 3.0f);
 
       Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
       float dist = Vector2Length(vecToAvg);
@@ -309,7 +312,7 @@ void Player::manageAttack() {
              effectivePos[0],
              effectivePos[1],
              effectivePos[2]))
-        ((Enemy*)en)->getHealthManager()->applyDamage( 60000 / area);
+        ((Enemy*)en)->getHealthManager()->applyDamage(60000 / area);
     }
   }
 }
