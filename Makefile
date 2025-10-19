@@ -40,7 +40,7 @@ build/%.o : src/%.cpp
 	$(CC) -c $< -o $@ -I$(RAYLIB)
 
 $(BUILDDIR)hs_%.o : src/%.hs $(HSDEPS) | $(BUILDDIR)
-	$(HC) -isrc -c $< -hidir $(BUILDDIR) -outputdir $(BUILDDIR) -o $@
+	$(HC) -c $< -hidir $(BUILDDIR) -outputdir $(BUILDDIR) -o $@
 
 $(HSDEPS): $(HSSRC) | $(BUILDDIR)
 	$(HC) -isrc -M $(HSSRC) -odir $(BUILDDIR) -hidir $(BUILDDIR) -dep-makefile $(HSDEPS)
@@ -49,7 +49,7 @@ $(HSDEPS): $(HSSRC) | $(BUILDDIR)
 	mv $(HSDEPS).tmp $(HSDEPS)
 
 $(BUILDDIR):
-	mkdir $(BUILDDIR)
+	mkdir -p $(BUILDDIR)
 
 clean:
 	rm -r $(BUILDDIR)
