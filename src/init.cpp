@@ -20,7 +20,7 @@ void Init(Entity* root) {
   Player* plr = new Player("Player", (Vector2){0, 0}, nullptr);
   root->addChild(plr);
   root->addChild(new Border());
-  root->addChild(new WaveManager());
+  // root->addChild(new WaveManager());
 }
 
 void PreRendering(std::vector<Entity*>* entities) { 

@@ -1,13 +1,17 @@
 #include "camera.hpp"
 #include "engine/entity.hpp"
-#include <iostream>
-#include "include.h"
+#include "raylib.h"
 #include <string>
 
 float CameraEntity::Smoothing = 10;
 float CameraEntity::DefaultZoom = .3;
 
 #define mouseLean .1
+
+Vector2 CameraEntity::getMousePosition() {
+  Vector2 mousePos = Vector2Scale(GetMousePosition() - Camera.offset, 1.0f / Camera.zoom);
+  return mousePos + Camera.target;
+}
 
 void CameraEntity::ManageCameraShake(float delta) {
   Vector2 baseOff = (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};

@@ -1,0 +1,48 @@
+#include "nodeBullet.hpp"
+#include "engine/entity.hpp"
+#include "raylib.h"
+#include "attackNode.hpp"
+#include "raymath.h"
+
+float NodeBullet::speed = 500;
+float NodeBullet::radius = 10;
+Color NodeBullet::color = WHITE;
+
+NodeBullet::NodeBullet(Vector2 alpha, Vector2 beta, float r)
+    : Entity2D("NodeBullet", alpha), theta(r) {
+  // calculate the lifetime with the speed and distance
+  targetLifetime = Vector2Distance(alpha, beta) / speed;
+  lifetime = 0;
+}
+
+NodeBullet::NodeBullet(Vector2 alpha, float epsilon, float r)
+    : Entity2D("NodeBullet", alpha), theta(r) {
+  targetLifetime = epsilon;
+  lifetime = 0;
+}
+
+NodeBullet::NodeBullet(Vector2 alpha, Vector2 beta)
+    : Entity2D("NodeBullet", alpha) {
+  targetLifetime = Vector2Distance(alpha, beta) / speed;
+  theta = atan2f(beta.y - alpha.y, beta.x - alpha.x);
+  lifetime = 0;
+}
+
+NodeBullet::~NodeBullet() {}
+
+void NodeBullet::Render() {
+  // draw a rectangle according to our dimensions and
+  DrawCircleV(Position, radius, color);
+}
+
+void NodeBullet::Process(float delta) {
+  lifetime += delta;
+  Position +=
+      (Vector2) {delta * speed * cos(theta), delta * speed * sin(theta)};
+  if(lifetime >= targetLifetime)
+    killDefered();
+}
+
+void NodeBullet::Death() {
+  getParent()->addChild(new AttackNode(Position));
+}

@@ -1,14 +1,17 @@
 #include "player.hpp"
 #include "afterimage.hpp"
+#include "attackNode.hpp"
 #include "bars.hpp"
 #include "border.hpp"
-#include "attackNode.hpp"
 #include "enemy.hpp"
 #include "engine/core.h"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
+#include "include.h"
+#include "nodeBullet.hpp"
 #include "particle.hpp"
 #include "raylib.h"
+#include "raymath.h"
 #include <algorithm>
 #include <cmath>
 #include <csignal>
@@ -64,16 +67,16 @@ void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
   DrawTriangle(Position,
-      Position + (Vector2) {cosf(rotation + 4 * PI / 3) * distance,
-                     -sinf(rotation + 4 * PI / 3) * distance},
       Position +
-          (Vector2) {cosf(rotation) * distance, -sinf(rotation) * distance},
+          (Vector2) {cosf(rotation) * distance, sinf(rotation) * distance},
+      Position + (Vector2) {cosf(rotation + 4 * PI / 3) * distance,
+                     sinf(rotation + 4 * PI / 3) * distance},
       YELLOW);
   DrawTriangle(Position,
-      Position +
-          (Vector2) {cosf(rotation) * distance, -sinf(rotation) * distance},
       Position + (Vector2) {cosf(rotation + 2 * PI / 3) * distance,
-                     -sinf(rotation + 2 * PI / 3) * distance},
+                     sinf(rotation + 2 * PI / 3) * distance},
+      Position +
+          (Vector2) {cosf(rotation) * distance, sinf(rotation) * distance},
       YELLOW);
 
   // we draw them darn sqrs
@@ -142,6 +145,9 @@ void Player::Process(float delta) {
   if(healthManager->isDead())
     killDefered();
 
+  if(IsKeyPressed(KEY_ENTER))
+    addChild(new NodeBullet(Position, cam->getMousePosition(), rotation));
+
   manageBars();
   manageRotation();
 }
@@ -151,15 +157,11 @@ void Player::manageBars() {
 }
 
 void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
-  // so basically, math :thumbsup:
   // bool for verticle b->growVert
-  float offsetX =
-      /*this one is either constant or index dependant depending on growVert*/
-      !b->ShrinkY ? -b->Dimensions.x / 2.0f
-                  : distance + b->Dimensions.x * index;
-  float offsetY = /*just the opposite of ^*/ b->ShrinkY
-                      ? -b->Dimensions.y / 2.0f
-                      : distance + b->Dimensions.y * index;
+  float offsetX = !b->ShrinkY ? -b->Dimensions.x / 2.0f
+                              : distance + b->Dimensions.x * index;
+  float offsetY =
+      b->ShrinkY ? -b->Dimensions.y / 2.0f : distance + b->Dimensions.y * index;
   Vector2 finalPosition = {Position.x + offsetX, Position.y + offsetY};
   b->Position = finalPosition;
   b->ShouldRender = shouldRender;
@@ -167,13 +169,8 @@ void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
 }
 
 void Player::manageRotation() {
-  Vector2 mousePos =
-      Vector2Scale(Vector2Subtract(GetMousePosition(), cam->Camera.offset),
-          1.0f / cam->Camera.zoom);
-  // then we also have to globalize the mouse position good thing we have a cam
-  // field
-  mousePos = Vector2Add(mousePos, cam->Camera.target);
-  rotation = atan2f(-(mousePos.y - Position.y),
+  Vector2 mousePos = cam->getMousePosition();
+  rotation = atan2f((mousePos.y - Position.y),
       mousePos.x - Position.x); // then it's as simple as b - a
 }
 
@@ -205,12 +202,9 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
 
   cam = new CameraEntity("Camera", this);
   addChild(cam);
-
 }
 
-Player::~Player() { 
-  Enemy::setPlayer(nullptr);
-}
+Player::~Player() { Enemy::setPlayer(nullptr); }
 
 void Player::Init() { Enemy::setPlayer(); };
 
@@ -220,9 +214,9 @@ HealthManager* Player::getHealthManager() { return healthManager; }
 
 bool Player::getDashing() { return dashing; }
 
-bool getTriangleIsValid(float angleSum) {
-  return angleSum - PI < DEG2RAD;
-}
+// the law which states that the sum a triangle's angles will be 180 degrees (pi
+// radians)
+bool getTriangleIsValid(float angleSum) { return angleSum - PI < DEG2RAD; }
 
 // calculates the area of a triangle with three *unwrapped* coordinates
 float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
@@ -230,11 +224,14 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
   // formula for area of a triangle b * h / 2
   float bLength = Border::getDistance(a, b);
 
-  float theta = atan2(b.y - a.y, b.x - a.x); // getting theta for the operation...
+  float theta =
+      atan2(b.y - a.y, b.x - a.x); // getting theta for the operation...
   Vector2 shortestVector = c - a;
 
-  // we apply a transformation matrix, but only keep the y, as that's the relative height
-  float triangleHeight = -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
+  // we apply a transformation matrix, but only keep the y, as that's the
+  // relative height
+  float triangleHeight =
+      -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
 
   return bLength * triangleHeight / 2;
 }
@@ -251,7 +248,9 @@ void Player::manageAttack() {
 
   float area;
   if(getTriangleIsValid(theta))
-    area = calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+    area = calculateTriangleArea(nodes[0]->Position,
+        nodes[1]->Position,
+        nodes[2]->Position);
   else
     area = 0;
 
@@ -264,10 +263,11 @@ void Player::manageAttack() {
   std::vector<Entity*> enemies =
       Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
 
-  for(Enemy* en = (Enemy*)enemies.front(); en < enemies.back(); en++) {
+  for(int i = 0; i < enemies.size(); i++) {
+    Enemy* en = (Enemy*)enemies[i];
     // we figure out the function for the actual slope thingy
     if(area == 0) {
-      float minDist = INFINITY;
+      float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
 
         Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
@@ -278,18 +278,20 @@ void Player::manageAttack() {
             &unwrappedNext,
             &en->Position,
             &closestPoint);
-        float d = Vector2Distance(closestPoint, en->Position);
-        minDist = min(d, minDist);
+        float distance = Vector2Distance(closestPoint, en->Position);
+        minimumDistance = min(distance, minimumDistance);
       }
-      if(minDist <= en->Radius)
+      if(minimumDistance <= en->Radius)
         en->killDefered();
     } else {
-      // so in this the triangle is regular, so we want to treat it like one; however, sometimes it needs to be unwrapped, otherwise it's considered having a much larger
-      // area than it should
+      // so in this the triangle is regular, so we want to treat it like one;
+      // however, sometimes it needs to be unwrapped, otherwise it's considered
+      // having a much larger area than it should
 
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
-        effectivePos[i] = Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
+        effectivePos[i] =
+            Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
 
       // then we can use a regular collision
       // checking collision circle triangle, easy peasy, lemon squeazy
@@ -297,7 +299,6 @@ void Player::manageAttack() {
       for(int i = 0; i < 3; i++)
         avg = Vector2Add(avg, effectivePos[i]);
       avg = Vector2Scale(avg, 1.0f / 3.0f);
-
 
       Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
       float dist = Vector2Length(vecToAvg);
@@ -309,7 +310,7 @@ void Player::manageAttack() {
              effectivePos[0],
              effectivePos[1],
              effectivePos[2]))
-        ((Enemy*)en)->getHealthManager()->applyDamage( 60000 / area);
+        ((Enemy*)en)->getHealthManager()->applyDamage(60000 / area);
     }
   }
 }
