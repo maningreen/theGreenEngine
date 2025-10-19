@@ -145,8 +145,10 @@ void Player::Process(float delta) {
   if(healthManager->isDead())
     killDefered();
 
-  if(IsKeyPressed(KEY_ENTER))
+  if(dashProgress >= 1 && IsKeyPressed(KEY_ENTER)) {
+    --dashProgress;
     addChild(new NodeBullet(Position, cam->getMousePosition(), rotation));
+  }
 
   manageBars();
   manageRotation();

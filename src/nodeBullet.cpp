@@ -1,10 +1,11 @@
 #include "nodeBullet.hpp"
+#include "border.hpp"
 #include "engine/entity.hpp"
 #include "raylib.h"
 #include "attackNode.hpp"
 #include "raymath.h"
 
-float NodeBullet::speed = 500;
+float NodeBullet::speed = 5000;
 float NodeBullet::radius = 10;
 Color NodeBullet::color = WHITE;
 
@@ -41,6 +42,7 @@ void NodeBullet::Process(float delta) {
       (Vector2) {delta * speed * cos(theta), delta * speed * sin(theta)};
   if(lifetime >= targetLifetime)
     killDefered();
+  Border::wrapEntity(this);
 }
 
 void NodeBullet::Death() {

@@ -4,6 +4,7 @@
 #include "laser.hpp"
 #include "player.hpp"
 #include "raylib.h"
+#include "raymath.h"
 #include <cmath>
 #include <vector>
 
@@ -123,8 +124,7 @@ void AttackNode::Process(float delta) {
     las->width = sqrt(radius);
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
     // las->position yeah
-    las->Position =
-        Vector2Add(Position, Vector2Scale(vectorToNext, radius / las->length));
+    las->Position = Position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
   }
 
   if(lifetime >= getMaxLifetime() + 1)
