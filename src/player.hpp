@@ -6,22 +6,19 @@
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
-#include "src/storeItem.hpp"
+#include "mod.hpp"
+#include "dashManager.hpp"
 
 class Player : public Entity2D {
-  bool dashing;
-  bool canDash;
-  float timeSinceDash;
-  Vector2 dashDirection;
-
   float lifetime;
 
   Bar* dashCooldownBar;
+  DashManager dashManager;
   HealthManager* healthManager;
 
   CameraEntity* cam;
 
-  std::vector<StoreItem> mods;
+  std::vector<Mod> mods;
 
   void manageBars();
 
@@ -29,9 +26,7 @@ class Player : public Entity2D {
 
   void manageRotation();
 
-  void manageAttack();
-
-  void manageDash();
+  void manageDash(float delta);
 
   void fireBullet();
 public:
@@ -44,9 +39,6 @@ public:
   float friction;
 
   float rotation;
-
-  unsigned dashCount;
-  float dashProgress;
 
   static float maxHealth;
 
@@ -83,6 +75,7 @@ public:
   Vector2 getInput();
 
   HealthManager* getHealthManager();
+  DashManager* getDashManager();
 
   float getLifetime();
   bool getDashing();

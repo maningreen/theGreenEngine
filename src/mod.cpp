@@ -19,3 +19,6 @@ Mod::Mod(std::function<void(Entity2D*)> onInit) : onInit(onInit) {
   onEnemyKill = [](Entity2D* p, Enemy* en){ return; };
   onEnemySpawn = [](Entity2D* p, Enemy* en){ return; };
 }
+
+Mod::~Mod() {}
+//yep

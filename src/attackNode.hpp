@@ -16,6 +16,8 @@ private:
 
   float ease(float x);
   static std::vector<AttackNode*> nodes;
+
+  static void manageAttack();
 public:
   void Render() override;
   void Process(float delta) override;
@@ -50,6 +52,9 @@ public:
   static int getBreakInPolygon();
 
   static std::vector<AttackNode*> getNodes();
+
+  // default is 60000, this may seem like a lot; however, it's per pixel^2
+  static float damage;
 };
 
 #endif

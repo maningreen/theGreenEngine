@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "engine/core.h"
 #include "postprocessing.hpp"
@@ -20,6 +21,7 @@ void Init(Entity* root) {
   Player* plr = new Player("Player", (Vector2){0, 0}, nullptr);
   root->addChild(plr);
   root->addChild(new Border());
+  root->addChild(new Enemy({200, 200}));
   // root->addChild(new WaveManager());
 }
 

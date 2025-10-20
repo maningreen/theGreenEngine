@@ -7,13 +7,24 @@
 #include "raymath.h"
 #include <cmath>
 #include <vector>
+#include "engine/core.h"
 
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)
 
+extern "C" {
+float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY,
+    float cX, float cY);
+void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c,
+    Vector2* out);
+};
+
+
 float AttackNode::defaultRadius = 30;
 float AttackNode::lifetimeAfterAttack = 1.5;
 std::vector<AttackNode*> AttackNode::nodes;
+
+float AttackNode::damage = 60000;
 
 AttackNode::AttackNode(Vector2 p)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
@@ -125,8 +136,84 @@ void AttackNode::Process(float delta) {
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
     // las->position yeah
     las->Position = Position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
+    if(index == 0)
+      manageAttack();
   }
 
   if(lifetime >= getMaxLifetime() + 1)
     killDefered();
+}
+
+void AttackNode::manageAttack() {
+  std::vector<AttackNode*> nodes = AttackNode::getNodes();
+
+  if(nodes.size() < 3) // we can't make a polygon with less than 3 vertices
+    return;
+
+  float theta = 0;
+  for(AttackNode* n: nodes)
+    theta += abs(n->getInternalAngle());
+
+  float area;
+  if(getTriangleIsValid(theta))
+    area = calculateTriangleArea(nodes[0]->Position,
+        nodes[1]->Position,
+        nodes[2]->Position);
+  else
+    area = 0;
+
+
+  std::vector<Entity*> enemies =
+      Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
+
+  for(int i = 0; i < enemies.size(); i++) {
+    Enemy* en = (Enemy*)enemies[i];
+    // we figure out the function for the actual slope thingy
+    if(area == 0) {
+      float minimumDistance = INFINITY;
+      for(int i = 0; i < 3; i++) {
+
+        Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
+        Vector2 closestPoint;
+
+        // this is an external function written in haskell
+        getClosestPointFromLineAndPoint(&nodes[i]->Position,
+            &unwrappedNext,
+            &en->Position,
+            &closestPoint);
+        float distance = Vector2Distance(closestPoint, en->Position);
+        minimumDistance = min(distance, minimumDistance);
+      }
+      if(minimumDistance <= en->Radius)
+        en->killDefered();
+    } else {
+      // so in this the triangle is regular, so we want to treat it like one;
+      // however, sometimes it needs to be unwrapped, otherwise it's considered
+      // having a much larger area than it should
+
+      Vector2 effectivePos[nodes.size()];
+      for(int i = 0; i < nodes.size(); i++)
+        effectivePos[i] =
+            Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
+
+      // then we can use a regular collision
+      // checking collision circle triangle, easy peasy, lemon squeazy
+      Vector2 avg = Vector2Zero();
+      for(int i = 0; i < 3; i++)
+        avg = Vector2Add(avg, effectivePos[i]);
+      avg = Vector2Scale(avg, 1.0f / 3.0f);
+
+      Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
+      float dist = Vector2Length(vecToAvg);
+      float r = en->Radius;
+
+      float min = dist < r ? dist : r;
+      Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
+      if(CheckCollisionPointTriangle(p,
+             effectivePos[0],
+             effectivePos[1],
+             effectivePos[2]))
+        ((Enemy*)en)->getHealthManager()->applyDamage(damage / area);
+    }
+  }
 }
