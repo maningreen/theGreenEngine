@@ -9,13 +9,6 @@ class WaveManager : public Entity {
 
     static unsigned enemyTypeCount;
 
-    static unsigned upgradeCount;
-    static float* floatUpgrades[];
-
-    static std::string upgradeNames[];
-
-    static float upgradeOptions;
-
     bool inStore;
   public:
 

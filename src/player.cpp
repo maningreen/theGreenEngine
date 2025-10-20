@@ -109,9 +109,7 @@ void Player::Process(float delta) {
   if(dashing || Vector2LengthSqr(inputDirection))
     if(fmodf(lifetime - particleSpawnTime, particleSpawnTime) <= 1.0 / 60.0f)
       getRoot()->addChild(new Particle(Position,
-          Vector2Scale(
-              Vector2Add(velocity, Vector2Scale(inputDirection, speed * delta)),
-              -1)));
+          Vector2Scale(velocity + Vector2Scale(inputDirection, speed * delta), -1)));
 
   timeSinceDash += delta;
   if(dashing) {
@@ -132,13 +130,11 @@ void Player::Process(float delta) {
       dashing = false;
   } else if(IsKeyPressed(dashKey) && dashProgress > 1) {
     dashing = true;
-    dashProgress--;
+    --dashProgress;
     dashDirection = Vector2Length(inputDirection) > 0
                         ? Vector2Scale(inputDirection, dashSpeed)
                         : Vector2Scale(Vector2Normalize(velocity), dashSpeed);
     timeSinceDash = 0;
-    if(AttackNode::getNodes().size() < 3)
-      addChild(new AttackNode(Position));
   } else if(dashProgress <= maxDashCount && timeSinceDash > dashRegenDelay)
     dashProgress += delta / dashCooldown;
 
@@ -175,6 +171,10 @@ void Player::manageRotation() {
   rotation = atan2f((mousePos.y - Position.y),
       mousePos.x - Position.x); // then it's as simple as b - a
 }
+
+void Player::manageDash() {
+}
+
 
 Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
     : Entity2D(name, position), cam(camera) {

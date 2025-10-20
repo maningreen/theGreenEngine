@@ -6,6 +6,7 @@
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
+#include "src/storeItem.hpp"
 
 class Player : public Entity2D {
   bool dashing;
@@ -20,6 +21,8 @@ class Player : public Entity2D {
 
   CameraEntity* cam;
 
+  std::vector<StoreItem> mods;
+
   void manageBars();
 
   void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
@@ -27,6 +30,10 @@ class Player : public Entity2D {
   void manageRotation();
 
   void manageAttack();
+
+  void manageDash();
+
+  void fireBullet();
 public:
   Player(const std::string& name, Vector2 position, CameraEntity* cam);
   ~Player();
