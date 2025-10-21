@@ -7,8 +7,6 @@
 #include "raymath.h"
 #include <cmath>
 #include <vector>
-#include <algorithm>
-#include <iostream>
 #include "engine/core.h"
 
 #define min(a, b) (a < b ? a : b)
@@ -81,13 +79,13 @@ float AttackNode::getInternalAngle() {
 }
 
 int AttackNode::getBreakInPolygon() {
+  // THERE IS A SINGULAR EDGE CASE
+  // that's if the first index is the one that's breaking it
+  if(nodes[0]->getPrev()->getBreakInLas())
+    return 0;
   for(int i = 0; i < nodes.size(); i++) {
     if(nodes[i]->getBreakInLas()) {
-      // THERE IS A SINGULAR EDGE CASE
-      // that's if the first index is the one that's breaking it
-      if(nodes[i]->getPrev()->getBreakInLas())
-        return i;
-      else if(nodes[i]->getNext()->getBreakInLas())
+      if(nodes[i]->getNext()->getBreakInLas())
         return i + 1;
     }
   }
@@ -112,19 +110,11 @@ AttackNode AttackNode::unwrapRelative() {
 }
 
 void AttackNode::Render() {
-  // DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
-  // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
-  // Color outer) DrawCircleLinesV(Vector2 center, float radius, Color color)
-  DrawCircleLinesV(Position, radius, WHITE);
+  DrawCircleV(Position, radius, WHITE);
 }
 
 void AttackNode::Process(float delta) {
   lifetime += delta;
-
-  if(lifetime >= getMaxLifetime())
-    radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
-  else if(lifetime <= 1)
-    radius = ease(1 - lifetime) * defaultRadius;
 
   if(nodes.size() >= 3) {
     AttackNode* next = getNext();
@@ -141,8 +131,12 @@ void AttackNode::Process(float delta) {
     las->Position = Position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
     if(index == 0)
       manageAttack();
-  }
+  } else if(lifetime <= 1)
+    radius = ease(1 - lifetime) * defaultRadius;
+  if(lifetime >= getMaxLifetime())
+    radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
 
+  // the +1 accounts for the time to ease out
   if(lifetime >= getMaxLifetime() + 1)
     killDefered();
 }
@@ -150,7 +144,7 @@ void AttackNode::Process(float delta) {
 void AttackNode::manageAttack() {
   std::vector<AttackNode*> nodes = AttackNode::getNodes();
 
-  if(nodes.size() < 3) // we can't make a polygon with less than 3 vertices
+  if(nodes.size() < 3)
     return;
 
   float theta = 0;
