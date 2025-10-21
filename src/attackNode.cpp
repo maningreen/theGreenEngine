@@ -7,6 +7,8 @@
 #include "raymath.h"
 #include <cmath>
 #include <vector>
+#include <algorithm>
+#include <iostream>
 #include "engine/core.h"
 
 #define min(a, b) (a < b ? a : b)
@@ -110,9 +112,10 @@ AttackNode AttackNode::unwrapRelative() {
 }
 
 void AttackNode::Render() {
-  DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
+  // DrawCircleGradient(Position.x, Position.y, radius, BLANK, WHITE);
   // DrawCircleGradient(int centerX, int centerY, float radius, Color inner,
   // Color outer) DrawCircleLinesV(Vector2 center, float radius, Color color)
+  DrawCircleLinesV(Position, radius, WHITE);
 }
 
 void AttackNode::Process(float delta) {
@@ -156,12 +159,12 @@ void AttackNode::manageAttack() {
 
   float area;
   if(getTriangleIsValid(theta))
-    area = calculateTriangleArea(nodes[0]->Position,
+    area = calculateTriangleArea(
+        nodes[0]->Position,
         nodes[1]->Position,
         nodes[2]->Position);
   else
     area = 0;
-
 
   std::vector<Entity*> enemies =
       Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");

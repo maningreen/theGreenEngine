@@ -15,6 +15,7 @@ DashManager::DashManager(unsigned dashCount,
     dashRegenDelay(dashRegenDelay), dashControl(dashControl),
     dashSpeed(dashSpeed), dashCooldown(cooldown) {
   dashProgress = 0;
+  dashRegenRate = 1;
   deltaDash = 0;
 }
 
@@ -26,12 +27,17 @@ int DashManager::beginDash(Vector2 dir) {
   else if(!getAvailableDashes())
     return 2;
   deltaDash = 0;
+  dashVelocity = Vector2Scale(dir, dashSpeed);
   return 0;
 }
 
 int DashManager::getAvailableDashes() { return floorf(dashProgress); }
 
+bool DashManager::canDash() { return dashProgress >= 1 && !isDashing(); }
+
 bool DashManager::isDashing() { return deltaDash <= dashLength; }
+
+float DashManager::getDashProgress() { return dashProgress; }
 
 float DashManager::getNextDashProgress(float delta) {
   float next = dashProgress + dashRegenRate * delta;
@@ -50,13 +56,14 @@ Vector2 DashManager::getDashDirection() {
   return Vector2Normalize(dashVelocity);
 }
 
-Vector2 DashManager::getDashVelocity() { return dashVelocity; }
+Vector2 DashManager::getDashVelocity() { 
+  return isDashing() ? dashVelocity : Vector2Zero(); 
+}
 
-Vector2 DashManager::applyInput(Vector2 i) {
-  Vector2Scale(Vector2Normalize(dashVelocity + Vector2Scale(i, dashSpeed * dashControl)), dashSpeed);
+Vector2 DashManager::applyInput(float delta, Vector2 i) {
   Vector2 normalizedVel = Vector2Normalize(dashVelocity);
-  Vector2 scaledI = Vector2Scale(i, dashControl);
-  return Vector2Scale(normalizedVel + scaledI, dashSpeed);
+  Vector2 scaledInput = Vector2Scale(i, delta * dashControl);
+  return Vector2Scale(normalizedVel + scaledInput, dashSpeed);
 }
 
 float DashManager::getDeltaDash() {
@@ -68,8 +75,8 @@ Vector2 DashManager::manageDash(float delta, Vector2 inputVector) {
   if(deltaDash > dashRegenDelay + dashLength)
     dashProgress = getNextDashProgress(delta);
   else if(isDashing())
-    dashVelocity = applyInput(inputVector);
-  return getPositionIncrement(delta);
+    dashVelocity = applyInput(delta, inputVector);
+  return dashVelocity;
 }
 
 Vector2 DashManager::getPositionIncrement(float delta) {

@@ -20,9 +20,9 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
   // we apply a transformation matrix, but only keep the y, as that's the
   // relative height
   float triangleHeight =
-      -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
+    -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
 
-  return bLength * triangleHeight / 2;
+  return abs(bLength * triangleHeight / 2);
 }
 
 bool getTriangleIsValid(float angleSum) { return angleSum - PI < DEG2RAD; }

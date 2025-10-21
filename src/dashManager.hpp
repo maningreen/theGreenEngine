@@ -20,7 +20,7 @@ class DashManager {
 
     // returns a new vector for the velocity based off of the input
     // **input should be a normalized vector**
-    Vector2 applyInput(Vector2 input);
+    Vector2 applyInput(float delta, Vector2 input);
   public:
     // the speed at which you dash
     float dashSpeed;
@@ -48,7 +48,12 @@ class DashManager {
     // returns the amount of available dashes
     int getAvailableDashes();
 
+    // returns true if dashCount >= 1 and not dashing
+    bool canDash();
+
     bool isDashing();
+
+    float getDashProgress();
 
     // removes the equivilent of one dash
     // if there're no available dashes does nothing.
@@ -66,7 +71,7 @@ class DashManager {
 
     // input {0, 0} as the input vector for no change
     // similar to Process(float delta) on entities.
-    // returns the equivilent to `getPositionIncrement()`
+    // returns the equivilent to getDashVelocity
     Vector2 manageDash(float delta, Vector2 inputVector);
 
     // given delta, it will return a vector to increment a position by
