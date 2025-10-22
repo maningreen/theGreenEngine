@@ -6,10 +6,10 @@
 
 class Afterimage : public Entity2D {
   public:
-    float Rotation;
-    float Opacity;
+    float rotation;
+    float opacity;
 
-    static float FadePower;
+    static float fadePower;
 
     virtual void Render();
     virtual void Process(float delta);
