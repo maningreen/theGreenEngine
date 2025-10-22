@@ -8,7 +8,8 @@
 #include <functional>
 #include <vector>
 
-keybind::keybind(int k, std::function<void(void)> c) : key(k), callback(c) {}
+keybind::keybind(int k, std::function<void(void)> c) : key(k), callback(c), mouseButton(false) {}
+keybind::keybind(int k, bool m, std::function<void(void)> c) : key(k), mouseButton(m), callback(c) {}
 
 InputManager::InputManager(Key u, Key d, Key l, Key r, std::vector<keybind> b)
   : Entity("Input Manager"), binds(b), up(u), down(d), left(l), right(r) {}

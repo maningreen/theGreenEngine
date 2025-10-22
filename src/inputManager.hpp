@@ -16,7 +16,7 @@ struct keybind {
 
   // a simple constructor
   keybind(int key, std::function<void(void)> callback);
-  keybind(int key, std::function<void(void)> callback, bool isMouseButton);
+  keybind(int key, bool isMouseButton, std::function<void(void)> callback);
 };
 
 typedef std::vector<keybind> keybinds;
