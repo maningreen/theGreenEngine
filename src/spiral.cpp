@@ -6,8 +6,6 @@
 #include <cmath>
 #include <cstdlib>
 
-#define min(a, b) (b < a ? b : a)
-
 Color Spiraler::defaultColour = BLUE;
 float Spiraler::SpinLength = 5;
 float Spiraler::SpinSpeed = 10;

@@ -9,7 +9,6 @@
 #include <iostream>
 #include <vector>
 
-#define max(a, b) (b < a ? a : b)
 #define stepCount 20
 
 bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle) {

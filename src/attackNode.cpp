@@ -10,7 +10,6 @@
 #include "engine/core.h"
 
 #define min(a, b) (a < b ? a : b)
-#define max(a, b) (a > b ? a : b)
 
 extern "C" {
 float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY,
@@ -169,7 +168,6 @@ void AttackNode::manageAttack() {
     if(area == 0) {
       float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
-
         Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
         Vector2 closestPoint;
 

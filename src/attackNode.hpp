@@ -18,6 +18,23 @@ private:
   static std::vector<AttackNode*> nodes;
 
   static void manageAttack();
+
+  // returns -1 when unable to calculate.
+  static float getArea();
+
+  static bool getTriangleIsRegular();
+  static bool getTriangleIsRegular(float angleSum);
+
+  static float getAngleSum();
+
+  // for when it's a regular triangle
+  // otherwise ise `manageAttackIrregular()`
+  static void manageAttackRegular();
+
+  // for when it's an irregular triangle
+  // otherwise ise `manageAttackRegular()`
+  static void manageAttackIrregular();
+
 public:
   void Render() override;
   void Process(float delta) override;

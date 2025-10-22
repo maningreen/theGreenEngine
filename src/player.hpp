@@ -6,29 +6,38 @@
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
+#include "include.h"
+#include "inputManager.hpp"
 #include "mod.hpp"
 #include "dashManager.hpp"
 
 class Player : public Entity2D {
-  float lifetime;
+  private:
+    float lifetime;
 
-  Bar* dashCooldownBar;
-  DashManager dashManager;
-  HealthManager* healthManager;
+    Bar* dashCooldownBar;
 
-  CameraEntity* cam;
+    HealthManager* healthManager;
+    DashManager dashManager;
+    InputManager* inputManager;
 
-  std::vector<Mod> mods;
+    CameraEntity* cam;
 
-  void manageBars();
+    std::vector<Mod> mods;
 
-  void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
+    void manageBars();
 
-  void manageRotation();
+    void manageBar(Bar* b, int offsetCount, float p, bool shouldRender);
 
-  void manageDash(float delta);
+    void manageRotation();
 
-  void fireBullet();
+    void manageDash(float delta);
+
+    void manageInput(float delta, Vector2 input);
+
+    void beginDash(Vector2 input);
+
+    void fireBullet();
 public:
   Player(const std::string& name, Vector2 position, CameraEntity* cam);
   ~Player();
@@ -42,13 +51,14 @@ public:
 
   static float maxHealth;
 
-  static int upKey;
-  static int downKey;
-  static int leftKey;
-  static int rightKey;
-  static int shootKey;
-  static int shootKeyMouse;
-  static int dashKey;
+  static Key upKey;
+  static Key downKey;
+  static Key leftKey;
+  static Key rightKey;
+  static Key shootKey;
+  static Key shootKeyMouse;
+  static Key dashKey;
+
   static const float defaultSpeed;
   static const float defaultFriction;
 
@@ -56,9 +66,7 @@ public:
   static float dashTime;
   static float dashControl;
   static float dashRegenDelay;
-
   static unsigned maxDashCount;
-
   static float dashCooldown;
 
   static float particleSpawnTime;
@@ -78,7 +86,6 @@ public:
   DashManager* getDashManager();
 
   float getLifetime();
-  bool getDashing();
 };
 
 #endif

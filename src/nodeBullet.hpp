@@ -2,6 +2,7 @@
 #define nodeBullet_h
 
 #include "engine/entity.hpp"
+#include <string>
 
 // A harmless projectile, that on death spawns an "attackNode"
 class NodeBullet : public Entity2D {
@@ -23,6 +24,8 @@ public:
   static float speed;
   static float radius;
   static Color color;
+
+  static const std::string tag;
 };
 
 #endif

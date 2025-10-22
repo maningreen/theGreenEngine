@@ -5,6 +5,8 @@
 #include "postprocessing.hpp"
 #include "player.hpp"
 #include "border.hpp"
+#include "raylib.h"
+#include "inputManager.hpp"
 #include "time.h"
 #include "waveManager.hpp"
 
@@ -22,6 +24,9 @@ void Init(Entity* root) {
   root->addChild(plr);
   root->addChild(new Border());
   root->addChild(new Enemy({200, 200}));
+  InputManager* manager = new InputManager();
+  manager->addBind(keybind(KEY_X, [root](){ root->killDefered(); }));
+  root->addChild(manager);
   // root->addChild(new WaveManager());
 }
 

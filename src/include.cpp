@@ -1,7 +1,9 @@
 #include "include.h"
 #include "border.hpp"
 
-Vector2 getInputVector(int u, int d, int l, int r) {
+#define min(a, b) (a < b ? a : b)
+
+Vector2 getInputVector(Key u, Key d, Key l, Key r) {
   Vector2 out = (Vector2) {(float)IsKeyDown(r) - (float)IsKeyDown(l),
       (float)IsKeyDown(d) - (float)IsKeyDown(u)};
   return Vector2Normalize(out);
@@ -23,6 +25,18 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c) {
     -shortestVector.x * sin(theta) + shortestVector.y * cos(theta);
 
   return abs(bLength * triangleHeight / 2);
+}
+
+bool calculateCollisionTriangleCircle(Vector2 a, Vector2 b, Vector2 c, Vector2 center, float radius) {
+  Vector2 avg = Vector2Scale(a + b + c, 1.0f / 3.0f);
+
+  Vector2 vecToAvg = avg - center;
+  float dist = Vector2Length(vecToAvg);
+
+  float min = min(dist, radius);
+  Vector2 p = center +  Vector2Scale(vecToAvg, min / dist);
+
+  return CheckCollisionPointTriangle(p, a, b, c);
 }
 
 bool getTriangleIsValid(float angleSum) { return angleSum - PI < DEG2RAD; }
