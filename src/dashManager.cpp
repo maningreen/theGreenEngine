@@ -4,6 +4,7 @@
 #include "raymath.h"
 
 #include <cmath>
+#include <cstdio>
 
 DashManager::DashManager(unsigned dashCount,
   float dashLength,
@@ -16,6 +17,7 @@ DashManager::DashManager(unsigned dashCount,
     dashSpeed(dashSpeed), dashCooldown(cooldown) {
   dashProgress = 0;
   dashRegenRate = 1;
+  dashing = false;
   deltaDash = 0;
 }
 
@@ -26,8 +28,11 @@ int DashManager::beginDash(Vector2 dir) {
     return 1;
   else if(!getAvailableDashes())
     return 2;
+
+  dashing = true;
   deltaDash = 0;
   dashVelocity = Vector2Scale(dir, dashSpeed);
+
   return 0;
 }
 
@@ -35,12 +40,13 @@ int DashManager::getAvailableDashes() { return floorf(dashProgress); }
 
 bool DashManager::canDash() { return dashProgress >= 1 && !isDashing(); }
 
-bool DashManager::isDashing() { return deltaDash <= dashLength; }
+bool DashManager::isDashing() { return dashing; }
 
 float DashManager::getDashProgress() { return dashProgress; }
 
 float DashManager::getNextDashProgress(float delta) {
   float next = dashProgress + dashRegenRate * delta;
+  printf("%f\n", dashProgress);
   if(next >= maxDashCount)
     return maxDashCount;
   else
@@ -50,6 +56,7 @@ float DashManager::getNextDashProgress(float delta) {
 void DashManager::removeDashProgress() {
   if(getAvailableDashes())
     --dashProgress;
+  deltaDash = 0;
 }
 
 Vector2 DashManager::getDashDirection() {
@@ -74,8 +81,12 @@ Vector2 DashManager::manageDash(float delta, Vector2 inputVector) {
   deltaDash += delta;
   if(deltaDash > dashRegenDelay + dashLength)
     dashProgress = getNextDashProgress(delta);
-  else if(isDashing())
+  else if(isDashing()) {
     dashVelocity = applyInput(delta, inputVector);
+    if(deltaDash >= dashLength)
+       dashing = false;
+  }
+
   return dashVelocity;
 }
 

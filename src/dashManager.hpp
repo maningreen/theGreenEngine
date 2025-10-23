@@ -3,7 +3,7 @@
 
 #include <raylib.h>
 
-// a semi-abstract class representing dashes
+// a semi-abstract class representing dashes/resources
 // it manages general dashing, the delays, recharge, etc
 class DashManager {
   private:
@@ -15,7 +15,9 @@ class DashManager {
     // the direction the dash is
     Vector2 dashVelocity;
 
-    // time elapsed since last dash
+    bool dashing;
+
+    // time elapsed since last use
     float deltaDash;
 
     // returns a new vector for the velocity based off of the input
@@ -67,6 +69,7 @@ class DashManager {
     // for a normalized vector use `Vector2 getDashDirection()`
     Vector2 getDashVelocity();
 
+    // returns the elapsed time since the last time `removeDashProgress()` was called
     float getDeltaDash();
 
     // input {0, 0} as the input vector for no change
@@ -75,7 +78,7 @@ class DashManager {
     Vector2 manageDash(float delta, Vector2 inputVector);
 
     // given delta, it will return a vector to increment a position by
-    // useful only when the parent hasn't a
+    // useful only when the parent hasn't a velocity
     Vector2 getPositionIncrement(float delta);
 
     DashManager(unsigned dashCount,
