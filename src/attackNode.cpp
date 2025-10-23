@@ -1,6 +1,7 @@
 #include "attackNode.hpp"
 #include "border.hpp"
 #include "engine/entity.hpp"
+#include "include.h"
 #include "laser.hpp"
 #include "player.hpp"
 #include "raylib.h"
@@ -77,6 +78,15 @@ float AttackNode::getInternalAngle() {
     return 2 * PI - deltaTheta;
 }
 
+float AttackNode::getInternalAngleSum() {
+  if(nodes.size() < 3)
+    return -1;
+  float theta = 0;
+  for(int i = 0; i < nodes.size(); i++)
+    theta += nodes[i]->getInternalAngle();
+  return theta;
+}
+
 int AttackNode::getBreakInPolygon() {
   // THERE IS A SINGULAR EDGE CASE
   // that's if the first index is the one that's breaking it
@@ -98,14 +108,39 @@ AttackNode AttackNode::unwrapRelative() {
       x.Position.x -= Border::length * 2;
     else
       x.Position.x += Border::length * 2;
-  }
-  if(abs(x.Position.y - getPrev()->Position.y) > Border::length) {
+  } else if(abs(x.Position.y - getPrev()->Position.y) > Border::length) {
     if(x.Position.y > 0)
       x.Position.y -= Border::length * 2;
     else
       x.Position.y += Border::length * 2;
   }
   return x;
+}
+
+// returns 0 if invalid triangle
+float AttackNode::getArea() {
+  if(nodes.size() < 3)
+    return 0;
+  if(getTriangleIsRegular())
+    return calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+  return 0;
+}
+
+float AttackNode::getArea(float theta) {
+  if(nodes.size() < 3)
+    return 0;
+  if(getTriangleIsRegular(theta))
+    return calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+  return 0;
+}
+
+bool AttackNode::getTriangleIsRegular() {
+  float angleSum = getInternalAngleSum();
+  return getTriangleIsValid(angleSum);
+}
+
+bool AttackNode::getTriangleIsRegular(float angleSum) {
+  return getTriangleIsValid(angleSum);
 }
 
 void AttackNode::Render() {
@@ -122,6 +157,7 @@ void AttackNode::Process(float delta) {
       las->shouldRender = true;
       lifetime = Player::dashCooldown + -lifetimeAfterAttack;
       las->lookAt(next->Position);
+      radius = defaultRadius;
     }
     las->length = Vector2Length(vectorToNext) - (next->radius + radius);
     las->width = sqrt(radius);
@@ -141,47 +177,19 @@ void AttackNode::Process(float delta) {
 }
 
 void AttackNode::manageAttack() {
-  std::vector<AttackNode*> nodes = AttackNode::getNodes();
-
   if(nodes.size() < 3)
     return;
 
-  float theta = 0;
-  for(AttackNode* n: nodes)
-    theta += abs(n->getInternalAngle());
-
-  float area;
-  if(getTriangleIsValid(theta))
-    area = calculateTriangleArea(
-        nodes[0]->Position,
-        nodes[1]->Position,
-        nodes[2]->Position);
-  else
-    area = 0;
+  float area = getArea();
+  bool validTriangle = getTriangleIsRegular();
 
   std::vector<Entity*> enemies =
-      Engine::getAllChildrenWithTagRecursive(getRoot(), "Enemy");
+      Engine::getAllChildrenWithTagRecursive(getRoot(), Enemy::tag);
 
   for(int i = 0; i < enemies.size(); i++) {
     Enemy* en = (Enemy*)enemies[i];
     // we figure out the function for the actual slope thingy
-    if(area == 0) {
-      float minimumDistance = INFINITY;
-      for(int i = 0; i < 3; i++) {
-        Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
-        Vector2 closestPoint;
-
-        // this is an external function written in haskell
-        getClosestPointFromLineAndPoint(&nodes[i]->Position,
-            &unwrappedNext,
-            &en->Position,
-            &closestPoint);
-        float distance = Vector2Distance(closestPoint, en->Position);
-        minimumDistance = min(distance, minimumDistance);
-      }
-      if(minimumDistance <= en->Radius)
-        en->killDefered();
-    } else {
+    if(validTriangle) {
       // so in this the triangle is regular, so we want to treat it like one;
       // however, sometimes it needs to be unwrapped, otherwise it's considered
       // having a much larger area than it should
@@ -209,6 +217,22 @@ void AttackNode::manageAttack() {
              effectivePos[1],
              effectivePos[2]))
         ((Enemy*)en)->getHealthManager()->applyDamage(damage / area);
+    } else {
+      float minimumDistance = INFINITY;
+      for(int i = 0; i < 3; i++) {
+        Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
+        Vector2 closestPoint;
+
+        // this is an external function written in haskell
+        getClosestPointFromLineAndPoint(&nodes[i]->Position,
+            &unwrappedNext,
+            &en->Position,
+            &closestPoint);
+        float distance = Vector2Distance(closestPoint, en->Position);
+        minimumDistance = min(distance, minimumDistance);
+      }
+      if(minimumDistance <= en->Radius)
+        en->killDefered();
     }
   }
 }

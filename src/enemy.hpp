@@ -3,8 +3,8 @@
 
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
-#include "include.h"
 #include "enemyBullet.hpp"
+#include <string>
 
 class Enemy : public Entity2D {
   private:
@@ -60,6 +60,8 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
     static float friction;
+
+    static const std::string tag;
 
     static float droppedHealthHP;
     Color colour;

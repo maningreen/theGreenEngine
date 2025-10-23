@@ -21,11 +21,13 @@ private:
 
   // returns -1 when unable to calculate.
   static float getArea();
+  static float getArea(float angleSum);
 
   static bool getTriangleIsRegular();
   static bool getTriangleIsRegular(float angleSum);
 
-  static float getAngleSum();
+  // returns -1 if unable to calculate
+  static float getInternalAngleSum();
 
   // for when it's a regular triangle
   // otherwise ise `manageAttackIrregular()`

@@ -15,6 +15,8 @@ Entity2D* Enemy::plr = nullptr;
 
 float Enemy::droppedHealthHP = 1;
 
+const std::string Enemy::tag = "Enemy";
+
 #define barDimensions (Vector2) {Radius * 2, 10}
 
 Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
@@ -28,7 +30,7 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   healthManager->getBar()->ShouldRender = true;
   colour = PINK;
   addChild(healthManager);
-  addTag("Enemy");
+  addTag(tag);
 }
 
 Enemy::~Enemy() {}
