@@ -42,7 +42,6 @@ int main() {
 
   float delta = 1.0f / 60.0f;
   while(!WindowShouldClose() && Root->getValid()) {
-
     manageChildrenProcess(&Root->Children, delta);
 
     BeginDrawing();
@@ -55,8 +54,6 @@ int main() {
 
     EndDrawing();
   }
-
-  Root->kill();
 
   CloseWindow();
 }

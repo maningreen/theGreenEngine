@@ -17,6 +17,7 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c);
 bool getTriangleIsValid(float angleSum);
 
 #define vecsToRec(a, b) (Rectangle){a.x, a.y, b.x, b.y}
-#define printDebug() printf("Passed Line: %d, In File: %s\n", __LINE__, __FILE__)
+
+#define DEBUG printf("Passed line: %d, in file: %s, in function %s\n", __LINE__, __FILE__, __FUNCTION__)
 
 #endif

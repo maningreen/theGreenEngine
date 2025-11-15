@@ -23,7 +23,7 @@ class Player : public Entity2D {
 
     CameraEntity* cam;
 
-    std::vector<Mod> mods;
+    ModManager* modManager;
 
     void manageBars();
 
@@ -37,7 +37,6 @@ class Player : public Entity2D {
 
     void beginDash(Vector2 input);
 
-    void fireBullet();
 public:
   Player(const std::string& name, Vector2 position, CameraEntity* cam);
   ~Player();
@@ -48,6 +47,21 @@ public:
   float friction;
 
   float rotation;
+
+  void fireBullet();
+
+  void Process(float delta) override;
+  void Render() override;
+  void Init() override;
+  float getLifetime();
+
+  Vector2 getInput();
+
+  HealthManager* getHealthManager();
+  DashManager* getDashManager();
+
+  static bool addEnemy(Enemy*);
+  static bool removeEnemy(Enemy*);
 
   static float maxHealth;
 
@@ -72,20 +86,6 @@ public:
   static float particleSpawnTime;
 
   static float hitboxRadius;
-
-  void Process(float delta) override;
-  void Render() override;
-  void Init() override;
-
-  static bool addEnemy(Enemy*);
-  static bool removeEnemy(Enemy*);
-
-  Vector2 getInput();
-
-  HealthManager* getHealthManager();
-  DashManager* getDashManager();
-
-  float getLifetime();
 };
 
 #endif

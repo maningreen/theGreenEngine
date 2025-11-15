@@ -3,7 +3,7 @@
 
 #include "nodeBullet.hpp"
 #include "enemy.hpp"
-#include "src/engine/entity.hpp"
+#include "engine/entity.hpp"
 #include <functional>
 
 struct Mod {

@@ -65,9 +65,13 @@ void Entity::printAllChildren() {
 }
 
 void Entity::kill() {
+  DEBUG;
   Death();
+  DEBUG;
   while(!Children.empty()) {
+    DEBUG;
     Children.back()->kill();
+    DEBUG;
     Children.pop_back();
   }
   delete this;

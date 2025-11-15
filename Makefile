@@ -18,7 +18,7 @@ RAYLIB = ./external
 
 # Flags
 ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
-LDFLAGS = -lraylib -lstdc++ -no-hs-main
+LDFLAGS = -lraylib -lstdc++ -no-hs-main -i./src -i./.
 RAYLIBFLAGS = -I$(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 # Target

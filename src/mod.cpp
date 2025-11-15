@@ -1,6 +1,6 @@
 #include "mod.hpp"
-#include "src/engine/entity.hpp"
-#include "src/nodeBullet.hpp"
+#include "engine/entity.hpp"
+#include "nodeBullet.hpp"
 
 Mod::Mod(
   std::function<void(Entity2D*)> onInit,

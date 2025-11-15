@@ -217,7 +217,16 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
   addChild(cam);
 }
 
-Player::~Player() { Enemy::setPlayer(nullptr); }
+Player::~Player() { 
+  Enemy::setPlayer(nullptr); 
+  DEBUG;
+  delete healthManager;
+  delete dashCooldownBar;
+  delete inputManager;
+  delete cam;
+  DEBUG;
+  delete modManager;
+}
 
 void Player::Init() { Enemy::setPlayer(); };
 
