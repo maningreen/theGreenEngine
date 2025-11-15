@@ -10,6 +10,7 @@
 #include "healthManager.hpp"
 #include "include.h"
 #include "inputManager.hpp"
+#include "mod.hpp"
 #include "nodeBullet.hpp"
 #include "particle.hpp"
 #include "raylib.h"
@@ -56,10 +57,9 @@ void Player::manageInput(float delta, Vector2 input) {
   velocity = input * delta * speed + velocity;
   manageDash(delta);
 
-  if(dashManager.isDashing() || Vector2LengthSqr(input))
-    if(fmodf(lifetime, particleSpawnTime) <= 1.0 / 60.0f) // what's the 1.0 / 60.0f? it's so that way it has a frame of leeway
-      addChild(new Particle(Position,
-        Vector2Scale(velocity + Vector2Scale(input, speed * delta), -1)));
+  if((dashManager.isDashing() || Vector2LengthSqr(input)) && fmodf(lifetime, particleSpawnTime) <= 1.0 / 60.0f)
+    addChild(new Particle(Position,
+      Vector2Scale(velocity + Vector2Scale(input, speed * delta), -1)));
 }
 
 void Player::beginDash(Vector2 input) {
@@ -111,11 +111,8 @@ void Player::Process(float delta) {
 
   Border::wrapEntity(this);
 
-  if(dashManager.isDashing()) {
-    if(fmodf(dashManager.getDeltaDash(), .1) < 1.0f / 120.0f)
+  if(dashManager.isDashing() && fmodf(dashManager.getDeltaDash(), .1) < 1.0f / 120.0f)
       getRoot()->addChild(new Afterimage(Position, rotation));
-
-  } 
 
   if(healthManager->isDead())
     killDefered();
@@ -215,6 +212,8 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
 
   cam = new CameraEntity("Camera", this);
   addChild(cam);
+
+  modManager = new ModManager;
 }
 
 Player::~Player() { 
