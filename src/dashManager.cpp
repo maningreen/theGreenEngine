@@ -46,7 +46,6 @@ float DashManager::getDashProgress() { return dashProgress; }
 
 float DashManager::getNextDashProgress(float delta) {
   float next = dashProgress + dashRegenRate * delta;
-  printf("%f\n", dashProgress);
   if(next >= maxDashCount)
     return maxDashCount;
   else

@@ -50,7 +50,12 @@ AttackNode::~AttackNode() {
 
 float AttackNode::ease(float x) { return 1 - (x * x * x * x); }
 
-int AttackNode::getIndex() { return index; }
+int AttackNode::getIndex() { 
+  for(int i = 0; i < nodes.size(); i++)
+    if(nodes[i] == this)
+      return i;
+  return -1;
+}
 
 float AttackNode::getMaxLifetime() { return 2 * Player::dashCooldown; }
 
