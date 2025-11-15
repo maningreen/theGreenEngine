@@ -219,12 +219,10 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
 
 Player::~Player() { 
   Enemy::setPlayer(nullptr); 
-  DEBUG;
   delete healthManager;
   delete dashCooldownBar;
   delete inputManager;
   delete cam;
-  DEBUG;
   delete modManager;
 }
 
