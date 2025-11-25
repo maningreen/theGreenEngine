@@ -1,13 +1,8 @@
 #include "bullet.hpp"
-#include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "border.hpp"
-#include "engine/core.h"
 #include <cmath>
 #include <cstdlib>
-#include "include.h"
-#include <iostream>
-#include <vector>
 
 #define stepCount 20
 

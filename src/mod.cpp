@@ -16,10 +16,10 @@ Mod::Mod(
   onEnemySpawn(onEnemySpawn) {}
 
 Mod::Mod(std::function<void(Entity2D*)> onInit) : onInit(onInit) {
-  onDash = [](Entity2D* p){ return; };
-  onFire = [](Entity2D* p, NodeBullet* b){ return; };
-  onEnemyKill = [](Entity2D* p, Enemy* en){ return; };
-  onEnemySpawn = [](Entity2D* p, Enemy* en){ return; };
+  onDash = [](Entity2D* p){ };
+  onFire = [](Entity2D* p, NodeBullet* b){ };
+  onEnemyKill = [](Entity2D* p, Enemy* en){ };
+  onEnemySpawn = [](Entity2D* p, Enemy* en){ };
 }
 
 Mod::~Mod() {}

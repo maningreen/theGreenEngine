@@ -17,6 +17,9 @@ float Enemy::droppedHealthHP = 1;
 
 const std::string Enemy::tag = "Enemy";
 
+std::vector<std::function<void(Enemy*)>> Enemy::onSpawnHooks;
+std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
+
 #define barDimensions (Vector2) {Radius * 2, 10}
 
 Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
@@ -35,9 +38,20 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
 
 Enemy::~Enemy() {}
 
-void Enemy::Death() { dropHealth(); }
+void Enemy::Death() { 
+  dropHealth(); 
+  for(std::function<void(Enemy *)> f : onDeathHooks)
+    f(this);
+}
 
-void Enemy::Init() { setPlayer(); }
+void Enemy::Init() { 
+  setPlayer(); 
+  for(
+    std::function<void(Enemy *)>* f = onSpawnHooks.data(); 
+    f < onSpawnHooks.data() + onSpawnHooks.size();
+    (*(f++))(this)
+  );
+}
 
 void Enemy::Process(float delta) {
   manageHealthBar(Radius);
@@ -74,6 +88,14 @@ void Enemy::setPlayer() {
 
 void Enemy::setPlayer(Entity2D* p) { 
   plr = p; 
+}
+
+void Enemy::addSpawnHook(std::function<void (Enemy *)> x) {
+  onSpawnHooks.push_back(x);
+}
+
+void Enemy::addDeathHook(std::function<void (Enemy *)> x) {
+  onDeathHooks.push_back(x);
 }
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
@@ -153,15 +175,14 @@ Vector2 getHealthPackVel(Vector2 enVel) {
 // if not provided uses droppedHealthHP
 // otherwise, same as the more verbose overload
 void Enemy::dropHealthPack() {
-  // :p
   Vector2 v = getHealthPackVel(Velocity);
   Entity* root = getRoot();
   HealthPack* h = new HealthPack(Position, Velocity, droppedHealthHP);
-  root->addChild(h);
+  getParent()->addChild(h);
 }
 
 void Enemy::dropHealthPack(float hp, Entity* root) {
   Vector2 v = getHealthPackVel(Velocity);
   HealthPack* h = new HealthPack(Position, Velocity, hp);
-  root->addChild(h);
+  getParent()->addChild(h);
 }

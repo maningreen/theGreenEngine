@@ -186,20 +186,35 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
   inputManager = new InputManager(upKey, downKey, leftKey, rightKey, keybinds());
   inputManager->addBind(keybind(
     shootKey,
-    [this](){ fireBullet(); }
+    [this](){ 
+      this->fireBullet(); 
+    }
   ));
   inputManager->addBind(keybind(
     shootKeyMouse,
     true,
-    [this](){ fireBullet(); }
+    [this](){ 
+      this->fireBullet(); 
+    }
   ));
   inputManager->addBind(keybindAlt(
     dashKey,
-    [this](Vector2 i){ beginDash(i); }
+    [this](Vector2 i){ 
+      this->beginDash(i); 
+    }
   ));
   inputManager->addVectorBind([this](float delta, Vector2 i) {
       this->manageInput(delta, i);
   });
+
+  Enemy::addSpawnHook([this](Enemy* x){
+    this->modManager->onEnemySpawn(this, x);
+  });
+
+  Enemy::addDeathHook([this](Enemy* x){
+    this->modManager->onEnemyKill(this, x);
+  });
+
   addChild(inputManager);
 
   velocity = (Vector2){0, 0};
@@ -218,6 +233,7 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
 
 Player::~Player() { 
   Enemy::setPlayer(nullptr); 
+
   delete healthManager;
   delete dashCooldownBar;
   delete inputManager;

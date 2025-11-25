@@ -25,7 +25,7 @@ void Init(Entity* root) {
   root->addChild(new Border());
   root->addChild(new Enemy({200, 200}));
   InputManager* manager = new InputManager();
-  manager->addBind(keybind(KEY_X, [root](){ root->killDefered(); }));
+  // manager->
   root->addChild(manager);
   // root->addChild(new WaveManager());
 }
