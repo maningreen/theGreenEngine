@@ -2,10 +2,9 @@
 
 module Player where
 
-import Foreign.C
 import Raylib
-import Foreign (Storable(peek, poke), malloc)
-import GHC.Exts (Ptr(Ptr))
+import Foreign (Storable(peek, poke))
+import GHC.Exts (Ptr)
 
 getLinFuncFromPoints :: (Floating a) => Vector2 -> Vector2 -> a -> a
 getLinFuncFromPoints a b = (+ c) . (* m)
