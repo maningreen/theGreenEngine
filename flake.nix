@@ -20,10 +20,10 @@
       default = pkgs.callPackage ./shell.nix { inherit pkgs; };
     });
 
-    packages = forAllSystems (system: let 
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      default = pkgs.callPackage ./default.nix { inherit pkgs; };
-    });
+    # packages = forAllSystems (system: let 
+      # pkgs = nixpkgs.legacyPackages.${system};
+    # in {
+      # default = pkgs.callPackage ./default.nix { inherit pkgs; };
+    # });
   };
 }

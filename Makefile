@@ -5,11 +5,11 @@ src := $(shell find $(srcdir) -name "*.cpp") $(shell find $(srcdir) -name "*.hs"
 
 HC = ghc
 CXX = g++
-CXXFLAGS = -Iexternal -Lexternal -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CXXFLAGS = -Iexternal -Lexternal -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -llua
 TARGET = $(builddir)/out
 HSDEPS = build/deps.mk
 
-OBJ = $(src:$(srcdir)/%.cpp=$(builddir)/%.o)
+OBJ := $(src:$(srcdir)/%.cpp=$(builddir)/%.o)
 
 build: $(TARGET)
 
