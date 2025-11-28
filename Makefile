@@ -1,63 +1,34 @@
-# SRC
-SRC = $(wildcard src/*.cpp) 
-HSSRC = $(wildcard src/*.hs)
-ENGINESRC = $(wildcard src/engine/*.cpp)
+builddir = build
+srcdir = src
 
-# OBJECTS
-OBJECTS = $(SRC:src/%.cpp=$(BUILDDIR)%.o) 
-HSOBJECTS = $(HSSRC:src/%.hs=$(BUILDDIR)hs_%.o) 
+src := $(shell find $(srcdir) -name "*.cpp") $(shell find $(srcdir) -name "*.hs")
 
-ENGINEOBJS = $(ENGINESRC:src/engine/%.cpp=$(BUILDDIR)%.o)
-ENGINEOUT = $(BUILDDIR)libengine.a
-
-# Define Compilers
-CC = g++
 HC = ghc
+CXX = g++
+CXXFLAGS = -Iexternal -Lexternal -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+TARGET = $(builddir)/out
+HSDEPS = build/deps.mk
 
-RAYLIB = ./external
+OBJ = $(src:$(srcdir)/%.cpp=$(builddir)/%.o)
 
-# Flags
-ENGINEFLAGS = $(ENGINEOUT) -L$(BUILDDIR) -lengine
-LDFLAGS = -lraylib -lstdc++ -no-hs-main
-RAYLIBFLAGS = -I$(RAYLIB) -L$(RAYLIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+build: $(TARGET)
 
-# Target
-OUT = build/engine
-BUILDDIR = build/
+$(TARGET): $(OBJ)
+	$(HC) $^ -o $@ $(CXXFLAGS) -lstdc++ -no-hs-main -hidir $(builddir) -outputdir $(builddir) 
 
-HSDEPS = $(BUILDDIR)hsDeps.mk
-
-$(OUT): $(ENGINEOUT) $(OBJECTS) $(HSOBJECTS) $(BUILDDIR)
-	$(HC) $(ENGINEFLAGS) $(OBJECTS) $(HSOBJECTS) -o $(OUT) $(LDFLAGS) $(RAYLIBFLAGS)
-
-$(ENGINEOUT): $(ENGINEOBJS)
-	ar rcs $(ENGINEOUT) $(ENGINEOBJS)
-
-build/%.o : src/engine/%.cpp
-	$(CC) -c $< -o $@ -I$(RAYLIB)
-
-build/%.o : src/%.cpp
-	$(CC) -c $< -o $@ -I$(RAYLIB)
-
-$(BUILDDIR)hs_%.o : src/%.hs $(HSDEPS) | $(BUILDDIR)
-	$(HC) -isrc -c $< -hidir $(BUILDDIR) -outputdir $(BUILDDIR) -o $@
-
-$(HSDEPS): $(HSSRC) | $(BUILDDIR)
-	$(HC) -isrc -M $(HSSRC) -odir $(BUILDDIR) -hidir $(BUILDDIR) -dep-makefile $(HSDEPS)
-	sed -e 's!$(BUILDDIR)!$(BUILDDIR)hs_!g'\
-			-e 's!\.hi!\.o!g' $(HSDEPS) > $(HSDEPS).tmp
-	mv $(HSDEPS).tmp $(HSDEPS)
-
-$(BUILDDIR):
-	mkdir $(BUILDDIR)
+build/%.o: src/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 clean:
-	rm -r $(BUILDDIR)
+	rm -rf $(builddir)
 
-run: $(OUT)
-	$(OUT)
+run: $(TARGET)
+	$(TARGET)
 
-include $(HSDEPS)
+$(builddir)/hs_%.o: src/%.hs $(HSDEPS) | $(builddir)
+	$(HC) -c $< -hidir $(builddir) -outputdir $(builddir) -o $@
 
-.PHONY: clean run
+.PHONY: build clean run
 
+INCLUDE: $(HSDEPS)

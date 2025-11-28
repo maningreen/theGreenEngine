@@ -2,14 +2,13 @@
 #define after_h
 
 #include "engine/entity.hpp"
-#include "include.h"
 
 class Afterimage : public Entity2D {
   public:
-    float Rotation;
-    float Opacity;
+    float rotation;
+    float opacity;
 
-    static float FadePower;
+    static float fadePower;
 
     virtual void Render();
     virtual void Process(float delta);

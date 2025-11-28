@@ -1,9 +1,12 @@
 #include "camera.hpp"
+#include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "engine/core.h"
 #include "postprocessing.hpp"
 #include "player.hpp"
 #include "border.hpp"
+#include "raylib.h"
+#include "inputManager.hpp"
 #include "time.h"
 #include "waveManager.hpp"
 
@@ -20,7 +23,10 @@ void Init(Entity* root) {
   Player* plr = new Player("Player", (Vector2){0, 0}, nullptr);
   root->addChild(plr);
   root->addChild(new Border());
-  root->addChild(new Enemy({1000, 1000}));
+  root->addChild(new Enemy({200, 200}));
+  InputManager* manager = new InputManager();
+  // manager->
+  root->addChild(manager);
   // root->addChild(new WaveManager());
 }
 

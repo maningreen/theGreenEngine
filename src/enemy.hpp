@@ -3,8 +3,9 @@
 
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
-#include "include.h"
 #include "enemyBullet.hpp"
+#include <functional>
+#include <string>
 
 class Enemy : public Entity2D {
   private:
@@ -15,6 +16,9 @@ class Enemy : public Entity2D {
 
     HealthManager* healthManager;
     void manageHealthBar(float radius);
+
+    static std::vector<std::function<void(Enemy*)>> onSpawnHooks;
+    static std::vector<std::function<void(Enemy*)>> onDeathHooks;
 
   public:
     Vector2 Velocity;
@@ -61,8 +65,13 @@ class Enemy : public Entity2D {
     static float Speed;
     static float friction;
 
+    static void addSpawnHook(std::function<void(Enemy*)>);
+    static void addDeathHook(std::function<void(Enemy*)>);
+
+    static const std::string tag;
+
     static float droppedHealthHP;
-    Color Colour;
+    Color colour;
 };
 
 #endif
