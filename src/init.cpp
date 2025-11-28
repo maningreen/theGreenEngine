@@ -14,7 +14,7 @@ extern "C" {
   extern void hs_init(int argc, char** argv);
 };
 
-// #define shader
+#define shader
 
 void Init(Entity* root) {
   hs_init(0, 0);

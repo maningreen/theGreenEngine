@@ -16,6 +16,8 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c);
 // (pi radians)
 bool getTriangleIsValid(float angleSum);
 
+bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
+
 #define vecsToRec(a, b) (Rectangle){a.x, a.y, b.x, b.y}
 
 #define DEBUG printf("Passed line: %d, in file: %s, in function %s\n", __LINE__, __FILE__, __FUNCTION__)

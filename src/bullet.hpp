@@ -5,13 +5,11 @@
 #include "engine/entity.hpp"
 #include "include.h"
 
-bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
-
 class Bullet : public Entity2D {
   public:
-    Vector2 Velocity;
+    Vector2 velocity;
     float Angle;
-    float Lifetime;
+    float lifetime;
     Color col;
     bool shouldWrap;
 
