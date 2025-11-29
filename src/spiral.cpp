@@ -24,7 +24,7 @@ float Spiraler::bulletLifetimeGrowth = .15;
 
 Spiraler::Spiraler(Vector2 position) : Enemy(position) {
   setState(approaching);
-  Radius = DefaultRadius;
+  radius = DefaultRadius;
   getHealthManager()->setMaxHealth(startingHealth);
   shotTime = 1.0f / 10.0f;
   targetPosition = getClosestPointToPlayerWithDistance(500);
@@ -47,7 +47,7 @@ void Spiraler::manageStates(float delta) {
     Vector2 vectorToPoint = Border::getShortestPathToPoint(this, targetPosition);
     //then we scale this to speed
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToPoint), speed * delta);
-    Velocity = Vector2Add(Velocity, velToAdd);
+    velocity = Vector2Add(velocity, velToAdd);
     //then if we're close enough to our target pos we break
     if(Vector2DistanceSqr(Position, targetPosition) <= 100 * 100) {
       swapToSpinning();

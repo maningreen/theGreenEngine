@@ -1,10 +1,11 @@
-#ifndef mod
-#define mod
+#ifndef mod_H
+#define mod_H
 
 #include "nodeBullet.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include <functional>
+#include <sol/sol.hpp>
 
 struct Mod {
   std::function<void(Entity2D*)> onInit;
@@ -24,12 +25,17 @@ struct Mod {
     std::function<void(Entity2D*)> onInit
   );
 
+  bool valid;
+
   ~Mod();
 };
 
 class ModManager {
   private:
     std::vector<Mod> mods;
+    sol::state lua;
+
+    void initLua();
 
   public:
     ModManager();
@@ -54,6 +60,8 @@ class ModManager {
 
     // removes a mod.
     void removeMod(int i);
+
+    sol::state& getLua();
 };
 
 #endif

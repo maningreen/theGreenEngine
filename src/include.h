@@ -3,6 +3,9 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 typedef int Key;
 

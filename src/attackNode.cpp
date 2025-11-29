@@ -213,7 +213,7 @@ void AttackNode::manageAttack() {
 
       Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
       float dist = Vector2Length(vecToAvg);
-      float r = en->Radius;
+      float r = en->radius;
 
       float min = dist < r ? dist : r;
       Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
@@ -236,7 +236,7 @@ void AttackNode::manageAttack() {
         float distance = Vector2Distance(closestPoint, en->Position);
         minimumDistance = min(distance, minimumDistance);
       }
-      if(minimumDistance <= en->Radius)
+      if(minimumDistance <= en->radius)
         en->killDefered();
     }
   }

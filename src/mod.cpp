@@ -1,7 +1,16 @@
+#include <sol/load_result.hpp>
+#define SOL_ALL_SAFETIES_ON 1
 #include "mod.hpp"
+#include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "nodeBullet.hpp"
+#include "player.hpp"
+#include <sol/forward.hpp>
+#include <sol/resolve.hpp>
+#include <sol/sol.hpp>
+#include <sol/state_view.hpp>
 
+// NOTE: all Entity2D*'s in this struct are expected to be Player*s
 Mod::Mod(
   std::function<void(Entity2D*)> onInit,
   std::function<void(Entity2D*)> onDash,
@@ -13,7 +22,8 @@ Mod::Mod(
   onDash(onDash), 
   onFire(onFire),
   onEnemyKill(onEnemyKill),
-  onEnemySpawn(onEnemySpawn) {}
+  onEnemySpawn(onEnemySpawn)
+  {}
 
 Mod::Mod(std::function<void(Entity2D*)> onInit) : onInit(onInit) {
   onDash = [](Entity2D* p){ };
@@ -24,7 +34,9 @@ Mod::Mod(std::function<void(Entity2D*)> onInit) : onInit(onInit) {
 
 Mod::~Mod() {}
 
-ModManager::ModManager() {}
+ModManager::ModManager() {
+  initLua();
+}
 
 ModManager::~ModManager() {}
 
@@ -55,4 +67,23 @@ void ModManager::addMod(Mod& x, Entity2D* y) {
 
 void ModManager::removeMod(int i) {
   mods.erase(mods.begin() + i);
+}
+
+sol::state& ModManager::getLua() {
+  return lua;
+}
+
+void ModManager::initLua() {
+  lua.open_libraries();
+
+  // for now assume the file is test.lua
+
+  for (auto& p : fs::directory_iterator("resources/mods")) {
+    sol::load_result chunk = lua.load_file(p.path().string());
+    sol::table mod = chunk();
+
+    sol::function onInit = mod["onInit"];
+    Mod x(onInit);
+    addMod(x, nullptr);
+  }
 }
