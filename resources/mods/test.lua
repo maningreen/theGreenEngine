@@ -1,5 +1,8 @@
 return {
   onInit = function() 
-    print("THIS IS LUA :DDD")
+    print("Hello, Lua!")
+  end,
+  onDash = function()
+    print("Dashed!")
   end
 }

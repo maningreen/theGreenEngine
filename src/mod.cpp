@@ -73,17 +73,29 @@ sol::state& ModManager::getLua() {
   return lua;
 }
 
+// got bless macros
+
+#define MODTHING(var, func) if(func.valid()) var.func = func
+#define MODTHING2(var, mod, funcName, search)           \
+  {                                                     \
+    sol::function funcName = var[search];               \
+    if(funcName.valid()) mod.funcName = funcName;       \
+  }
+
 void ModManager::initLua() {
   lua.open_libraries();
 
-  // for now assume the file is test.lua
-
-  for (auto& p : fs::directory_iterator("resources/mods")) {
+  for(const fs::directory_entry& p : fs::directory_iterator("resources/mods")) {
     sol::load_result chunk = lua.load_file(p.path().string());
     sol::table mod = chunk();
 
     sol::function onInit = mod["onInit"];
+
     Mod x(onInit);
+    MODTHING2(mod, x, onDash, "onDash")
+    MODTHING2(mod, x, onFire, "onFire")
+    MODTHING2(mod, x, onEnemyKill, "onKill")
+    MODTHING2(mod, x, onEnemySpawn, "onSpawn")
     addMod(x, nullptr);
   }
 }

@@ -215,6 +215,13 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
     this->modManager->onEnemyKill(this, x);
   });
 
+  inputManager->addBind(keybind(
+    dashKey,
+    [this]() {
+      this->modManager->onDash(this);
+    }
+  ));
+
   addChild(inputManager);
 
   velocity = (Vector2){0, 0};
