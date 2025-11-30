@@ -56,7 +56,6 @@ void PostRendering(std::vector<Entity*>* entities) {
   );
 
   DrawTexturePro(data->Texture.texture, (Rectangle){0, 0, 3 * (float)data->Texture.texture.width, 3 * -(float)data->Texture.texture.height}, (Rectangle){-(float)data->Texture.texture.width, -(float)data->Texture.texture.height, 3 * (float)data->Texture.texture.width, 3 * (float)data->Texture.texture.height}, {0, 0}, 0, WHITE);
-
   EndMode2D();
 #ifdef shader
   EndShaderMode();

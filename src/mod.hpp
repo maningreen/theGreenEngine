@@ -11,10 +11,10 @@
 
 struct Mod {
   sol::function onInit;
-  sol::function onDash;
-  sol::function onFire;
-  sol::function onEnemyKill;
-  sol::function onEnemySpawn;
+  std::optional<sol::function> onDash;
+  std::optional<sol::function> onFire;
+  std::optional<sol::function> onEnemyKill;
+  std::optional<sol::function> onEnemySpawn;
 
   Mod(sol::function onInit);
 

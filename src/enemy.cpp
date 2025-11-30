@@ -6,6 +6,7 @@
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
 #include "healthPack.hpp"
+#include "include.h"
 #include <cmath>
 
 float Enemy::DefaultRadius = 30;

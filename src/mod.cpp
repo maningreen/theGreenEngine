@@ -16,7 +16,7 @@ Mod::Mod(sol::function init) {
   onInit = init;
 }
 
-#define MODTHING(var, table, functionName, key) if(sol::function function = table[key]) var.functionName = function
+#define MODTHING(var, table, functionName, key) if(sol::function function = table[key]) var.functionName = function; else var.functionName = std::nullopt
 
 std::optional<Mod> Mod::fromTable(sol::table table) {
   sol::function onInit = table["onInit"];
@@ -43,19 +43,31 @@ ModManager::ModManager() {
 ModManager::~ModManager() {}
 
 void ModManager::onDash(Entity2D* x) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onDash((Player*)x));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++) {
+    if(m->onDash)
+      m->onDash.value()((Player*)x);
+  }
 }
 
 void ModManager::onFire(Entity2D* x, NodeBullet* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onFire((Player*)x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++) {
+    if(m->onFire)
+    m->onFire.value()((Player*)x, y);
+  }
 }
 
 void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemyKill((Player*)x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++) {
+    if(m->onEnemyKill)
+      m->onEnemyKill.value()((Player*)x, y);
+  }
 }
 
 void ModManager::onEnemySpawn(Entity2D* x, Enemy* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemySpawn((Player*)x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++) {
+    if(m->onEnemySpawn)
+      (m->onEnemySpawn.value())((Player*)x, y);
+  }
 }
 
 void ModManager::addModPartial(Mod x) {

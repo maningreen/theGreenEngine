@@ -1,8 +1,8 @@
 return {
   onInit = function (player)
-    print("FUCk")
-    player:test()
+    print(player.speed)
   end,
-  -- onDash = function (player)
-  -- end
+  onKill = function (player)
+    player.speed = player.speed * 3
+  end
 }
