@@ -1,8 +1,8 @@
 return {
-  onInit = function() 
-    print("Hello, Lua!")
+  onInit = function (player)
+    print("FUCk")
+    player:test()
   end,
-  onDash = function()
-    print("Dashed!")
-  end
+  -- onDash = function (player)
+  -- end
 }

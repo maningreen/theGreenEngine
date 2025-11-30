@@ -1,36 +1,38 @@
-#include <sol/load_result.hpp>
-#define SOL_ALL_SAFETIES_ON 1
+#include "dashManager.hpp"
+#include "healthManager.hpp"
+#include "include.h"
+#include "inputManager.hpp"
+#include <cstdio>
+#include <sol/forward.hpp>
 #include "mod.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "nodeBullet.hpp"
 #include "player.hpp"
-#include <sol/forward.hpp>
-#include <sol/resolve.hpp>
+#define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
-#include <sol/state_view.hpp>
 
-// NOTE: all Entity2D*'s in this struct are expected to be Player*s
-Mod::Mod(
-  std::function<void(Entity2D*)> onInit,
-  std::function<void(Entity2D*)> onDash,
-  std::function<void(Entity2D*, NodeBullet*)> onFire,
-  std::function<void(Entity2D*, Enemy*)> onEnemyKill,
-  std::function<void(Entity2D*, Enemy*)> onEnemySpawn 
-) : 
-  onInit(onInit), 
-  onDash(onDash), 
-  onFire(onFire),
-  onEnemyKill(onEnemyKill),
-  onEnemySpawn(onEnemySpawn)
-  {}
-
-Mod::Mod(std::function<void(Entity2D*)> onInit) : onInit(onInit) {
-  onDash = [](Entity2D* p){ };
-  onFire = [](Entity2D* p, NodeBullet* b){ };
-  onEnemyKill = [](Entity2D* p, Enemy* en){ };
-  onEnemySpawn = [](Entity2D* p, Enemy* en){ };
+Mod::Mod(sol::function init) {
+  onInit = init;
 }
+
+#define MODTHING(var, table, functionName, key) if(sol::function function = table[key]) var.functionName = function
+
+std::optional<Mod> Mod::fromTable(sol::table table) {
+  sol::function onInit = table["onInit"];
+  if(!onInit.valid())
+    return std::nullopt;
+  Mod x(onInit);
+
+  MODTHING(x, table, onDash, "onDash");
+  MODTHING(x, table, onFire, "onFire");
+  MODTHING(x, table, onEnemyKill, "onKill");
+  MODTHING(x, table, onEnemySpawn, "onSpawn");
+
+  return x;
+}
+
+#undef MODTHING
 
 Mod::~Mod() {}
 
@@ -41,27 +43,27 @@ ModManager::ModManager() {
 ModManager::~ModManager() {}
 
 void ModManager::onDash(Entity2D* x) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onDash(x));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onDash((Player*)x));
 }
 
 void ModManager::onFire(Entity2D* x, NodeBullet* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onFire(x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onFire((Player*)x, y));
 }
 
 void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemyKill(x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemyKill((Player*)x, y));
 }
 
 void ModManager::onEnemySpawn(Entity2D* x, Enemy* y) {
-  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemySpawn(x, y));
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); (m++)->onEnemySpawn((Player*)x, y));
 }
 
-void ModManager::addModPartial(Mod& x) {
+void ModManager::addModPartial(Mod x) {
   mods.push_back(x);
 }
 
-void ModManager::addMod(Mod& x, Entity2D* y) {
-  x.onInit(y);
+void ModManager::addMod(Mod x, Entity2D* y) {
+  x.onInit((Player*)y);
   mods.push_back(x);
 }
 
@@ -73,29 +75,102 @@ sol::state& ModManager::getLua() {
   return lua;
 }
 
-// got bless macros
-
-#define MODTHING(var, func) if(func.valid()) var.func = func
-#define MODTHING2(var, mod, funcName, search)           \
-  {                                                     \
-    sol::function funcName = var[search];               \
-    if(funcName.valid()) mod.funcName = funcName;       \
-  }
-
 void ModManager::initLua() {
   lua.open_libraries();
 
+  sol::usertype<Vector2> vec = lua.new_usertype<Vector2>(
+    "vector2"
+  );
+  vec["x"] = &Vector2::x;
+  vec["y"] = &Vector2::y;
+  vec["normalize"] = &Vector2Normalize;
+  vec["scale"] = &Vector2Scale;
+  lua["vector"] = [](float a, float b){ return (Vector2){a, b}; };
+
+  sol::usertype<Player> plr = lua.new_usertype<Player>(
+    "Player",
+    sol::constructors<Player(std::string&, Vector2)>()
+  // , "defaultMaxHealth", &Player::maxHealth
+  // , "defaultDashSpeed", &Player::defaultDashSpeed
+  // , "defaultDashTime", &Player::defaultDashTime
+  // , "defaultDashControl", &Player::defaultDashControl
+  // , "defaultDashRegenDelay", &Player::defaultDashRegenDelay
+  // , "defaultMaxDashCount", &Player::defaultMaxDashCount
+  // , "defaultDashCooldown", &Player::defaultDashCooldown
+  // , "particleSpawnTime", &Player::particleSpawnTime
+  );
+  plr["getHealthManager"] = &Player::getHealthManager;
+  plr["getInputManager"] = &Player::getInputManager;
+  plr[ "getDashManager"] = &Player::getDashManager;
+  plr["position"] = &Player::Position;
+  plr["velocity"] = &Player::velocity;
+  plr["speed"] = &Player::speed;
+  plr["friction"] = &Player::friction;
+  plr["fireBullet"] = &Player::fireBullet;
+  plr["test"] = [](Player x){
+    printf("GOD DAMN");
+  };
+
+  sol::usertype<HealthManager> hm = lua.new_usertype<HealthManager>(
+    "healthManager"
+  );
+  hm["getHealth"] = &HealthManager::getHealth;
+  hm["setHealth"] = &HealthManager::setHealth;
+  hm["applyDamage"] = &HealthManager::applyDamage;
+  hm["applyHealing"] = &HealthManager::applyHealing;
+  hm["isDead"] = &HealthManager::isDead;
+  hm["getMaxHealth"] = &HealthManager::getMaxHealth;
+  hm["setMaxHealth"] = &HealthManager::setMaxHealth;
+
+  sol::usertype<DashManager> dm = lua.new_usertype<DashManager>(
+    "dashManager"
+  );
+  dm["dashSpeed"] = &DashManager::dashSpeed;
+  dm["dashControl"] = &DashManager::dashControl;
+  dm["dashRegenDelay"] = &DashManager::dashRegenDelay;
+  dm["dashLength"] = &DashManager::dashLength;
+  dm["maxDashCount"] = &DashManager::maxDashCount;
+  dm["getAvailableDashes"] = &DashManager::getAvailableDashes;
+  dm["isDashing"] = &DashManager::isDashing;
+  dm["getDashProgress"] = &DashManager::getDashProgress;
+  dm["removeDashProgress"] = &DashManager::removeDashProgress;
+  dm["addDash"] = &DashManager::addDashProgress;
+  dm["getDashVelocity"] = &DashManager::getDashVelocity;
+  dm["getDashDirection"] = &DashManager::getDashDirection;
+  dm["getDeltaDash"] = &DashManager::getDeltaDash;
+  dm["canDash"] = &DashManager::canDash;
+
+  lua.new_usertype<keybind>(
+    "keybind", sol::constructors<keybind(Key, bool, sol::function)>()
+  );
+
+  lua.new_usertype<keybindAlt>(
+    "keybind", sol::constructors<keybind(Key, bool, sol::function)>()
+  );
+
+sol::usertype<InputManager> im =  lua.new_usertype<InputManager>(
+    "inputManager"
+  );
+  im["addVectorBind"] = &InputManager::addVectorBind;
+  im["addBind"] = sol::overload([](InputManager* self, const keybind& b) { self->addBind(b); }, [](InputManager* self, const keybindAlt& b) { self->addBind(b); });
+  im["up"] = &InputManager::up;
+  im["down"] = &InputManager::down;
+  im["left"] = &InputManager::left;
+  im["right"] = &InputManager::right;
+  im["removeVectorBind"] = &InputManager::removeVectorBind;
+  im["removeBind"] = &InputManager::removeBind;
+}
+
+// got bless macros
+#define SETMODFUNCTION(var, mod, funcName, search) \
+  if(sol::function funcName = var[search]) \
+    mod.funcName(funcName)
+
+void ModManager::loadMods(Entity2D* plr) {
   for(const fs::directory_entry& p : fs::directory_iterator("resources/mods")) {
-    sol::load_result chunk = lua.load_file(p.path().string());
-    sol::table mod = chunk();
-
-    sol::function onInit = mod["onInit"];
-
-    Mod x(onInit);
-    MODTHING2(mod, x, onDash, "onDash")
-    MODTHING2(mod, x, onFire, "onFire")
-    MODTHING2(mod, x, onEnemyKill, "onKill")
-    MODTHING2(mod, x, onEnemySpawn, "onSpawn")
-    addMod(x, nullptr);
+    sol::table modTable = lua.script_file(p.path().string());
+    auto mod = Mod::fromTable(modTable);
+    if(mod.has_value())
+      addMod(mod.value(), plr);
   }
 }

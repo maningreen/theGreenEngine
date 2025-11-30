@@ -39,8 +39,6 @@ class DashManager {
     // if 0, no dashes are available, and this class is redundant
     unsigned maxDashCount;
 
-    float dashCooldown;
-
     // returns 0 able to dash
     // other return codes:
     //  1: already dashing
@@ -56,6 +54,8 @@ class DashManager {
     bool isDashing();
 
     float getDashProgress();
+    
+    void addDashProgress();
 
     // removes the equivilent of one dash
     // if there're no available dashes does nothing.
@@ -85,8 +85,8 @@ class DashManager {
       float dashLength,
       float dashRegenDelay,
       float dashControl,
-      float dashSpeed,
-      float dashCooldown);
+      float dashSpeed
+    );
     ~DashManager();
 };
 

@@ -5,39 +5,34 @@
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include <functional>
+#include <optional>
+#include <sol/forward.hpp>
 #include <sol/sol.hpp>
 
 struct Mod {
-  std::function<void(Entity2D*)> onInit;
-  std::function<void(Entity2D*)> onDash;
-  std::function<void(Entity2D*, NodeBullet*)> onFire;
-  std::function<void(Entity2D*, Enemy*)> onEnemyKill;
-  std::function<void(Entity2D*, Enemy*)> onEnemySpawn;
+  sol::function onInit;
+  sol::function onDash;
+  sol::function onFire;
+  sol::function onEnemyKill;
+  sol::function onEnemySpawn;
 
-  Mod(
-    std::function<void(Entity2D*)> onInit,
-    std::function<void(Entity2D*)> onDash,
-    std::function<void(Entity2D*, NodeBullet*)> onFire,
-    std::function<void(Entity2D*, Enemy*)> onEnemyKill,
-    std::function<void(Entity2D*, Enemy*)> onEnemySpawn
-  );
-  Mod(
-    std::function<void(Entity2D*)> onInit
-  );
+  Mod(sol::function onInit);
 
-  bool valid;
+  // will return std::nullopt when there is no onInit
+  static std::optional<Mod> fromTable(sol::table);
 
   ~Mod();
 };
 
 class ModManager {
   private:
-    std::vector<Mod> mods;
     sol::state lua;
 
+    // this function doesn't call onInit, only sets up the lua
     void initLua();
-
   public:
+    std::vector<Mod> mods;
+
     ModManager();
     ~ModManager();
 
@@ -53,10 +48,14 @@ class ModManager {
     void onEnemySpawn(Entity2D*, Enemy*);
 
     // adds a mod, does *not* call onInit
-    void addModPartial(Mod&);
+    void addModPartial(Mod);
 
     // adds a mod, calls onInit
-    void addMod(Mod&, Entity2D*);
+    void addMod(Mod, Entity2D*);
+
+    // loads all the mods in resources/mods
+    // parses the lua and calls onInit
+    void loadMods(Entity2D*);
 
     // removes a mod.
     void removeMod(int i);

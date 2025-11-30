@@ -36,6 +36,11 @@ void InputManager::removeBind(int i) {
     binds.erase(binds.begin() + i);
 }
 
+void InputManager::removeVectorBind(int i) {
+  if(i >= 0 && i < vectorBinds.size())
+    vectorBinds.erase(vectorBinds.begin() + i);
+}
+
 void InputManager::Process(float delta) {
   Vector2 input = getInputVector(up, down, left, right);
   for(int i = 0; i < binds.size(); i++) {

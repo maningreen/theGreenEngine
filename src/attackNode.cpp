@@ -57,7 +57,7 @@ int AttackNode::getIndex() {
   return -1;
 }
 
-float AttackNode::getMaxLifetime() { return 2 * Player::dashCooldown; }
+float AttackNode::getMaxLifetime() { return 2 * Player::player->getDashManager()->dashRegenRate; }
 
 std::vector<AttackNode*> AttackNode::getNodes() { return nodes; }
 
@@ -160,7 +160,7 @@ void AttackNode::Process(float delta) {
     Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
     if(!las->shouldRender) {
       las->shouldRender = true;
-      lifetime = Player::dashCooldown + -lifetimeAfterAttack;
+      lifetime = Player::player->getDashManager()->dashRegenRate + -lifetimeAfterAttack;
       las->lookAt(next->Position);
       radius = defaultRadius;
     }

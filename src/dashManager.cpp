@@ -10,11 +10,10 @@ DashManager::DashManager(unsigned dashCount,
   float dashLength,
   float dashRegenDelay,
   float dashControl,
-  float dashSpeed,
-  float cooldown)
+  float dashSpeed)
   : maxDashCount(dashCount), dashLength(dashLength),
     dashRegenDelay(dashRegenDelay), dashControl(dashControl),
-    dashSpeed(dashSpeed), dashCooldown(cooldown) {
+    dashSpeed(dashSpeed) {
   dashProgress = 0;
   dashRegenRate = 1;
   dashing = false;
@@ -43,6 +42,12 @@ bool DashManager::canDash() { return dashProgress >= 1 && !isDashing(); }
 bool DashManager::isDashing() { return dashing; }
 
 float DashManager::getDashProgress() { return dashProgress; }
+
+void DashManager::addDashProgress() { 
+  dashProgress += 1;
+  if(dashProgress >= maxDashCount)
+    dashProgress = maxDashCount;
+}
 
 float DashManager::getNextDashProgress(float delta) {
   float next = dashProgress + dashRegenRate * delta;
@@ -82,8 +87,7 @@ Vector2 DashManager::manageDash(float delta, Vector2 inputVector) {
     dashProgress = getNextDashProgress(delta);
   else if(isDashing()) {
     dashVelocity = applyInput(delta, inputVector);
-    if(deltaDash >= dashLength)
-       dashing = false;
+    dashing = deltaDash < dashLength;
   }
 
   return dashVelocity;
