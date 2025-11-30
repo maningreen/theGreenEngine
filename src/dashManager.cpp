@@ -11,11 +11,11 @@ DashManager::DashManager(unsigned dashCount,
   float dashRegenDelay,
   float dashControl,
   float dashSpeed)
-  : maxDashCount(dashCount), dashLength(dashLength),
-    dashRegenDelay(dashRegenDelay), dashControl(dashControl),
-    dashSpeed(dashSpeed) {
-  dashProgress = 0;
-  dashRegenRate = 1;
+  : maxDashCount(dashCount), length(dashLength),
+    regenDelay(dashRegenDelay), control(dashControl),
+    speed(dashSpeed) {
+  progress = 0;
+  regenRate = 1;
   dashing = false;
   deltaDash = 0;
 }
@@ -30,27 +30,27 @@ int DashManager::beginDash(Vector2 dir) {
 
   dashing = true;
   deltaDash = 0;
-  dashVelocity = Vector2Scale(dir, dashSpeed);
+  dashVelocity = Vector2Scale(dir, speed);
 
   return 0;
 }
 
-int DashManager::getAvailableDashes() { return floorf(dashProgress); }
+int DashManager::getAvailableDashes() { return floorf(progress); }
 
-bool DashManager::canDash() { return dashProgress >= 1 && !isDashing(); }
+bool DashManager::canDash() { return progress >= 1 && !isDashing(); }
 
 bool DashManager::isDashing() { return dashing; }
 
-float DashManager::getDashProgress() { return dashProgress; }
+float DashManager::getDashProgress() { return progress; }
 
 void DashManager::addDashProgress() { 
-  dashProgress += 1;
-  if(dashProgress >= maxDashCount)
-    dashProgress = maxDashCount;
+  progress += 1;
+  if(progress >= maxDashCount)
+    progress = maxDashCount;
 }
 
 float DashManager::getNextDashProgress(float delta) {
-  float next = dashProgress + dashRegenRate * delta;
+  float next = progress + regenRate * delta;
   if(next >= maxDashCount)
     return maxDashCount;
   else
@@ -59,7 +59,7 @@ float DashManager::getNextDashProgress(float delta) {
 
 void DashManager::removeDashProgress() {
   if(getAvailableDashes())
-    --dashProgress;
+    --progress;
   deltaDash = 0;
 }
 
@@ -73,8 +73,8 @@ Vector2 DashManager::getDashVelocity() {
 
 Vector2 DashManager::applyInput(float delta, Vector2 i) {
   Vector2 normalizedVel = Vector2Normalize(dashVelocity);
-  Vector2 scaledInput = Vector2Scale(i, delta * dashControl);
-  return Vector2Scale(normalizedVel + scaledInput, dashSpeed);
+  Vector2 scaledInput = Vector2Scale(i, delta * control);
+  return Vector2Scale(normalizedVel + scaledInput, speed);
 }
 
 float DashManager::getDeltaDash() {
@@ -83,11 +83,11 @@ float DashManager::getDeltaDash() {
 
 Vector2 DashManager::manageDash(float delta, Vector2 inputVector) {
   deltaDash += delta;
-  if(deltaDash > dashRegenDelay + dashLength)
-    dashProgress = getNextDashProgress(delta);
+  if(deltaDash > regenDelay + length)
+    progress = getNextDashProgress(delta);
   else if(isDashing()) {
     dashVelocity = applyInput(delta, inputVector);
-    dashing = deltaDash < dashLength;
+    dashing = deltaDash < length;
   }
 
   return dashVelocity;

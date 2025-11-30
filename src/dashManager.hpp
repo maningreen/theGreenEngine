@@ -9,7 +9,7 @@ class DashManager {
   private:
     // the progress on dashing, if >1 then that means you can dash, every
     // integer is one more dash available
-    float dashProgress;
+    float progress;
     float getNextDashProgress(float delta);
 
     // the direction the dash is
@@ -25,15 +25,15 @@ class DashManager {
     Vector2 applyInput(float delta, Vector2 input);
   public:
     // the speed at which you dash
-    float dashSpeed;
+    float speed;
     // the amount of control you have over a dash
-    float dashControl;
+    float control;
     // the delay after dashing you begin to regenerate
-    float dashRegenDelay;
+    float regenDelay;
     // the rate at which the dash regenerates per second
-    float dashRegenRate;
+    float regenRate;
     // the length a dash takes (s)
-    float dashLength;
+    float length;
 
     // the maximum amount of dashes available
     // if 0, no dashes are available, and this class is redundant

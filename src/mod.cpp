@@ -1,14 +1,19 @@
+#include "border.hpp"
 #include "dashManager.hpp"
 #include "healthManager.hpp"
 #include "include.h"
 #include "inputManager.hpp"
 #include <cstdio>
 #include <sol/forward.hpp>
+#include <sol/raii.hpp>
+#include <sol/types.hpp>
 #include "mod.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "nodeBullet.hpp"
 #include "player.hpp"
+#include "raylib.h"
+#include "raymath.h"
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
@@ -97,7 +102,21 @@ void ModManager::initLua() {
   vec["y"] = &Vector2::y;
   vec["normalize"] = &Vector2Normalize;
   vec["scale"] = &Vector2Scale;
-  lua["vector"] = [](float a, float b){ return (Vector2){a, b}; };
+  vec["add"] = &Vector2Add;
+  vec["subtract"] = &Vector2Subtract;
+  vec["scale"] = &Vector2Scale;
+  vec["lerp"] = &Vector2Lerp;
+  lua["vector2"] = [](float a, float b){ return (Vector2){a, b}; };
+
+  sol::usertype<Color> col = lua.new_usertype<Color>("color");
+  col["r"] = &Color::r;
+  col["g"] = &Color::g;
+  col["b"] = &Color::b;
+  col["a"] = &Color::a;
+  col["lerp"] = &ColorLerp;
+  lua["color"] = [](unsigned char r, unsigned char g, unsigned char b, unsigned char a){
+    return (Color){r, g, b, a};
+  };
 
   sol::usertype<Player> plr = lua.new_usertype<Player>(
     "Player",
@@ -111,13 +130,12 @@ void ModManager::initLua() {
   // , "defaultDashCooldown", &Player::defaultDashCooldown
   // , "particleSpawnTime", &Player::particleSpawnTime
   );
-  plr["getHealthManager"] = &Player::getHealthManager;
-  plr["getInputManager"] = &Player::getInputManager;
-  plr[ "getDashManager"] = &Player::getDashManager;
+  plr["getHealth"] = &Player::getHealthManager;
+  plr["getInput"] = &Player::getInputManager;
+  plr["getDashManager"] = &Player::getDashManager;
   plr["position"] = &Player::Position;
   plr["velocity"] = &Player::velocity;
   plr["speed"] = &Player::speed;
-  plr["friction"] = &Player::friction;
   plr["fireBullet"] = &Player::fireBullet;
   plr["test"] = [](Player x){
     printf("GOD DAMN");
@@ -135,12 +153,12 @@ void ModManager::initLua() {
   hm["setMaxHealth"] = &HealthManager::setMaxHealth;
 
   sol::usertype<DashManager> dm = lua.new_usertype<DashManager>(
-    "dashManager"
+    "dash"
   );
-  dm["dashSpeed"] = &DashManager::dashSpeed;
-  dm["dashControl"] = &DashManager::dashControl;
-  dm["dashRegenDelay"] = &DashManager::dashRegenDelay;
-  dm["dashLength"] = &DashManager::dashLength;
+  dm["speed"] = &DashManager::speed;
+  dm["control"] = &DashManager::control;
+  dm["regenDelay"] = &DashManager::regenDelay;
+  dm["length"] = &DashManager::length;
   dm["maxDashCount"] = &DashManager::maxDashCount;
   dm["getAvailableDashes"] = &DashManager::getAvailableDashes;
   dm["isDashing"] = &DashManager::isDashing;
@@ -160,7 +178,7 @@ void ModManager::initLua() {
     "keybind", sol::constructors<keybind(Key, bool, sol::function)>()
   );
 
-sol::usertype<InputManager> im =  lua.new_usertype<InputManager>(
+  sol::usertype<InputManager> im = lua.new_usertype<InputManager>(
     "inputManager"
   );
   im["addVectorBind"] = &InputManager::addVectorBind;
@@ -171,6 +189,63 @@ sol::usertype<InputManager> im =  lua.new_usertype<InputManager>(
   im["right"] = &InputManager::right;
   im["removeVectorBind"] = &InputManager::removeVectorBind;
   im["removeBind"] = &InputManager::removeBind;
+
+   sol::usertype<Enemy> en = lua.new_usertype<Enemy>(
+    "enemy",
+    sol::constructors<Enemy(Vector2)>()
+  );
+
+  sol::table global = lua["global"].get_or_create<sol::table>();
+  global.set_function("getFriction", [](){ return Entity2D::friction; });
+  global.set_function("setFriction", [](float f){ Entity2D::friction = f; });
+
+  en["position"] = &Enemy::Position;
+  en["velocity"] = &Enemy::velocity;
+  en["radius"] = &Enemy::radius;
+  en["getStateTime"] = &Enemy::getStateTime;
+  en["resetStateTime"] = &Enemy::resetStateTime;
+  en["setState"] = &Enemy::setState;
+  en["getState"] = &Enemy::getState;
+  en["dropHealthPack"] = sol::overload(
+    [](Enemy* self){
+      self->dropHealthPack();
+    },
+    [](Enemy* self, float hp){
+      self->dropHealthPack(hp);
+    }
+  );
+  en["color"] = &Enemy::colour;
+
+  sol::table enemy = lua["Enemy"].get_or_create<sol::table>();
+  enemy.set_function(
+    "addDeathHook",
+    &Enemy::addDeathHook
+  );
+  enemy.set_function(
+    "addSpawnHook",
+    &Enemy::addSpawnHook
+  );
+
+  sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
+  nb["theta"] = &NodeBullet::theta;
+  nb["lifetime"] = &NodeBullet::lifetime;
+  nb["targetLifetime"] = &NodeBullet::targetLifetime;
+
+  sol::table nodeBullet = lua["NodeBullet"].get_or_create<sol::table>();
+  nodeBullet["speed"] = &NodeBullet::speed;
+  nodeBullet["radius"] = &NodeBullet::radius;
+  nodeBullet["color"] = &NodeBullet::color;
+
+  sol::table border = lua["Border"].get_or_create<sol::table>();
+  border["length"] = Border::length;
+  border["wrapEntity"] = &Border::wrapEntity;
+  border["wrapPos"] = &Border::wrapPos;
+  border["wrapPosX"] = &Border::wrapPosX;
+  border["wrapPosY"] = &Border::wrapPosY;
+  border["GetShortestPathToPoint"] = sol::overload([](Vector2 a, Vector2 b){
+    return Border::getShortestPathToPoint(a, b);
+  });
+  border["getDistance"] = &Border::getDistance;
 }
 
 // got bless macros

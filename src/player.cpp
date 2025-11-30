@@ -39,7 +39,6 @@ Player* Player::player = nullptr;
 float Player::maxHealth = 10;
 
 const float Player::defaultSpeed = 4000;
-const float Player::defaultFriction = 58;
 
 const float Player::defaultDashTime = .4;
 const float Player::defaultDashSpeed = 3000;
@@ -111,7 +110,7 @@ void Player::Process(float delta) {
   lifetime += delta;
 
   Position = Position + velocity * delta;
-  velocity = velocity * delta * friction;
+  velocity = velocity * Entity2D::friction;
 
   Border::wrapEntity(this);
 
@@ -232,7 +231,6 @@ Player::Player(const std::string& name, Vector2 position)
 
   velocity = (Vector2){0, 0};
   speed = defaultSpeed;
-  friction = defaultFriction;
 
   dashCooldownBar =
     new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);

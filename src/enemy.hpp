@@ -52,7 +52,7 @@ class Enemy : public Entity2D {
     virtual void dropHealth() {};
 
     void dropHealthPack();
-    void dropHealthPack(float hp, Entity* root);
+    void dropHealthPack(float hp);
 
     Enemy(Vector2 position);
     ~Enemy();
@@ -63,7 +63,6 @@ class Enemy : public Entity2D {
 
     static float DefaultRadius;
     static float Speed;
-    static float friction;
 
     static void addSpawnHook(std::function<void(Enemy*)>);
     static void addDeathHook(std::function<void(Enemy*)>);

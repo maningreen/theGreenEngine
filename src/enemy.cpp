@@ -11,7 +11,6 @@
 
 float Enemy::DefaultRadius = 30;
 float Enemy::Speed = 4000;
-float Enemy::friction = 58;
 Entity2D* Enemy::plr = nullptr;
 
 float Enemy::droppedHealthHP = 1;
@@ -56,8 +55,8 @@ void Enemy::Init() {
 
 void Enemy::Process(float delta) {
   manageHealthBar(radius);
-  Position = Vector2Add(Position, velocity * delta);
-  velocity = Vector2Scale(velocity, friction * delta);
+  Position = Position + velocity * delta;
+  velocity = velocity * friction;
   stateTime += delta;
   if(plr != nullptr)
     manageStates(delta);
@@ -182,7 +181,7 @@ void Enemy::dropHealthPack() {
   getParent()->addChild(h);
 }
 
-void Enemy::dropHealthPack(float hp, Entity* root) {
+void Enemy::dropHealthPack(float hp) {
   Vector2 v = getHealthPackVel(velocity);
   HealthPack* h = new HealthPack(Position, velocity, hp);
   getParent()->addChild(h);

@@ -27,7 +27,6 @@ public:
   bool getIsAttracted();
 
   static const Color col;
-  static const float friction;
   static const float decayRate;
   static const float playerPickupRadius;
 };

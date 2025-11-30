@@ -44,7 +44,6 @@ public:
   Vector2 velocity;
 
   float speed;
-  float friction;
 
   float rotation;
 
@@ -75,7 +74,6 @@ public:
   static Key dashKey;
 
   static const float defaultSpeed;
-  static const float defaultFriction;
 
   static const float defaultDashSpeed;
   static const float defaultDashTime;

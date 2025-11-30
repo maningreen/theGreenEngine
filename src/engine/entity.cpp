@@ -4,6 +4,7 @@
 #include <vector>
 
 Entity* Entity::root = nullptr;
+float Entity2D::friction = .97;
 
 bool Entity::setRoot(Entity* r) {
   if(root != nullptr)

@@ -5,8 +5,7 @@
 #include <string>
 
 // A harmless projectile, that on death spawns an "attackNode"
-class NodeBullet : public Entity2D {
-public:
+struct NodeBullet : public Entity2D {
   // rotation of the "bullet"
   float theta;
   float lifetime;
