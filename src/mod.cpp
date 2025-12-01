@@ -1,12 +1,14 @@
+#include <filesystem>
+#include <sol/forward.hpp>
+#define SOL_ALL_SAFETIES_ON 1
+
 #include "border.hpp"
 #include "dashManager.hpp"
 #include "healthManager.hpp"
 #include "include.h"
 #include "inputManager.hpp"
 #include <cstdio>
-#include <sol/forward.hpp>
-#include <sol/raii.hpp>
-#include <sol/types.hpp>
+#include <string>
 #include "mod.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
@@ -14,20 +16,23 @@
 #include "player.hpp"
 #include "raylib.h"
 #include "raymath.h"
-#define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
-Mod::Mod(sol::function init) {
+const std::string ModManager::poolPath = "resources/mods/pool";
+const std::string ModManager::initPath = "resources/mods/init";
+
+Mod::Mod(std::string n, sol::function init) {
+  name = n;
   onInit = init;
 }
 
 #define MODTHING(var, table, functionName, key) if(sol::function function = table[key]) var.functionName = function; else var.functionName = std::nullopt
 
-std::optional<Mod> Mod::fromTable(sol::table table) {
+std::optional<Mod> Mod::fromTable(std::string n, sol::table table) {
   sol::function onInit = table["onInit"];
   if(!onInit.valid())
     return std::nullopt;
-  Mod x(onInit);
+  Mod x(n, onInit);
 
   MODTHING(x, table, onDash, "onDash");
   MODTHING(x, table, onFire, "onFire");
@@ -80,8 +85,9 @@ void ModManager::addModPartial(Mod x) {
 }
 
 void ModManager::addMod(Mod x, Entity2D* y) {
-  x.onInit((Player*)y);
-  mods.push_back(x);
+  sol::function_result z = x.onInit((Player*)y);
+  if(!z.valid() || (int)z != 1) // didn't return anything, carry on || didn't return anything we care about
+    mods.push_back(x);
 }
 
 void ModManager::removeMod(int i) {
@@ -132,14 +138,11 @@ void ModManager::initLua() {
   );
   plr["getHealth"] = &Player::getHealthManager;
   plr["getInput"] = &Player::getInputManager;
-  plr["getDashManager"] = &Player::getDashManager;
+  plr["getDash"] = &Player::getDashManager;
   plr["position"] = &Player::Position;
   plr["velocity"] = &Player::velocity;
   plr["speed"] = &Player::speed;
   plr["fireBullet"] = &Player::fireBullet;
-  plr["test"] = [](Player x){
-    printf("GOD DAMN");
-  };
 
   sol::usertype<HealthManager> hm = lua.new_usertype<HealthManager>(
     "healthManager"
@@ -254,10 +257,26 @@ void ModManager::initLua() {
     mod.funcName(funcName)
 
 void ModManager::loadMods(Entity2D* plr) {
-  for(const fs::directory_entry& p : fs::directory_iterator("resources/mods")) {
+  for(const fs::directory_entry& p : fs::directory_iterator(initPath)) {
     sol::table modTable = lua.script_file(p.path().string());
-    auto mod = Mod::fromTable(modTable);
+    auto mod = Mod::fromTable(p.path().filename().string(), modTable);
     if(mod.has_value())
       addMod(mod.value(), plr);
   }
+}
+
+int ModManager::loadMod(std::string name, Entity2D* plr) {
+  // check if file is valid, if so we return 1
+  std::string path = poolPath;
+  path.append(1, '/').append(name).append(".lua"); // we assume it fits in the format, with a .lua extention
+  if(!fs::exists(path))
+    return 1;
+
+  // great, we continue
+  sol::table modTable = lua.script_file(path); // load the file
+  auto mod = Mod::fromTable(name, modTable); // parse the table
+  if(mod.has_value()) // check validity
+    addMod(mod.value(), plr); // if it's valid shablamo
+
+  return 0;
 }

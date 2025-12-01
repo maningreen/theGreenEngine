@@ -10,16 +10,18 @@
 #include <sol/sol.hpp>
 
 struct Mod {
+  std::string name;
+
   sol::function onInit;
   std::optional<sol::function> onDash;
   std::optional<sol::function> onFire;
   std::optional<sol::function> onEnemyKill;
   std::optional<sol::function> onEnemySpawn;
 
-  Mod(sol::function onInit);
+  Mod(std::string name, sol::function onInit);
 
   // will return std::nullopt when there is no onInit
-  static std::optional<Mod> fromTable(sol::table);
+  static std::optional<Mod> fromTable(std::string name, sol::table);
 
   ~Mod();
 };
@@ -57,10 +59,18 @@ class ModManager {
     // parses the lua and calls onInit
     void loadMods(Entity2D*);
 
+    // loads a mod from `pool`
+    // if fails, returns 0, otherwise 1
+    // expects format: (poolPath)/(mod).lua
+    int loadMod(std::string mod, Entity2D* plr);
+
     // removes a mod.
     void removeMod(int i);
 
     sol::state& getLua();
+
+    static const std::string poolPath;
+    static const std::string initPath;
 };
 
 #endif
