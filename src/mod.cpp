@@ -156,17 +156,18 @@ void ModManager::initLua() {
   hm["setMaxHealth"] = &HealthManager::setMaxHealth;
 
   sol::usertype<DashManager> dm = lua.new_usertype<DashManager>(
-    "dash"
+    "dashManager"
   );
   dm["speed"] = &DashManager::speed;
   dm["control"] = &DashManager::control;
   dm["regenDelay"] = &DashManager::regenDelay;
+  dm["regenRate"] = &DashManager::regenRate;
   dm["length"] = &DashManager::length;
   dm["maxDashCount"] = &DashManager::maxDashCount;
   dm["getAvailableDashes"] = &DashManager::getAvailableDashes;
   dm["isDashing"] = &DashManager::isDashing;
   dm["getDashProgress"] = &DashManager::getDashProgress;
-  dm["removeDashProgress"] = &DashManager::removeDashProgress;
+  dm["removeDash"] = &DashManager::removeDashProgress;
   dm["addDash"] = &DashManager::addDashProgress;
   dm["getDashVelocity"] = &DashManager::getDashVelocity;
   dm["getDashDirection"] = &DashManager::getDashDirection;
@@ -245,7 +246,7 @@ void ModManager::initLua() {
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;
   border["wrapPosY"] = &Border::wrapPosY;
-  border["GetShortestPathToPoint"] = sol::overload([](Vector2 a, Vector2 b){
+  border["getShortestPathToPoint"] = sol::overload([](Vector2 a, Vector2 b){
     return Border::getShortestPathToPoint(a, b);
   });
   border["getDistance"] = &Border::getDistance;

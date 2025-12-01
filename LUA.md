@@ -150,7 +150,7 @@ There are also global tables defined
             print("Enemy killed!")
         end)
         ```
-    - `addSpawnHook :: (Enemy -> Void -> void)`
+    - `addSpawnHook() :: (Enemy -> Void) -> Void`
       - Similar to `addDeathHook`, Provide a function, which takes an `enemy`, and returns `void`
       this function will be called every time an enemy is spawned
       - example:
@@ -159,6 +159,29 @@ There are also global tables defined
             print("Enemy Spawned!")
         end)
       ```
+  - Border
+    - The border table is a set of abstract functions used to implemet wrapping.
+    - `length :: Float`
+      - the lenght from the origin (center) to one side. The total length of one side is `2 * length`
+    - `wrapEntity() :: Entity -> Void`
+      - if an "entity" (a base internal class) is out of bounds, it's position will be wrapped around to be inside the border.
+    - `wrapPos() :: Vector2 -> Vector2`
+      - if a vector2 is out of bounds, it's position will be wrapped around to be inside the border.
+    - `wrapPosX() :: Vector2 -> Vector2`
+      - if a vector2's X position is out of bounds, it's X position will be wrapped around to be inside the border.
+    - `wrapPosY() :: Vector2 -> Vector2`
+      - if a vector2's Y position is out of bounds, it's Y position will be wrapped around to be inside the border.
+    - `getShortestPathToPoint() :: Vector2 -> Vector2 -> Vector2`
+      - returns the effective equivilent of `b - a`, with the vector to, wrapped.
+    - `getDistance() :: Vector2 -> Vector2 -> Float`
+      - returns the effective distance between two points.
+  - NodeBullet
+    - `speed :: Float`
+      - the speed (px / s) of all the bullets.
+    - `radius :: Float`
+      - the visual radius of the bullets.
+    - `color :: Color`
+      - the color of the bullets.
 
 ### Types, in depth
 As mentioned there are multiple "types", implimented as classes in the back, but as tables for you, this is just if your curious, but doesn't amount to much.
@@ -287,16 +310,169 @@ The HealthManager is used under the hood to manage the health enemies, and the p
 - sets the maximum HP.
 - example: `healthManager:setMaxHealth(10)`
 
-<!-- #### Dash (manager)
+#### Dash (manager)
 
 Represents dashes, an abstract undefined resource, which is used for dashes.
 
 `speed :: Float`
+- the speed of the dash (px / s)
+
 `control :: Float`
+- the amount of 'control' the input has on the dash
+
 `regenDelay :: Float`
+- the amount of time (s) after a dash one must wait for it to begin recharging, does *not* include the dash itself
+
+`regenRate :: FLoat`
+- the rate at which the dash regenerates (dashes / s)
+
 `length :: Float`
+- the amount of time (s) a dash sould last.
+
 `maxDashCount :: Float`
- `maxDashCount :: Float` -->
+- the maximum amount of 'dashes' you can have, sets the maximum of dashProgress
+
+`getAvailableDashes :: DashManager -> Int`
+- returns the amount of 'dashes' available, equivalent to the floor of getDashProgress
+
+`isDashing :: DashManager -> Bool`
+- returns whether or not it's in a dashing state.
+
+`getDashProgress :: DashManager -> Float`
+- returns the amount of "dashProgress" is availabe, dashProgress is an abstract unit used to represent dashes, 1 dashProgress is 1 available dash.
+
+`removeDash :: DashManager -> Void`
+- subtracts one from the dashProgress
+
+`addDash :: DashManager -> Void`
+- adds one to the dashProgress
+
+`getDashVelocity :: DashManager -> Vector2`
+- returns the velocity of the dash, equivalent to `getDashDirection() * speed`
+
+`getDashDirection :: DashManager -> Vector2`
+- returns the directon of the dash in a normalized vector
+
+`getDeltaDash :: DashManager -> Float`
+- returns the "deltaDash", a variable used to represent the elapsed time since a dash began.
+
+`canDash :: DashManager -> Bool`
+- returns whether or not the DashManager is in a state which meets the criteria for dashing.
+
+#### InputManager
+
+##### Its youngest child Key
+
+Key is a number used to represent (get this) a key on the keyboard or a button on the mouse.
+"How do i find the value?", see [here](./keys.md), and just comb through
+
+##### Its son keybind
+
+Keybind is a struct used to represent a (guess what) keybind.
+
+`keybind() :: Key -> Bool -> (Void -> Void)`
+- `keybind(key, isMouse, function)` is how it's defined, give it the key index, whether or not it's a mouse button, and a function.
+- example:
+```lua
+keybind(
+    66 -- the number in keys.md for the 'b' key
+    false, -- it is not a mouse key
+    function()
+        print("you pressed B!")
+    end
+)
+```
+
+```lua
+keybind(
+    1 -- the number in keys.md for right mouse button
+    true, -- it is a mouse key
+    function()
+        print("you clicked your right mouse button!")
+    end
+)
+
+```
+
+##### Its daughter keybindAlt
+
+keybindAlt is a struct used to represent an alternate keybind, which takes in the input vector as an argument to it's function.
+
+`keybindAlt() :: Key -> Bool -> (Vector2 -> Void)`
+- give it the same keys as keybind, and whether or not its a mouse key, and an alternative function, which takes in the input vector.
+
+##### The Father.
+
+InputManager manages keybinds.
+
+The input vector
+- keys 
+  - `up :: Key`     Default `w`
+  - `down :: Key`   Default `s`
+  - `left :: Key`   Default `a`
+  - `right :: Key`  Default `d`
+- you can change any of these properties (*as long as you set them to keyboard keys*).
+- how the game figures out where the player wants to move the player
+
+
+`addVectorBind() :: InputManager -> (Vector2 -> Void) -> Void`
+- A vector bind is a function, which is called every frame with the inputVector.
+
+`addBind() :: (Keybind or keybindAlt) -> Void`
+- adds a keybind to the list of keybinds
+
+`removeVectorBind() :: Int -> Void`
+- removes a vectorBind at the given index (0 base)
+
+`removeBind() :: Int -> Void`
+- removes a keybind or keybindAlt from the binds list, at the given index (0 base)
+
+#### Enemy
+
+Enemies are internally state machines.
+This affects them largely.
+
+`position :: Vector2`
+- position of the enemy.
+
+`velocity :: Vector2`
+- velocity of the enemy.
+
+`radius :: float`
+- radius of the enemy, visual and effective
+
+`color :: Color`
+- color of the enemy.
+
+`getStateTime() :: Void -> Void`
+- returns the amount of time in a given state
+
+`resetStateTime() :: Void -> Void`
+- rests the amount of time in a given state to 0
+
+`setState() :: Int -> Void`
+- sets the internal state of an enemy. 
+- WARNING: to avoid undefined behavior it's suggested to figure out all of the state of an enemy
+- states are generally numberd 0..n, where n is the index of the 'last' state
+
+`getState() :: Void -> Int`
+- returns the current state.
+
+`dropHealthPack() :: Void -> Void` or `dropHealthPack :: Float -> Void`
+- drops a health pack with a default HP, or a provided HP
+
+# NodeBullet
+
+The NodeBullet is a damageless bullet, which spawns an attack nod at its destination. This is the bullet the player fires.
+
+`theta :: Float`
+- the rotation of the bullet.
+
+`lifetime :: Float`
+- the amount of time (s) the bullet has been alive.
+
+`targetLifetime :: Float`
+- the amount of time (s) the bullet will be alive.
 
 ## Credits
 
