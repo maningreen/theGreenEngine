@@ -18,6 +18,8 @@ in
         gcc # c++ compiler package
         ghc # haskell compiler
         haskell-language-server
+        sol2 # lib for lua
+        lua # lua itself
       ]
       ++ raylibPackages;
     shellHook = ''

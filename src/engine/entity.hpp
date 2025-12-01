@@ -53,6 +53,8 @@ public:
 
   Entity2D(const std::string& name, Entity* Parent, Vector2 position);
   Entity2D(const std::string& name, Vector2 position);
+
+  static float friction;
 };
 
 #endif

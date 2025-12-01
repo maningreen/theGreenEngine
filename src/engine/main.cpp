@@ -10,8 +10,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     manageChildrenProcess(&(*children)[i]->Children, delta);
     if(!(*children)[i]->getValid()) {
       (*children)[i]->kill();
-      children->erase(children->begin() + i);
-      i--;
+      children->erase(children->begin() + i--);
       continue;
     }
   }

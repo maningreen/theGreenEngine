@@ -57,7 +57,7 @@ int AttackNode::getIndex() {
   return -1;
 }
 
-float AttackNode::getMaxLifetime() { return 2 * Player::dashCooldown; }
+float AttackNode::getMaxLifetime() { return 2 * Player::player->getDashManager()->regenRate; }
 
 std::vector<AttackNode*> AttackNode::getNodes() { return nodes; }
 
@@ -160,7 +160,7 @@ void AttackNode::Process(float delta) {
     Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
     if(!las->shouldRender) {
       las->shouldRender = true;
-      lifetime = Player::dashCooldown + -lifetimeAfterAttack;
+      lifetime = Player::player->getDashManager()->regenRate + -lifetimeAfterAttack;
       las->lookAt(next->Position);
       radius = defaultRadius;
     }
@@ -213,7 +213,7 @@ void AttackNode::manageAttack() {
 
       Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
       float dist = Vector2Length(vecToAvg);
-      float r = en->Radius;
+      float r = en->radius;
 
       float min = dist < r ? dist : r;
       Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
@@ -236,7 +236,7 @@ void AttackNode::manageAttack() {
         float distance = Vector2Distance(closestPoint, en->Position);
         minimumDistance = min(distance, minimumDistance);
       }
-      if(minimumDistance <= en->Radius)
+      if(minimumDistance <= en->radius)
         en->killDefered();
     }
   }

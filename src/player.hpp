@@ -38,13 +38,12 @@ class Player : public Entity2D {
     void beginDash(Vector2 input);
 
 public:
-  Player(const std::string& name, Vector2 position, CameraEntity* cam);
+  Player(const std::string& name, Vector2 position);
   ~Player();
 
   Vector2 velocity;
 
   float speed;
-  float friction;
 
   float rotation;
 
@@ -59,6 +58,7 @@ public:
 
   HealthManager* getHealthManager();
   DashManager* getDashManager();
+  InputManager* getInputManager();
 
   static bool addEnemy(Enemy*);
   static bool removeEnemy(Enemy*);
@@ -74,18 +74,19 @@ public:
   static Key dashKey;
 
   static const float defaultSpeed;
-  static const float defaultFriction;
 
-  static float dashSpeed;
-  static float dashTime;
-  static float dashControl;
-  static float dashRegenDelay;
-  static unsigned maxDashCount;
-  static float dashCooldown;
+  static const float defaultDashSpeed;
+  static const float defaultDashTime;
+  static const float defaultDashControl;
+  static const float defaultDashRegenDelay;
+  static const unsigned defaultMaxDashCount;
+  static const float defaultDashCooldown;
 
   static float particleSpawnTime;
 
   static float hitboxRadius;
+
+  static Player* player;
 };
 
 #endif

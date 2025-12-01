@@ -4,6 +4,7 @@
 #include "attackNode.hpp"
 #include "bars.hpp"
 #include "border.hpp"
+#include "dashManager.hpp"
 #include "enemy.hpp"
 #include "engine/core.h"
 #include "engine/entity.hpp"
@@ -20,6 +21,7 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 
 Key Player::upKey = KEY_W;
@@ -32,18 +34,18 @@ Key Player::dashKey = KEY_SPACE;
 Key Player::shootKey = KEY_ENTER;
 Key Player::shootKeyMouse = MOUSE_LEFT_BUTTON;
 
-float Player::dashTime = .4;
-float Player::dashSpeed = 3000;
+Player* Player::player = nullptr;
 
 float Player::maxHealth = 10;
 
 const float Player::defaultSpeed = 4000;
-const float Player::defaultFriction = 58;
 
-float Player::dashControl = 3;
-float Player::dashCooldown = 1.5;
-float Player::dashRegenDelay = .7;
-unsigned Player::maxDashCount = 3;
+const float Player::defaultDashTime = .4;
+const float Player::defaultDashSpeed = 3000;
+const float Player::defaultDashControl = 3;
+const float Player::defaultDashCooldown = 1.5;
+const float Player::defaultDashRegenDelay = .7;
+const unsigned Player::defaultMaxDashCount = 3;
 
 float Player::particleSpawnTime = 1.0f / 30.0f;
 
@@ -66,8 +68,8 @@ void Player::beginDash(Vector2 input) {
   if(dashManager.canDash()) {
     Vector2 dashDirection =
       Vector2Length(input) > 0
-        ? Vector2Scale(input, dashSpeed)
-        : Vector2Scale(Vector2Normalize(velocity), dashSpeed);
+        ? input
+        : Vector2Normalize(velocity);
     dashManager.beginDash(dashDirection);
     dashManager.removeDashProgress();
   }
@@ -77,9 +79,10 @@ void Player::Render() {
   // get the mouse position (in cartesian)
   // draw our triangle
   DrawTriangle(Position,
-    Position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
+    Position + (Vector2){cosf(rotation) * distance, 
+                         sinf(rotation) * distance},
     Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
-                 sinf(rotation + 4 * PI / 3) * distance},
+                         sinf(rotation + 4 * PI / 3) * distance},
     YELLOW);
   DrawTriangle(Position,
     Position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
@@ -91,9 +94,9 @@ void Player::Render() {
   const float height = 10;
   const Vector2 dems = {dashCooldownBar->Dimensions.x, height};
   // maxDashCount is the amount we draw
-  float offsetY = dashCooldownBar->Dimensions.y / maxDashCount;
+  float offsetY = dashCooldownBar->Dimensions.y / dashManager.maxDashCount;
 
-  for(int i = 0; i < maxDashCount; i++) {
+  for(int i = 0; i < dashManager.maxDashCount; i++) {
     DrawRectangleV((Vector2){dashCooldownBar->Position.x,
                      dashCooldownBar->Position.y + (i * offsetY)},
       dems,
@@ -107,7 +110,7 @@ void Player::Process(float delta) {
   lifetime += delta;
 
   Position = Position + velocity * delta;
-  velocity = velocity * delta * friction;
+  velocity = velocity * Entity2D::friction;
 
   Border::wrapEntity(this);
 
@@ -164,14 +167,15 @@ void Player::fireBullet() {
   }
 }
 
-Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
-  : dashManager(maxDashCount,
-      dashTime,
-      dashRegenDelay,
-      dashControl,
-      dashSpeed,
-      dashCooldown),
-    Entity2D(name, position), cam(camera) {
+Player::Player(const std::string& name, Vector2 position)
+  : dashManager(defaultMaxDashCount,
+      defaultDashTime,
+      defaultDashRegenDelay,
+      defaultDashControl,
+      defaultDashSpeed),
+    Entity2D(name, position) {
+
+  Player::player = this;
 
   healthManager = new HealthManager(maxHealth,
     BarManager(&Position,
@@ -215,11 +219,18 @@ Player::Player(const std::string& name, Vector2 position, CameraEntity* camera)
     this->modManager->onEnemyKill(this, x);
   });
 
+  inputManager->addBind(keybind(
+    dashKey,
+    [this]() {
+      if(this->dashManager.canDash())
+        this->modManager->onDash(this);
+    }
+  ));
+
   addChild(inputManager);
 
   velocity = (Vector2){0, 0};
   speed = defaultSpeed;
-  friction = defaultFriction;
 
   dashCooldownBar =
     new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
@@ -241,8 +252,13 @@ Player::~Player() {
   delete modManager;
 }
 
-void Player::Init() { Enemy::setPlayer(); };
+void Player::Init() { 
+  Enemy::setPlayer(); 
+  modManager->loadMods(this);
+};
 
 float Player::getLifetime() { return lifetime; }
 
 HealthManager* Player::getHealthManager() { return healthManager; }
+DashManager* Player::getDashManager() { return &dashManager; }
+InputManager* Player::getInputManager() { return inputManager; }

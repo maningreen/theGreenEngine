@@ -5,7 +5,6 @@
 #include "engine/core.h"
 
 const Color HealthPack::col = RED;
-const float HealthPack::friction = 50;
 const float HealthPack::decayRate = .9;
 const float HealthPack::playerPickupRadius = 200;
 Player* HealthPack::plr = nullptr;

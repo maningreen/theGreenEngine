@@ -6,11 +6,11 @@
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
 #include "healthPack.hpp"
+#include "include.h"
 #include <cmath>
 
 float Enemy::DefaultRadius = 30;
 float Enemy::Speed = 4000;
-float Enemy::friction = 58;
 Entity2D* Enemy::plr = nullptr;
 
 float Enemy::droppedHealthHP = 1;
@@ -20,15 +20,15 @@ const std::string Enemy::tag = "Enemy";
 std::vector<std::function<void(Enemy*)>> Enemy::onSpawnHooks;
 std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
 
-#define barDimensions (Vector2) {Radius * 2, 10}
+#define barDimensions (Vector2) {radius * 2, 10}
 
 Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
-  Velocity = {0, 0};
-  TargetPos = {0, 0};
-  Radius = DefaultRadius;
+  velocity = {0, 0};
+  targetPos = {0, 0};
+  radius = DefaultRadius;
   healthManager = new HealthManager(10,
       BarManager(&Position,
-          Radius * 1.5f,
+          radius * 1.5f,
           Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
   healthManager->getBar()->ShouldRender = true;
   colour = PINK;
@@ -54,9 +54,9 @@ void Enemy::Init() {
 }
 
 void Enemy::Process(float delta) {
-  manageHealthBar(Radius);
-  Position = Vector2Add(Position, Velocity * delta);
-  Velocity = Vector2Scale(Velocity, friction * delta);
+  manageHealthBar(radius);
+  Position = Position + velocity * delta;
+  velocity = velocity * friction;
   stateTime += delta;
   if(plr != nullptr)
     manageStates(delta);
@@ -67,7 +67,7 @@ void Enemy::Render() {
   // hmm what do we want for our enemies???
   // hear me out:
   // circle :3
-  DrawCircleV(Position, Radius, colour); // WHOOOOOO
+  DrawCircleV(Position, radius, colour); // WHOOOOOO
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
@@ -175,14 +175,14 @@ Vector2 getHealthPackVel(Vector2 enVel) {
 // if not provided uses droppedHealthHP
 // otherwise, same as the more verbose overload
 void Enemy::dropHealthPack() {
-  Vector2 v = getHealthPackVel(Velocity);
+  Vector2 v = getHealthPackVel(velocity);
   Entity* root = getRoot();
-  HealthPack* h = new HealthPack(Position, Velocity, droppedHealthHP);
+  HealthPack* h = new HealthPack(Position, velocity, droppedHealthHP);
   getParent()->addChild(h);
 }
 
-void Enemy::dropHealthPack(float hp, Entity* root) {
-  Vector2 v = getHealthPackVel(Velocity);
-  HealthPack* h = new HealthPack(Position, Velocity, hp);
+void Enemy::dropHealthPack(float hp) {
+  Vector2 v = getHealthPackVel(velocity);
+  HealthPack* h = new HealthPack(Position, velocity, hp);
   getParent()->addChild(h);
 }

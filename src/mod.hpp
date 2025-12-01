@@ -1,37 +1,40 @@
-#ifndef mod
-#define mod
+#ifndef mod_H
+#define mod_H
 
 #include "nodeBullet.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include <functional>
+#include <optional>
+#include <sol/forward.hpp>
+#include <sol/sol.hpp>
 
 struct Mod {
-  std::function<void(Entity2D*)> onInit;
-  std::function<void(Entity2D*)> onDash;
-  std::function<void(Entity2D*, NodeBullet*)> onFire;
-  std::function<void(Entity2D*, Enemy*)> onEnemyKill;
-  std::function<void(Entity2D*, Enemy*)> onEnemySpawn;
+  std::string name;
 
-  Mod(
-    std::function<void(Entity2D*)> onInit,
-    std::function<void(Entity2D*)> onDash,
-    std::function<void(Entity2D*, NodeBullet*)> onFire,
-    std::function<void(Entity2D*, Enemy*)> onEnemyKill,
-    std::function<void(Entity2D*, Enemy*)> onEnemySpawn
-  );
-  Mod(
-    std::function<void(Entity2D*)> onInit
-  );
+  sol::function onInit;
+  std::optional<sol::function> onDash;
+  std::optional<sol::function> onFire;
+  std::optional<sol::function> onEnemyKill;
+  std::optional<sol::function> onEnemySpawn;
+
+  Mod(std::string name, sol::function onInit);
+
+  // will return std::nullopt when there is no onInit
+  static std::optional<Mod> fromTable(std::string name, sol::table);
 
   ~Mod();
 };
 
 class ModManager {
   private:
+    sol::state lua;
+
+    // this function doesn't call onInit, only sets up the lua
+    void initLua();
+  public:
     std::vector<Mod> mods;
 
-  public:
     ModManager();
     ~ModManager();
 
@@ -47,13 +50,27 @@ class ModManager {
     void onEnemySpawn(Entity2D*, Enemy*);
 
     // adds a mod, does *not* call onInit
-    void addModPartial(Mod&);
+    void addModPartial(Mod);
 
     // adds a mod, calls onInit
-    void addMod(Mod&, Entity2D*);
+    void addMod(Mod, Entity2D*);
+
+    // loads all the mods in resources/mods
+    // parses the lua and calls onInit
+    void loadMods(Entity2D*);
+
+    // loads a mod from `pool`
+    // if fails, returns 0, otherwise 1
+    // expects format: (poolPath)/(mod).lua
+    int loadMod(std::string mod, Entity2D* plr);
 
     // removes a mod.
     void removeMod(int i);
+
+    sol::state& getLua();
+
+    static const std::string poolPath;
+    static const std::string initPath;
 };
 
 #endif

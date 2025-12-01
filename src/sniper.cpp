@@ -28,7 +28,7 @@ Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position, 0
   getHealthManager()->setMaxHealth(defaultHealth);
   getHealthManager()->setHealth(defaultHealth);
   las->length = 1000;
-  Radius = getRadius();
+  radius = getRadius();
   colour = PURPLE;
 }
 
@@ -61,7 +61,7 @@ void Sniper::manageStates(float delta) {
     targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToTarget), speed * delta);
-    Velocity = Vector2Add(Velocity, velToAdd);
+    velocity = Vector2Add(velocity, velToAdd);
     las->shouldRender = false;
     //get if close enough to target
     if(Vector2Distance(Position, targetPosition) < maxDistFromTargetPos)
@@ -73,7 +73,7 @@ void Sniper::manageStates(float delta) {
     las->width = widthGrowthRate * getStateTime();
     if(getStateTime() > aimTime) {
       setState(positioning);
-      Velocity = Vector2Add(Velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
+      velocity = Vector2Add(velocity, (Vector2){-cosf(rotation) * shotRecoil, -sinf(rotation) * shotRecoil});
       fireBullet(rotation, 5, bulletSpeed, bulletDamage, colour);
     }
   } else {

@@ -50,6 +50,7 @@ class InputManager : public Entity {
 
     void addVectorBind(std::function<void(float, Vector2)> bind);
     void removeBind(int index);
+    void removeVectorBind(int index);
 
     Key up;
     Key down;

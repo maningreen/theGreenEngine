@@ -57,7 +57,7 @@ void Dasher::manageStates(float delta) {
         delta * speed);
     // step c
     // add this to vel
-    Velocity = Vector2Add(Velocity, velToAdd);
+    velocity = Vector2Add(velocity, velToAdd);
     // step 5
     // if we close enough we swap states
     if(Vector2DistanceSqr(getPlayer()->Position, Position) <=
@@ -66,7 +66,7 @@ void Dasher::manageStates(float delta) {
       setState(winding);
   } else if(getState() == recovery) {
     // we wait :p
-    if(Vector2LengthSqr(Velocity) >=
+    if(Vector2LengthSqr(velocity) >=
         recoverSpeedThreshold * recoverSpeedThreshold)
       resetStateTime();
     if(getStateTime() > recoveryTime)
@@ -76,16 +76,16 @@ void Dasher::manageStates(float delta) {
     stateVector = Vector2Normalize(getShortestVectorToPlayer());
     // so sniper what we wanna do, get the shortest vector to player
     // then we scale this to windupSpeed
-    Velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector),
+    velocity = Vector2Add(Vector2Scale(Vector2Normalize(stateVector),
                               -getStateTime() * windupSpeed),
-        Velocity);
+        velocity);
     if(getStateTime() > windupTime) {
       setState(dashing);
-      Velocity = Vector2Zero();
+      velocity = Vector2Zero();
     }
   } else if(getState() == dashing) {
     // we... dash?
-    Velocity = Vector2Scale(stateVector, dashSpeed * delta);
+    velocity = Vector2Scale(stateVector, dashSpeed * delta);
     if(getStateTime() > dashTime)
       setState(recovery);
     // we also gotta check some collision shtuff
@@ -99,8 +99,8 @@ void Dasher::manageStates(float delta) {
           Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
       scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x,
           scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
-      Velocity =
-          (Vector2) {scaledOffset.x * Velocity.x, scaledOffset.y * Velocity.y};
+      velocity =
+          (Vector2) {scaledOffset.x * velocity.x, scaledOffset.y * velocity.y};
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO "
