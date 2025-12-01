@@ -198,7 +198,7 @@ void ModManager::initLua() {
     sol::constructors<Enemy(Vector2)>()
   );
 
-  sol::table global = lua["global"].get_or_create<sol::table>();
+  sol::table global = lua["Global"].get_or_create<sol::table>();
   global.set_function("getFriction", [](){ return Entity2D::friction; });
   global.set_function("setFriction", [](float f){ Entity2D::friction = f; });
 
