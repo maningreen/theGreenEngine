@@ -72,6 +72,7 @@ void Player::beginDash(Vector2 input) {
         : Vector2Normalize(velocity);
     dashManager.beginDash(dashDirection);
     dashManager.removeDashProgress();
+    modManager->onDash(this);
   }
 }
 
@@ -218,14 +219,6 @@ Player::Player(const std::string& name, Vector2 position)
   Enemy::addDeathHook([this](Enemy* x){
     this->modManager->onEnemyKill(this, x);
   });
-
-  inputManager->addBind(keybind(
-    dashKey,
-    [this]() {
-      if(this->dashManager.canDash())
-        this->modManager->onDash(this);
-    }
-  ));
 
   addChild(inputManager);
 
