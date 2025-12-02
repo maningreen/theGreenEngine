@@ -1,4 +1,5 @@
 #include "entity.hpp"
+#include <csignal>
 #include <vector>
 
 #define baseScreenScalar 1000
@@ -30,26 +31,26 @@ void PreRendering(std::vector<Entity*>* entities);
 void PostRendering(std::vector<Entity*>* entities);
 
 int main() {
-  Entity* Root = new Entity("Root", nullptr);
-  Entity::setRoot(Root);
+  Entity Root = Entity("Root", nullptr);
+  Entity::setRoot(&Root);
 
   SetTargetFPS(60);
 
   InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-  Init(Root);
+  Init(&Root);
 
   float delta = 1.0f / 60.0f;
-  while(!WindowShouldClose() && Root->getValid()) {
-    manageChildrenProcess(&Root->Children, delta);
+  while(!WindowShouldClose() && Root.getValid()) {
+    manageChildrenProcess(&Root.Children, delta);
 
     BeginDrawing();
 
-    PreRendering(&Root->Children);
+    PreRendering(&Root.Children);
 
-    manageChildrenRendering(&Root->Children);
+    manageChildrenRendering(&Root.Children);
 
-    PostRendering(&Root->Children);
+    PostRendering(&Root.Children);
 
     EndDrawing();
   }
