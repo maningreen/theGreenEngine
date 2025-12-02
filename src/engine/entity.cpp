@@ -1,5 +1,6 @@
 #include "entity.hpp"
 #include "../include.h"
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -67,8 +68,15 @@ void Entity::printAllChildren() {
 
 void Entity::kill() {
   Death();
-  while(!Children.empty()) {
+
+  if(getParent()->getValid() && valid) return; // maybe revived itself
+
+  int len = Children.size();
+  for(int i = 0; i < len; i++) {
     Children.back()->kill();
+
+    if(Children.back()->getValid()) return; // again that edge case
+
     Children.pop_back();
   }
   delete this;

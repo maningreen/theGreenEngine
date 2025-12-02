@@ -11,6 +11,8 @@ private:
 
   static Entity* root;
 
+protected:
+
   bool valid;
 
 public:
