@@ -69,13 +69,13 @@ void Entity::printAllChildren() {
 void Entity::kill() {
   Death();
 
-  if(getParent()->getValid() && valid) return; // maybe revived itself
+  if(valid) return; // maybe revived itself
 
   int len = Children.size();
   for(int i = 0; i < len; i++) {
     Children.back()->kill();
 
-    if(Children.back()->getValid()) return; // again that edge case
+    if(Children.back()->getValid()) delete Children.back();
 
     Children.pop_back();
   }
