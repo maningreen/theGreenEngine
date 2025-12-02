@@ -7,7 +7,7 @@ This document will go over how the lua modding framework is structured, and it's
 There are two types of mods, and up to 5 functions with unique triggers in each mod
   - pool
     - added at runtime
-    - `resources/mods/init`
+    - `resources/mods/pool`
   - init
     - added when the game is loading
     - `resources/mods/init`
@@ -35,7 +35,7 @@ return {
 ```
 
 Here's another example mod,
-this one doubles the player's speed
+this one prints the players speed, then doubles the player's speed
 ```lua
 return {
     onInit = function(player) 
@@ -68,27 +68,28 @@ Here is a disection of all these functions:
 FAQ:
   - Q: Do I need to define the arguments when defining the function?
     - A: No
+
   - Q: Do I need to define the arguments in order when defining the function?
-    - A: Yes
-  - Q: What if I have an item that's ignored?
+    - A: Yes, otherwise the program will throw a hissy fit (crash)
+
+  - Q: Do I *really* need to define an onInit?
+    - A: Yeah, sorry... If you hate it, nag me, and in the meantime use `onInit = function() end`
+
+  - Q: What if I have an item that's not specified in the return?
     - A: We ignore it
+
+  - Q: What did that question ask?
+    - A: say i have a table, say there's a member `x`, if i return that table as a mod, will that cause a problem? (No, we just ignore it)
+    - Example:
+    ```lua
+    return {
+        a = "something!"
+        onInit = function() end
+    }
+    ```
+
   - Q: Can I do things with these arguments? What are they?
     - A: Later.
-
-### Requirements of a mod
-
-Mods should be placed in either of the two paths, with a `.lua` extention.<br>
-Examples:
-  - `resources/mods/init/setFriction.lua`
-  - `resources/mods/init/increase\ speed.lua`
-  - `resources/mods/pool/increaseDashCount.lua`
-Every mod has its own name.
-Mod names are derivated from the file name, example: `setFriction.lua` -> `setFriction`
-
-Every mod must have an `onInit` function.
-If it doesn't, the function is ignored
-
-Every function is not necessary to be defined and completely optional
 
 ### Basic mod template
 
@@ -112,11 +113,43 @@ return {
 }
 ```
 
-This template provides every function, and argument.
+This template provides every function, and argument. And prints "Hello, world".
+
+
+### Requirements of a mod
+
+Mods should be placed in either of the two paths, with a `.lua` extention.<br>
+Examples:
+  - `resources/mods/init/setFriction.lua`
+  - `resources/mods/init/increase\ speed.lua`
+  - `resources/mods/pool/increaseDashCount.lua`
+Every mod has its own name.
+Mod names are derivated from the file name, example: `setFriction.lua` -> `setFriction`
+
+Every mod must have an `onInit` function.
+If it doesn't, the mod is ignored.
+
+Every other function is not necessary to be defined and completely optional (onKill, onDash...).
 
 ### Loading a mod
 
 You may have noticed the `return {...}` in every example, this is because the way the game parses this is by evaluation. The code is evaluated and then the table is parsed into an internal class.
+
+### Unloading a mod
+
+If you want you mod to denitialize itself, return `1`, from any function, when it's called, the mod will be released.
+Here's an example of a mod which will only run for one dash
+```lua
+return {
+    onInit = function() end
+    onDash = function()
+        print("hey, you dashed!")
+        return 1
+    end
+}
+```
+
+If you return, say a string, or a float, or `0`, nothing will happen. Only if you return `1`.
 
 ## Types
 
@@ -161,27 +194,65 @@ There are also global tables defined
       ```
   - Border
     - The border table is a set of abstract functions used to implemet wrapping.
+
     - `length :: Float`
       - the lenght from the origin (center) to one side. The total length of one side is `2 * length`
+
     - `wrapEntity() :: Entity -> Void`
       - if an "entity" (a base internal class) is out of bounds, it's position will be wrapped around to be inside the border.
+
     - `wrapPos() :: Vector2 -> Vector2`
       - if a vector2 is out of bounds, it's position will be wrapped around to be inside the border.
+
     - `wrapPosX() :: Vector2 -> Vector2`
       - if a vector2's X position is out of bounds, it's X position will be wrapped around to be inside the border.
+
     - `wrapPosY() :: Vector2 -> Vector2`
       - if a vector2's Y position is out of bounds, it's Y position will be wrapped around to be inside the border.
+
     - `getShortestPathToPoint() :: Vector2 -> Vector2 -> Vector2`
       - returns the effective equivilent of `b - a`, with the vector to, wrapped.
+
     - `getDistance() :: Vector2 -> Vector2 -> Float`
       - returns the effective distance between two points.
   - NodeBullet
+
     - `speed :: Float`
       - the speed (px / s) of all the bullets.
+
     - `radius :: Float`
       - the visual radius of the bullets.
+
     - `color :: Color`
       - the color of the bullets.
+  - Player
+
+    - `defaultMaxHealth :: Float`
+      - the default maximum health of the player
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    - `defaultDashSpeed :: Float`
+      - the default dash speed (px / s) of the player
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    - `defaultDashTime :: Float`
+      - the default length a dash lasts (s) for the player
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    - `defaultDashControl :: Float`
+      - the default 'control' the player has over the direction a dash. (arbitrary, bigger == more)
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    - `defaultMaxDashCount :: Int`
+      - the default maximum amount of dashes the player has.
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    - `defaultDashCooldown :: Float`
+      - the default minimum amount of time between ending a dash and beginning a new one.
+      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+    -`particleSpawnTime`
+      - The time (s) between spawning the cool little exhaust particles.
 
 ### Types, in depth
 As mentioned there are multiple "types", implimented as classes in the back, but as tables for you, this is just if your curious, but doesn't amount to much.
@@ -461,7 +532,7 @@ This affects them largely.
 `dropHealthPack() :: Void -> Void` or `dropHealthPack :: Float -> Void`
 - drops a health pack with a default HP, or a provided HP
 
-# NodeBullet
+#### NodeBullet
 
 The NodeBullet is a damageless bullet, which spawns an attack nod at its destination. This is the bullet the player fires.
 
@@ -476,4 +547,4 @@ The NodeBullet is a damageless bullet, which spawns an attack nod at its destina
 
 ## Credits
 
-The amazing library used for the lua, is [sol](https://github.com/ThePhD), if you are taking any inspiration, I highly recommend this library.
+The amazing library used for the lua, is [sol](https://github.com/ThePhD/sol), if you are taking any inspiration, I highly recommend this library.
