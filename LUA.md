@@ -22,13 +22,13 @@ The following is a possible (but useless) mod.
 ```lua
 return {
     onInit = function()
-    end
+    end,
     onDash = function()
-    end
+    end,
     onFire = function()
-    end
+    end,
     onSpawn = function()
-    end
+    end,
     onKill = function()
     end
 }
@@ -97,16 +97,16 @@ FAQ:
 return {
     onInit = function(player)
         print("Hello, World!")
-    end
+    end,
 
     onDash = function(player)
-    end
+    end,
 
     onFire = function(player, bullet)
-    end
+    end,
 
     onKill = function(player, enemy)
-    end
+    end,
 
     onSpawn = function(player, enemy)
     end
@@ -446,7 +446,7 @@ Keybind is a struct used to represent a (guess what) keybind.
 - example:
 ```lua
 keybind(
-    66 -- the number in keys.md for the 'b' key
+    66, -- the number in keys.md for the 'b' key
     false, -- it is not a mouse key
     function()
         print("you pressed B!")
@@ -456,7 +456,7 @@ keybind(
 
 ```lua
 keybind(
-    1 -- the number in keys.md for right mouse button
+    1, -- the number in keys.md for right mouse button
     true, -- it is a mouse key
     function()
         print("you clicked your right mouse button!")
