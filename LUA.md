@@ -529,6 +529,9 @@ This affects them largely.
 `getState() :: Void -> Int`
 - returns the current state.
 
+`getHealth() :: Void -> HealthManager`
+- returns the health manager of the enemy.
+
 `dropHealthPack() :: Void -> Void` or `dropHealthPack :: Float -> Void`
 - drops a health pack with a default HP, or a provided HP
 
@@ -544,6 +547,116 @@ The NodeBullet is a damageless bullet, which spawns an attack nod at its destina
 
 `targetLifetime :: Float`
 - the amount of time (s) the bullet will be alive.
+
+### A few more examples
+
+This mod will give one free dash.
+```lua
+return {
+  onInit = function() end,
+  onDash = function(player)
+    local dash = player:getDash() -- gets the internal dash manager
+    dash:addDash() -- adds the dash
+    return 1 -- sends the "free this mod" signal
+  end
+}
+```
+This mod can be edited to give infinite dashes, by removing the `return 1` line.
+
+This mod would teleport an enemy near the player when spawned.
+```lua
+local dist = 200 -- set the target distance to 200 px
+
+return {
+  onInit = function() end,
+  onSpawn = function(player, enemy)
+    -- get the vector to the player
+    local vecTo = Border.getShortestPathToPoint(player.position, enemy.position)
+    -- scale the vector
+    local scaled = vecTo:normalize():scale(dist)
+    local endPos = player.position:add(scaled)
+    enemy.position = endPos
+  end
+}
+```
+
+This mod will double the speed of dashing.
+```lua
+return {
+  onInit = function(player)
+    local dash = player:getDash()
+    dash.speed = Player.defaultDashSpeed * 2
+  end
+}
+```
+
+This mod will crash the game.
+```lua
+return {
+  onInit = function(player)
+    Global.setFricition(-3)
+    return 1
+  end
+}
+```
+
+This mod is some simple debugging
+```lua
+return {
+  onInit = function()
+    print("game init!")
+  end,
+  onSpawn = function(_, en)
+    print("Enemy spawned! ", en.position.x, " ", en.position.y)
+  end,
+  onKill = function(_, _)
+    print("Enemy killed!")
+  end
+}
+```
+
+This mod will kill every enemy, not fun, but you could do it.
+```lua
+return {
+  onInit = function() end,
+  onSpawn = function(_, en)
+    local healthManager = en:getHealth()
+    healthManager:applyDamage(healthManager:getMaxHealth())
+  end
+}
+```
+
+This mod will make every enemy immortal.
+```lua
+return {
+  onInit = function() end,
+  onKill = function(_, en)
+    local healthManger = en:getHealth()
+    healthManger:applyHealing(healthManger:getMaxHealth())
+  end
+}
+```
+
+This mod will make you feel bad.
+```lua
+return {
+  onInit = function() 
+    print("you suck")
+  end
+}
+```
+
+This mod will randomize the players position
+```lua
+math.randomseed(os.time())
+
+return {
+  onInit = function(plr) 
+    plr.position.x = math.random(-Border.length, Border.length)
+    plr.position.y = math.random(-Border.length, Border.length)
+  end
+}
+```
 
 ## Credits
 
