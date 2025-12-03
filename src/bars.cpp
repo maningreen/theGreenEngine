@@ -13,9 +13,9 @@ void Bar::render() {
   Vector2 dimensionsFull = (Vector2){Dimensions.x * (ShrinkY ? 1 : Progress), Dimensions.y * (ShrinkY ? Progress : 1)};
   Vector2 dimensionsNotFull = (Vector2){Dimensions.x - (!ShrinkY ? dimensionsFull.x : 0), Dimensions.y - (ShrinkY ? dimensionsFull.y : 0)};
   //then we calculate our not full offset
-  Vector2 notFullOffset = (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
+  Vector2 emptyOffset = (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
   DrawRectangleV(position, dimensionsFull, Colour);
-  DrawRectangleV(Vector2Add(notFullOffset, position), dimensionsNotFull, EmptyCol);
+  DrawRectangleV(emptyOffset + position, dimensionsNotFull, EmptyCol);
 }
 
 void Bar::process(float delta) {

@@ -179,13 +179,16 @@ Player::Player(const std::string& name, Vector2 position)
   Player::player = this;
 
   healthManager = new HealthManager(maxHealth,
-    BarManager(&position,
+    BarManager(&this->position,
       distance,
       Bar(position,
         (Vector2){barDimensions.y, barDimensions.x},
         RED,
         DARKGRAY,
-        false)));
+        false
+      )
+    )
+  );
   addChild(healthManager);
 
   inputManager = new InputManager(upKey, downKey, leftKey, rightKey, keybinds());
