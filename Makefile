@@ -7,7 +7,6 @@ HC = ghc
 CXX = g++
 CXXFLAGS = -Iexternal -Lexternal -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -llua
 TARGET = $(builddir)/out
-HSDEPS = build/deps.mk
 
 OBJ := $(src:$(srcdir)/%.cpp=$(builddir)/%.o)
 
@@ -26,9 +25,4 @@ clean:
 run: $(TARGET)
 	$(TARGET)
 
-$(builddir)/hs_%.o: src/%.hs $(HSDEPS) | $(builddir)
-	$(HC) -c $< -hidir $(builddir) -outputdir $(builddir) -o $@
-
 .PHONY: build clean run
-
-INCLUDE: $(HSDEPS)
