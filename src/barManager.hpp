@@ -20,8 +20,8 @@ public:
 
   void setBarPercentage(float p);
 
-  void Process(float delta) override;
-  void Render() override;
+  void process(float delta) override;
+  void render() override;
 };
 
 #endif

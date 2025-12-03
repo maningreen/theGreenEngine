@@ -24,25 +24,25 @@ float HealthPack::getRadiusForHealth() {
 
 bool HealthPack::getIsAttracted() { return isAttracted; }
 
-void HealthPack::Render() {
+void HealthPack::render() {
   const float r = getRadiusForHealth();
-  DrawCircleV(Position, r, col);
+  DrawCircleV(position, r, col);
 }
 
 void HealthPack::setPlayer() {
-  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->Children, "Player");
+  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->children, "Player");
 }
 
-void HealthPack::Process(float delta) {
+void HealthPack::process(float delta) {
   // ok so the way i do this is really weird, we have two methods of movement, cartesian and polar
   // cartesien is for when we're just chillin and moving about *before* we get picked up
   // the latter however is for when we're picked up, so that way it's a generally consistent time to be
   // picked up (also it looks really cool)
   if(plr == nullptr)
     return;
-  const Vector2 offset = Vector2Subtract(plr->Position, Position);
+  const Vector2 offset = Vector2Subtract(plr->position, position);
   if (!isAttracted) {
-    Position = Vector2Add(Position, Vector2Scale(velCart, delta));
+    position = Vector2Add(position, Vector2Scale(velCart, delta));
     velCart = Vector2Scale(velCart, delta * friction);
     health = health - (health * decayRate * delta);
     if (health < 0)
@@ -62,7 +62,7 @@ void HealthPack::Process(float delta) {
     plr->getHealthManager()->applyHealing(health);
     velPol += delta * 100;
     const Vector2 velToAdd = Vector2Scale(offset, velPol * delta);
-    Position = Vector2Add(Position, velToAdd);
+    position = Vector2Add(position, velToAdd);
     if (Vector2Length(offset) <= cutoffDistance)
       killDefered();
   }

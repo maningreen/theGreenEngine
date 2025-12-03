@@ -16,9 +16,9 @@ protected:
   bool valid;
 
 public:
-  std::string Name;
-  std::vector<Entity*> Children;
-  std::vector<std::string> Tags;
+  std::string name;
+  std::vector<Entity*> children;
+  std::vector<std::string> tags;
 
   Entity(const std::string& name, Entity* parent);
   Entity(const std::string& name);
@@ -43,15 +43,15 @@ public:
   //returns false if failed, true if succeeded
   static bool setRoot(Entity* root);
 
-  virtual void Process(float delta) {};
-  virtual void Render() {};
-  virtual void Init() {};
-  virtual void Death() {};
+  virtual void process(float delta) {};
+  virtual void render() {};
+  virtual void init() {};
+  virtual void death() {};
 };
 
 class Entity2D : public Entity {
 public:
-  Vector2 Position;
+  Vector2 position;
 
   Entity2D(const std::string& name, Entity* Parent, Vector2 position);
   Entity2D(const std::string& name, Vector2 position);

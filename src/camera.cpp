@@ -20,15 +20,15 @@ void CameraEntity::ManageCameraShake(float delta) {
 
 void CameraEntity::ManageCameraMotion(float delta) {
   if(Follow != nullptr)
-    Camera.target = Follow->Position;
+    Camera.target = Follow->position;
 }
 
-void CameraEntity::Process(float delta) {
+void CameraEntity::process(float delta) {
   ManageCameraMotion(delta);
   ManageCameraShake(delta);
 }
 
-void CameraEntity::Render() {
+void CameraEntity::render() {
   ClearBackground(BLACK);
 }
 

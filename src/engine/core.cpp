@@ -21,7 +21,7 @@ Entity* Engine::searchTreeForEntity(std::vector<Entity*>* entities, std::string 
   if(out != nullptr)
     return out;
   for(Entity* item : *entities) {
-    out = searchTreeForEntity(&item->Children, name);
+    out = searchTreeForEntity(&item->children, name);
     if(out != nullptr)
       return out;
   }
@@ -30,7 +30,7 @@ Entity* Engine::searchTreeForEntity(std::vector<Entity*>* entities, std::string 
 
 std::vector<Entity*> Engine::getAllChildrenWithTag(Entity* en, std::string tag) {
   std::vector<Entity*> out;
-  for(Entity* child : en->Children) {
+  for(Entity* child : en->children) {
     if(entityHasTag(child, tag))
       out.push_back(child);
   }
@@ -39,7 +39,7 @@ std::vector<Entity*> Engine::getAllChildrenWithTag(Entity* en, std::string tag) 
 
 std::vector<Entity*> Engine::getAllChildrenWithTagRecursive(Entity* en, std::string tag) {
   std::vector<Entity*> out;
-  for(Entity* child : en->Children) {
+  for(Entity* child : en->children) {
     std::vector<Entity*> buff = getAllChildrenWithTagRecursive(child, tag);
     if(child->hasTag(tag))
       buff.push_back(child);
@@ -50,7 +50,7 @@ std::vector<Entity*> Engine::getAllChildrenWithTagRecursive(Entity* en, std::str
 
 Entity* Engine::getFirstEntityIndexWithName(std::vector<Entity*> entities, std::string name) {
   for(Entity* item : entities)
-    if(item->Name == name)
+    if(item->name == name)
       return item;
   return nullptr;
 }
@@ -60,7 +60,7 @@ void Engine::addEntity(std::vector<Entity*>* entities, Entity* entity) {
 }
 
 bool Engine::entityHasTag(Entity* entity, std::string tag) {
-  for(std::string item : entity->Tags)
+  for(std::string item : entity->tags)
     if(item == tag)
       return true;
   return false;

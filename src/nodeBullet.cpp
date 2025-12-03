@@ -36,20 +36,20 @@ NodeBullet::NodeBullet(Vector2 alpha, Vector2 beta)
 
 NodeBullet::~NodeBullet() {}
 
-void NodeBullet::Render() {
+void NodeBullet::render() {
   // draw a rectangle according to our dimensions and
-  DrawCircleV(Position, radius, color);
+  DrawCircleV(position, radius, color);
 }
 
-void NodeBullet::Process(float delta) {
+void NodeBullet::process(float delta) {
   lifetime += delta;
-  Position +=
+  position +=
       (Vector2) {delta * speed * cos(theta), delta * speed * sin(theta)};
   if(lifetime >= targetLifetime)
     killDefered();
   Border::wrapEntity(this);
 }
 
-void NodeBullet::Death() {
-  getParent()->addChild(new AttackNode(Position));
+void NodeBullet::death() {
+  getParent()->addChild(new AttackNode(position));
 }

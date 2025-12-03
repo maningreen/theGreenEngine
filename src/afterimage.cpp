@@ -10,21 +10,21 @@ Afterimage::Afterimage(Vector2 pos, float angle) : Entity2D("Afterimage", pos), 
 
 Afterimage::~Afterimage() {}
 
-void Afterimage::Render() {
+void Afterimage::render() {
   const float distance = 50;
-  DrawTriangle(Position,
-    Position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
-    Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
+  DrawTriangle(position,
+    position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
+    position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
                  sinf(rotation + 4 * PI / 3) * distance},
     (Color){YELLOW.r, YELLOW.g, YELLOW.b, (unsigned char)opacity});
-  DrawTriangle(Position,
-    Position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
+  DrawTriangle(position,
+    position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
                  sinf(rotation + 2 * PI / 3) * distance},
-    Position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
+    position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
     (Color){YELLOW.r, YELLOW.g, YELLOW.b, (unsigned char)opacity});
 }
 
-void Afterimage::Process(float delta) {
+void Afterimage::process(float delta) {
   opacity += -opacity * fadePower * delta;
   if(opacity < 10)
     killDefered();

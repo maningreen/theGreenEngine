@@ -43,7 +43,7 @@ class InputManager : public Entity {
     // binds of which to call on an input-vector input
     std::vector<std::function<void(float, Vector2)>> vectorBinds;
 
-    void Process(float delta) override;
+    void process(float delta) override;
 
     void addBind(const keybind& bind);
     void addBind(const keybindAlt& bind);

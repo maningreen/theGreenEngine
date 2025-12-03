@@ -15,8 +15,8 @@ class Bar : public Entity2D {
     Vector2 Dimensions;
     bool ShrinkY;
 
-    virtual void Render();
-    virtual void Process(float delta);
+    virtual void render();
+    virtual void process(float delta);
 
     ~Bar();
 

@@ -25,7 +25,7 @@ class HealthManager : public BarManager {
     float getMaxHealth();
     void setMaxHealth(float m);
 
-    void Process(float delta) override;
+    void process(float delta) override;
 };
 
 #endif

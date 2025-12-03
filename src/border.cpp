@@ -11,12 +11,12 @@ Border::Border() : Entity2D("Border", (Vector2){0, 0}){}
 
 Border::~Border() {}
 
-void Border::Render() {
+void Border::render() {
   DrawRectangleLinesEx((Rectangle){-length, -length, length * 2, length * 2}, 20, WHITE);
 }
 
 void Border::wrapEntity(Entity2D* en) {
-  en->Position = wrapPos(en->Position);
+  en->position = wrapPos(en->position);
 }
 
 Vector2 Border::wrapPos(Vector2 p) {
@@ -44,7 +44,7 @@ Vector2 Border::wrapPosY(Vector2 v) {
 }
 
 Vector2 Border::getShortestPathToPoint(const Entity2D* en, const Vector2 point) {
-  Vector2 vectorTo = Vector2Subtract(point, en->Position);
+  Vector2 vectorTo = Vector2Subtract(point, en->position);
   if(vectorTo.x < -length)
     vectorTo.x += length * 2;
   else if(vectorTo.x > length)

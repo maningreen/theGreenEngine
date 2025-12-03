@@ -27,9 +27,17 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   targetPos = {0, 0};
   radius = DefaultRadius;
   healthManager = new HealthManager(10,
-      BarManager(&Position,
-          radius * 1.5f,
-          Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)));
+    BarManager(&position,
+      radius * 1.5f,
+      Bar(
+        Vector2Zero(), 
+        barDimensions,
+        RED, 
+        DARKGRAY, 
+        false
+      )
+    )
+  );
   healthManager->getBar()->ShouldRender = true;
   colour = PINK;
   addChild(healthManager);
@@ -38,14 +46,16 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
 
 Enemy::~Enemy() {}
 
-void Enemy::Death() { 
+void Enemy::death() { 
   for(std::function<void(Enemy *)> f : onDeathHooks)
     f(this);
   if(healthManager->isDead())
     dropHealth(); 
+  else 
+    valid = true;
 }
 
-void Enemy::Init() { 
+void Enemy::init() { 
   setPlayer(); 
   for(
     std::function<void(Enemy *)>* f = onSpawnHooks.data(); 
@@ -54,9 +64,9 @@ void Enemy::Init() {
   );
 }
 
-void Enemy::Process(float delta) {
+void Enemy::process(float delta) {
   manageHealthBar(radius);
-  Position = Position + velocity * delta;
+  position = position + velocity * delta;
   velocity = velocity * friction;
   stateTime += delta;
   if(plr != nullptr)
@@ -64,17 +74,17 @@ void Enemy::Process(float delta) {
   Border::wrapEntity(this);
 }
 
-void Enemy::Render() {
+void Enemy::render() {
   // hmm what do we want for our enemies???
   // hear me out:
   // circle :3
-  DrawCircleV(Position, radius, colour); // WHOOOOOO
+  DrawCircleV(position, radius, colour); // WHOOOOOO
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
   if(plr == nullptr)
     return Vector2Zero();
-  return Border::getShortestPathToPoint(Position, plr->Position);
+  return Border::getShortestPathToPoint(position, plr->position);
 }
 
 void Enemy::manageHealthBar(float r) {
@@ -84,7 +94,7 @@ void Enemy::manageHealthBar(float r) {
 }
 
 void Enemy::setPlayer() {
-  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->Children, "Player");
+  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->children, "Player");
 }
 
 void Enemy::setPlayer(Entity2D* p) { 
@@ -114,7 +124,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // so that's what we wanna do
   Vector2 vectorFromPlayer =
       Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
-  Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->Position);
+  Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->position);
   Vector2 vectorToGlobal = Border::wrapPos(globalPos);
   // then we do some shmath
   return vectorToGlobal;
@@ -138,19 +148,19 @@ float Enemy::getStateTime() const { return stateTime; }
 
 Entity2D* Enemy::getPlayer() { return plr; }
 
-HealthManager* Enemy::getHealthManager() const { return healthManager; }
+HealthManager* Enemy::getHealthManager() { return healthManager; }
 
 void Enemy::resetStateTime() { stateTime = 0; }
 
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, Color col) const {
-  EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime);
+  EnemyBullet* bul = new EnemyBullet(position, angle, col, true, lifetime);
   getRoot()->addChild(bul);
   return bul;
 }
 
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s,
     Color col) const {
-  EnemyBullet* bul = new EnemyBullet(Position, angle, col, true, lifetime, s);
+  EnemyBullet* bul = new EnemyBullet(position, angle, col, true, lifetime, s);
   getRoot()->addChild(bul);
   return bul;
 }
@@ -158,7 +168,7 @@ EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s,
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, float dmg,
     Color col) const {
   EnemyBullet* bul =
-      new EnemyBullet(Position, angle, col, true, lifetime, s, dmg);
+      new EnemyBullet(position, angle, col, true, lifetime, s, dmg);
   getRoot()->addChild(bul);
   return bul;
 }
@@ -178,12 +188,12 @@ Vector2 getHealthPackVel(Vector2 enVel) {
 void Enemy::dropHealthPack() {
   Vector2 v = getHealthPackVel(velocity);
   Entity* root = getRoot();
-  HealthPack* h = new HealthPack(Position, velocity, droppedHealthHP);
+  HealthPack* h = new HealthPack(position, velocity, droppedHealthHP);
   getParent()->addChild(h);
 }
 
 void Enemy::dropHealthPack(float hp) {
   Vector2 v = getHealthPackVel(velocity);
-  HealthPack* h = new HealthPack(Position, velocity, hp);
+  HealthPack* h = new HealthPack(position, velocity, hp);
   getParent()->addChild(h);
 }

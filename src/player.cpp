@@ -60,7 +60,7 @@ void Player::manageInput(float delta, Vector2 input) {
   manageDash(delta);
 
   if((dashManager.isDashing() || Vector2LengthSqr(input)) && fmodf(lifetime, particleSpawnTime) <= 1.0 / 60.0f)
-    addChild(new Particle(Position,
+    addChild(new Particle(position,
       Vector2Scale(velocity + Vector2Scale(input, speed * delta), -1)));
 }
 
@@ -76,19 +76,19 @@ void Player::beginDash(Vector2 input) {
   }
 }
 
-void Player::Render() {
+void Player::render() {
   // get the mouse position (in cartesian)
   // draw our triangle
-  DrawTriangle(Position,
-    Position + (Vector2){cosf(rotation) * distance, 
+  DrawTriangle(position,
+    position + (Vector2){cosf(rotation) * distance, 
                          sinf(rotation) * distance},
-    Position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
+    position + (Vector2){cosf(rotation + 4 * PI / 3) * distance,
                          sinf(rotation + 4 * PI / 3) * distance},
     YELLOW);
-  DrawTriangle(Position,
-    Position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
+  DrawTriangle(position,
+    position + (Vector2){cosf(rotation + 2 * PI / 3) * distance,
                  sinf(rotation + 2 * PI / 3) * distance},
-    Position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
+    position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
     YELLOW);
 
   // we draw them darn sqrs
@@ -98,25 +98,25 @@ void Player::Render() {
   float offsetY = dashCooldownBar->Dimensions.y / dashManager.maxDashCount;
 
   for(int i = 0; i < dashManager.maxDashCount; i++) {
-    DrawRectangleV((Vector2){dashCooldownBar->Position.x,
-                     dashCooldownBar->Position.y + (i * offsetY)},
+    DrawRectangleV((Vector2){dashCooldownBar->position.x,
+                     dashCooldownBar->position.y + (i * offsetY)},
       dems,
       dashCooldownBar->EmptyCol);
   }
 
-  DrawCircleV(Position, 5, WHITE);
+  DrawCircleV(position, 5, WHITE);
 }
 
-void Player::Process(float delta) {
+void Player::process(float delta) {
   lifetime += delta;
 
-  Position = Position + velocity * delta;
+  position = position + velocity * delta;
   velocity = velocity * Entity2D::friction;
 
   Border::wrapEntity(this);
 
   if(dashManager.isDashing() && fmodf(dashManager.getDeltaDash(), .1) < 1.0f / 120.0f)
-      getRoot()->addChild(new Afterimage(Position, rotation));
+      getRoot()->addChild(new Afterimage(position, rotation));
 
   if(healthManager->isDead())
     killDefered();
@@ -138,16 +138,16 @@ void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
     !b->ShrinkY ? -b->Dimensions.x / 2.0f : distance + b->Dimensions.x * index;
   float offsetY =
     b->ShrinkY ? -b->Dimensions.y / 2.0f : distance + b->Dimensions.y * index;
-  Vector2 finalPosition = {Position.x + offsetX, Position.y + offsetY};
-  b->Position = finalPosition;
+  Vector2 finalPosition = {position.x + offsetX, position.y + offsetY};
+  b->position = finalPosition;
   b->ShouldRender = shouldRender;
   b->Progress = p;
 }
 
 void Player::manageRotation() {
   Vector2 mousePos = cam->getMousePosition();
-  rotation = atan2f((mousePos.y - Position.y),
-    mousePos.x - Position.x); // then it's as simple as b - a
+  rotation = atan2f((mousePos.y - position.y),
+    mousePos.x - position.x); // then it's as simple as b - a
 }
 
 void Player::manageDash(float delta) {
@@ -164,7 +164,7 @@ void Player::fireBullet() {
   int nodeCount = AttackNode::getNodes().size();
   if(dashManager.getAvailableDashes() > 0 && nodeCount + nodeBulletCount < 3) {
     dashManager.removeDashProgress();
-    addChild(new NodeBullet(Position, cam->getMousePosition(), rotation));
+    addChild(new NodeBullet(position, cam->getMousePosition(), rotation));
   }
 }
 
@@ -179,9 +179,9 @@ Player::Player(const std::string& name, Vector2 position)
   Player::player = this;
 
   healthManager = new HealthManager(maxHealth,
-    BarManager(&Position,
+    BarManager(&position,
       distance,
-      Bar(Position,
+      Bar(position,
         (Vector2){barDimensions.y, barDimensions.x},
         RED,
         DARKGRAY,
@@ -226,7 +226,7 @@ Player::Player(const std::string& name, Vector2 position)
   speed = defaultSpeed;
 
   dashCooldownBar =
-    new Bar(Position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
+    new Bar(position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
   addChild(dashCooldownBar);
 
   cam = new CameraEntity("Camera", this);
@@ -245,7 +245,7 @@ Player::~Player() {
   delete modManager;
 }
 
-void Player::Init() { 
+void Player::init() { 
   Enemy::setPlayer(); 
   modManager->loadMods(this);
 };

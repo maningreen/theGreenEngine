@@ -11,9 +11,9 @@ struct NodeBullet : public Entity2D {
   float lifetime;
   float targetLifetime;
 
-  void Render() override;
-  void Process(float delta) override;
-  void Death() override;
+  void render() override;
+  void process(float delta) override;
+  void death() override;
 
   NodeBullet(Vector2 alpha, Vector2 beta, float r);
   NodeBullet(Vector2 alpha, float targetLifetime, float r);

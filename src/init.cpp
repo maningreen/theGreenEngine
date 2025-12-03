@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "dasher.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "engine/core.h"
@@ -8,8 +9,9 @@
 #include "border.hpp"
 #include "raylib.h"
 #include "inputManager.hpp"
+#include "sniper.hpp"
+#include "spiral.hpp"
 #include "time.h"
-#include "waveManager.hpp"
 
 extern "C" {
   extern void hs_init(int argc, char** argv);
@@ -25,15 +27,18 @@ void Init(Entity* root) {
   root->addChild(plr);
   root->addChild(new Border());
   root->addChild(new Enemy({200, 200}));
-  InputManager* manager = new InputManager();
+  root->addChild(new Enemy({1200, 200}));
+  // root->addChild(new Dasher({200, 200}));
+  // root->addChild(new Spiraler({200, 200}));
+  // root->addChild(new Sniper({200, 200}));
+  // InputManager* manager = new InputManager();
   // root->addChild(manager);
-  // root->addChild(new WaveManager());
 }
 
 void PreRendering(std::vector<Entity*>* entities) { 
   PostProcessingData* data = (PostProcessingData*)entities->front();
 
-  BeginTextureMode(data->Texture);
+  BeginTextureMode(data->texture);
   BeginMode2D((Camera2D){.offset = Vector2Zero(), .target = {-Border::length, -Border::length}, .rotation = 0, .zoom = 1});
 }
 
@@ -55,7 +60,7 @@ void PostRendering(std::vector<Entity*>* entities) {
     }
   );
 
-  DrawTexturePro(data->Texture.texture, (Rectangle){0, 0, 3 * (float)data->Texture.texture.width, 3 * -(float)data->Texture.texture.height}, (Rectangle){-(float)data->Texture.texture.width, -(float)data->Texture.texture.height, 3 * (float)data->Texture.texture.width, 3 * (float)data->Texture.texture.height}, {0, 0}, 0, WHITE);
+  DrawTexturePro(data->texture.texture, (Rectangle){0, 0, 3 * (float)data->texture.texture.width, 3 * -(float)data->texture.texture.height}, (Rectangle){-(float)data->texture.texture.width, -(float)data->texture.texture.height, 3 * (float)data->texture.texture.width, 3 * (float)data->texture.texture.height}, {0, 0}, 0, WHITE);
   EndMode2D();
 #ifdef shader
   EndShaderMode();

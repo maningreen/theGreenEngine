@@ -16,7 +16,7 @@ public:
   bool shouldRender;
   Color colour;
 
-  void Render() override;
+  void render() override;
 
   bool getBreaks();
   bool getBreaksX();

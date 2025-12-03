@@ -10,11 +10,11 @@ class PostProcessingData : public Entity {
     int pixelShaderScreenDimensionsLoc;
 
   public:
-    RenderTexture2D Texture;
-    Vector2 ScreenDems;
+    RenderTexture2D texture;
+    Vector2 screenDems;
 
-    virtual void Render();
-    virtual void Process(float data);
+    virtual void render();
+    virtual void process(float data);
 
     Shader getShader();
 

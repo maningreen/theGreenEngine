@@ -10,8 +10,8 @@ class Afterimage : public Entity2D {
 
     static float fadePower;
 
-    virtual void Render();
-    virtual void Process(float delta);
+    virtual void render();
+    virtual void process(float delta);
 
     Afterimage(Vector2 pos, float angle);
     ~Afterimage();

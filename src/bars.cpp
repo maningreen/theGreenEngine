@@ -5,7 +5,7 @@
 
 float Bar::SmoothingSpeed = 15;
 
-void Bar::Render() {
+void Bar::render() {
   if(!ShouldRender)
     return;
   //STEP UNO calculate the portion that's gonna be drawn OH WAIT THATS OUR PROGRESS
@@ -14,11 +14,11 @@ void Bar::Render() {
   Vector2 dimensionsNotFull = (Vector2){Dimensions.x - (!ShrinkY ? dimensionsFull.x : 0), Dimensions.y - (ShrinkY ? dimensionsFull.y : 0)};
   //then we calculate our not full offset
   Vector2 notFullOffset = (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
-  DrawRectangleV(Position, dimensionsFull, Colour);
-  DrawRectangleV(Vector2Add(notFullOffset, Position), dimensionsNotFull, EmptyCol);
+  DrawRectangleV(position, dimensionsFull, Colour);
+  DrawRectangleV(Vector2Add(notFullOffset, position), dimensionsNotFull, EmptyCol);
 }
 
-void Bar::Process(float delta) {
+void Bar::process(float delta) {
   if(Smooth)
     Progress += (TargetProgress - Progress) * SmoothingSpeed * delta;
   else

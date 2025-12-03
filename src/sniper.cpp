@@ -22,7 +22,7 @@ float Sniper::radius = 50;
 Color Sniper::defaultColour = PURPLE;
 Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 
-Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(Position, 0, 0, laserColour)) {
+Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(position, 0, 0, laserColour)) {
   setState(positioning);
   addChild(las);
   getHealthManager()->setMaxHealth(defaultHealth);
@@ -55,16 +55,16 @@ Vector2 Sniper::getTargetPosition() const { return targetPosition; }
 
 void Sniper::manageStates(float delta) {
   //so here it's pretty easy
-  las->lookAt(getPlayer()->Position);
-  las->Position = Position;
+  las->lookAt(getPlayer()->position);
+  las->position = position;
   if(getState() == positioning) {
-    targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(Position, getPlayer()->Position), minDist, maxDist));
+    targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(position, getPlayer()->position), minDist, maxDist));
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToTarget), speed * delta);
     velocity = Vector2Add(velocity, velToAdd);
     las->shouldRender = false;
     //get if close enough to target
-    if(Vector2Distance(Position, targetPosition) < maxDistFromTargetPos)
+    if(Vector2Distance(position, targetPosition) < maxDistFromTargetPos)
       setState(aiming);
   } else if(getState() == aiming) {
     if(las->length < minDist)

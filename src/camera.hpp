@@ -16,8 +16,8 @@ class CameraEntity : public Entity {
     void ManageCameraShake(float delta);
     void ManageCameraMotion(float delta);
 
-    void Process(float delta);
-    void Render();
+    void process(float delta);
+    void render();
 
     CameraEntity(std::string name, Entity2D* target);
     ~CameraEntity();

@@ -12,9 +12,9 @@ struct Bullet : public Entity2D {
   Color col;
   bool shouldWrap;
 
-  void Process(float delta) override;
-  void Render() override;
-  void Init() override;
+  void process(float delta) override;
+  void render() override;
+  void init() override;
 
   virtual bool ManageCollision();
 

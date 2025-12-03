@@ -29,7 +29,7 @@ class Enemy : public Entity2D {
     Vector2 getShortestVectorToPlayer() const;
     float getAngleToPlayer() const;
 
-    HealthManager* getHealthManager() const;
+    HealthManager* getHealthManager();
 
     void setState(unsigned char s);
     unsigned char getState() const;
@@ -43,10 +43,10 @@ class Enemy : public Entity2D {
     EnemyBullet* fireBullet(float angle, float lifetime, float speed, Color col) const;
     EnemyBullet* fireBullet(float angle, float lifetime, float speed, float dmg, Color col) const;
 
-    void Process(float delta) override;
-    void Render() override;
-    void Death() override;
-    void Init() override;
+    void process(float delta) override;
+    void render() override;
+    void death() override;
+    void init() override;
 
     virtual void manageStates(float delta) {};
     virtual void dropHealth() {};

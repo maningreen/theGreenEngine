@@ -53,14 +53,14 @@ void Dasher::manageStates(float delta) {
     Vector2 closestVecToPlr = getClosestPointToPlayerWithDistance(targetDist);
     // step two we cap the bagnibude
     Vector2 velToAdd = Vector2Scale(
-        Vector2Normalize(Vector2Subtract(closestVecToPlr, Position)),
+        Vector2Normalize(Vector2Subtract(closestVecToPlr, position)),
         delta * speed);
     // step c
     // add this to vel
     velocity = Vector2Add(velocity, velToAdd);
     // step 5
     // if we close enough we swap states
-    if(Vector2DistanceSqr(getPlayer()->Position, Position) <=
+    if(Vector2DistanceSqr(getPlayer()->position, position) <=
         maximumDist * maximumDist)
       // we close enough :D
       setState(winding);
@@ -89,14 +89,14 @@ void Dasher::manageStates(float delta) {
     if(getStateTime() > dashTime)
       setState(recovery);
     // we also gotta check some collision shtuff
-    if(Vector2DistanceSqr(Position, getPlayer()->Position) <
+    if(Vector2DistanceSqr(position, getPlayer()->position) <
         (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       // for psuedo i-frames
       ((Player*)getPlayer())->getHealthManager()->applyDamage(damage);
       setState(recovery);
       // then we do a bounce
       Vector2 scaledOffset =
-          Vector2Normalize(Vector2Subtract(getPlayer()->Position, Position));
+          Vector2Normalize(Vector2Subtract(getPlayer()->position, position));
       scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x,
           scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
       velocity =

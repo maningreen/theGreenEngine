@@ -49,9 +49,9 @@ public:
 
   void fireBullet();
 
-  void Process(float delta) override;
-  void Render() override;
-  void Init() override;
+  void process(float delta) override;
+  void render() override;
+  void init() override;
   float getLifetime();
 
   Vector2 getInput();

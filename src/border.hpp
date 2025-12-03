@@ -11,7 +11,7 @@ class Border : public Entity2D {
   public:
     static float length;
 
-    virtual void Render();
+    virtual void render();
 
     Border();
     ~Border();

@@ -28,7 +28,7 @@ float Laser::getDefaultWidth() {
 }
 
 void Laser::lookAt(Vector2 v) {
-  Vector2 vecTo = Border::getShortestPathToPoint(Position, v);
+  Vector2 vecTo = Border::getShortestPathToPoint(position, v);
   rotation = atan2f(vecTo.y, vecTo.x);
   length = Vector2Length(vecTo);
 }
@@ -39,14 +39,14 @@ bool Laser::getBreaks() {
 
 bool Laser::getBreaksX() {
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
-  Vector2 preWrap = Vector2Add(Position, localOffset);
+  Vector2 preWrap = Vector2Add(position, localOffset);
   Vector2 endPos = Border::wrapPos(preWrap);
   return endPos.x != preWrap.x;
 }
 
 bool Laser::getBreaksY() {
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
-  Vector2 preWrap = Vector2Add(Position, localOffset);
+  Vector2 preWrap = Vector2Add(position, localOffset);
   Vector2 endPos = Border::wrapPos(preWrap);
   return endPos.y != preWrap.y;
 }
@@ -55,35 +55,35 @@ Vector2 Laser::getBreakingPoint() {
   if(!getBreaks())
     return Vector2Zero();
   Vector2 endPos = getEndPoint();
-  float slope = (endPos.y - Position.y) / (endPos.x - Position.x);
+  float slope = (endPos.y - position.y) / (endPos.x - position.x);
   float xLen, yLen;
   if(getBreaksX()) {
-    xLen = Border::length - abs(Position.x);
-    yLen = xLen * slope + Position.y;
+    xLen = Border::length - abs(position.x);
+    yLen = xLen * slope + position.y;
   } else if(getBreaksY()) {
-    yLen = Border::length - abs(Position.y);
-    xLen = xLen / slope + Position.y;
+    yLen = Border::length - abs(position.y);
+    xLen = xLen / slope + position.y;
   }
-  return (Vector2){ Position.x + xLen, Position.y + yLen};
+  return (Vector2){ position.x + xLen, position.y + yLen};
 }
 
 Vector2 Laser::getEndPoint() {
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
-  return Border::wrapPos(Vector2Add(Position, localOffset));
+  return Border::wrapPos(Vector2Add(position, localOffset));
 }
 
-void Laser::Render() {
+void Laser::render() {
   if(!shouldRender) //:)
     return;
   Vector2 localOffset = (Vector2){cosf(rotation) * length, sinf(rotation) * length};
-  Vector2 rayOrigin = Position;
+  Vector2 rayOrigin = position;
   Vector2 preWrap = Vector2Add(rayOrigin, localOffset);
   Vector2 endPos = Border::wrapPos(preWrap);
 
   int i = 0;
 
   if(preWrap.x == endPos.x && preWrap.y == endPos.y)
-    DrawLineEx(Position, endPos, width, colour);
+    DrawLineEx(position, endPos, width, colour);
   else while(abs(preWrap.x - endPos.x) > 10 || abs(preWrap.y - endPos.y) > 10) {
       //get intersection
       bool left = localOffset.x >= 0;

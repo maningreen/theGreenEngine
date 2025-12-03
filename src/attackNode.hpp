@@ -38,8 +38,8 @@ private:
   static void manageAttackIrregular();
 
 public:
-  void Render() override;
-  void Process(float delta) override;
+  void render() override;
+  void process(float delta) override;
 
   int getIndex();
 

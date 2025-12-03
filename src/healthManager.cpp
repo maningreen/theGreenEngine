@@ -55,13 +55,13 @@ void HealthManager::setMaxHealth(float m) {
 
 HealthManager::~HealthManager() {}
 
-void HealthManager::Process(float delta) {
+void HealthManager::process(float delta) {
   setBarPercentage(health / maxHealth);
-  getBar()->Process(delta);
+  getBar()->process(delta);
   if(!getPositionPointer()) //should be 0 if not real
     return;
   // now we know we gots to set our position
-  getBar()->Position = Vector2Add(*getPositionPointer(), //then we want to offset it say... down/right depending on if it shrinks on it's y or not
+  getBar()->position = Vector2Add(*getPositionPointer(), //then we want to offset it say... down/right depending on if it shrinks on it's y or not
       getBar()->ShrinkY ? (Vector2){90, 0} : (Vector2){0, targetDistance});
-  getBar()->Position = Vector2Subtract(Vector2Add(*getPositionPointer(), !getBar()->ShrinkY ? (Vector2){0, targetDistance} : (Vector2){targetDistance, 0}), !getBar()->ShrinkY ? (Vector2){ getBar()->Dimensions.x / 2.0f, 0} : (Vector2){0, getBar()->Dimensions.y / 2.0f});
+  getBar()->position = Vector2Subtract(Vector2Add(*getPositionPointer(), !getBar()->ShrinkY ? (Vector2){0, targetDistance} : (Vector2){targetDistance, 0}), !getBar()->ShrinkY ? (Vector2){ getBar()->Dimensions.x / 2.0f, 0} : (Vector2){0, getBar()->Dimensions.y / 2.0f});
 }

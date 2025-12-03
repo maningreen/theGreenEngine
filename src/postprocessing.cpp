@@ -5,15 +5,15 @@
 #include "include.h"
 
 PostProcessingData::PostProcessingData() : Entity("Data") {
-  ScreenDems = (Vector2){(float)GetScreenWidth(), (float)GetScreenHeight()};
-  Texture = LoadRenderTexture(2 * Border::length, 2 * Border::length);
+  screenDems = (Vector2){(float)GetScreenWidth(), (float)GetScreenHeight()};
+  texture = LoadRenderTexture(2 * Border::length, 2 * Border::length);
   pixelShader = LoadShader(0, "resources/shaders/pixel.glsl");
   pixelShaderScreenDimensionsLoc = GetShaderLocation(pixelShader, "screenDems");
-  SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &ScreenDems, SHADER_UNIFORM_VEC2);
+  SetShaderValue(pixelShader, pixelShaderScreenDimensionsLoc, &screenDems, SHADER_UNIFORM_VEC2);
   addTag("PostProcessingData");
 }
 
-void PostProcessingData::Process(float delta) {
+void PostProcessingData::process(float delta) {
   // Vector2 currentDems = {(float)GetScreenWidth(), (float)GetScreenHeight()};
   // if(*(long*)&currentDems != *(long*)&ScreenDems) { //fancy way to not do an ||
     // ScreenDems = currentDems;
@@ -23,10 +23,10 @@ void PostProcessingData::Process(float delta) {
   // }
 }
 
-void PostProcessingData::Render() {}
+void PostProcessingData::render() {}
 
 PostProcessingData::~PostProcessingData() {
-  UnloadRenderTexture(Texture);
+  UnloadRenderTexture(texture);
   UnloadShader(pixelShader);
 }
 

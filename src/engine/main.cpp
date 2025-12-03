@@ -7,8 +7,8 @@
 
 void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   for(int i = 0; i < children->size(); i++) {
-    (*children)[i]->Process(delta);
-    manageChildrenProcess(&(*children)[i]->Children, delta);
+    (*children)[i]->process(delta);
+    manageChildrenProcess(&(*children)[i]->children, delta);
     if(!(*children)[i]->getValid()) {
       (*children)[i]->kill();
       if(!(*children)[i]->getValid()) { // last chance!
@@ -21,8 +21,8 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
 
 void manageChildrenRendering(std::vector<Entity*>* children) {
   for(Entity* child : *children) {
-    manageChildrenRendering(&child->Children);
-    child->Render();
+    manageChildrenRendering(&child->children);
+    child->render();
   }
 }
 
@@ -44,15 +44,15 @@ int main() {
 
   float delta = 1.0f / 60.0f;
   while(!WindowShouldClose() && Root.getValid()) {
-    manageChildrenProcess(&Root.Children, delta);
+    manageChildrenProcess(&Root.children, delta);
 
     BeginDrawing();
 
-    PreRendering(&Root.Children);
+    PreRendering(&Root.children);
 
-    manageChildrenRendering(&Root.Children);
+    manageChildrenRendering(&Root.children);
 
-    PostRendering(&Root.Children);
+    PostRendering(&Root.children);
 
     EndDrawing();
   }

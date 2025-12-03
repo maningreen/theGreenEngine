@@ -49,18 +49,18 @@ Bullet::Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime
   col = DefaultColour;
 }
 
-void Bullet::Init() {}
+void Bullet::init() {}
 
 Bullet::~Bullet() {}
 
-void Bullet::Process(float delta) {
+void Bullet::process(float delta) {
   //check if colliding with enemy
   for(int i = 0; i < stepCount; i++) {
     if(ManageCollision()) {
       killDefered();
       return;       //make it smart as shit
     }
-    Position = Vector2Add(Position, Vector2Scale(velocity, delta / stepCount));
+    position = Vector2Add(position, Vector2Scale(velocity, delta / stepCount));
     if(shouldWrap)
       Border::wrapEntity(this);
   }
@@ -73,12 +73,12 @@ bool Bullet::ManageCollision() {
   return false;
 }
 
-void Bullet::Render() {
+void Bullet::render() {
   //TIME FOR SOME FUCKY FUN MATH :DDDDDDD
   //so here is our wanted result
   //we want a nice rectangle (dimensions BulletDimensions)
   //with center Position
   //IF ONLY THERE WAS A FUNCTION FOR THIS
   //he said with a gleam in his eye
-  DrawRectanglePro((Rectangle){Position.x, Position.y, bulletDimensions.x, bulletDimensions.y}, (Vector2){bulletDimensions.x / 2.0f, bulletDimensions.y / 2.0f}, -Angle * 180 / M_PI, col);
+  DrawRectanglePro((Rectangle){position.x, position.y, bulletDimensions.x, bulletDimensions.y}, (Vector2){bulletDimensions.x / 2.0f, bulletDimensions.y / 2.0f}, -Angle * 180 / M_PI, col);
 }

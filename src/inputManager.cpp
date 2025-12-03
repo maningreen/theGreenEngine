@@ -41,7 +41,7 @@ void InputManager::removeVectorBind(int i) {
     vectorBinds.erase(vectorBinds.begin() + i);
 }
 
-void InputManager::Process(float delta) {
+void InputManager::process(float delta) {
   Vector2 input = getInputVector(up, down, left, right);
   for(int i = 0; i < binds.size(); i++) {
     // it's keybind

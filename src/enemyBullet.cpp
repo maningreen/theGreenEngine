@@ -37,7 +37,7 @@ bool EnemyBullet::ManageCollision() {
   if(Enemy::getPlayer() == nullptr)
     return false;
 
-  bool hit = CheckCollisionCircleRecEx(Enemy::getPlayer()->Position, Player::hitboxRadius, Position, bulletDimensions, Angle); //(we've done it all before)
+  bool hit = CheckCollisionCircleRecEx(Enemy::getPlayer()->position, Player::hitboxRadius, position, bulletDimensions, Angle); //(we've done it all before)
   if(hit)
     ((Player*)Enemy::getPlayer())->getHealthManager()->applyDamage(damage);
   return hit;

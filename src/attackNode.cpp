@@ -28,7 +28,7 @@ float AttackNode::damage = 60000;
 
 AttackNode::AttackNode(Vector2 p)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
-  las = new Laser(Position, 0, 500, WHITE);
+  las = new Laser(position, 0, 500, WHITE);
   las->shouldRender = false;
   addChild(las);
   index = nodes.size();
@@ -37,7 +37,7 @@ AttackNode::AttackNode(Vector2 p)
 
 AttackNode::AttackNode(Vector2 p, bool x)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
-  las = new Laser(Position, 0, 500, WHITE);
+  las = new Laser(position, 0, 500, WHITE);
   las->shouldRender = false;
   addChild(las);
 }
@@ -108,16 +108,16 @@ int AttackNode::getBreakInPolygon() {
 
 AttackNode AttackNode::unwrapRelative() {
   AttackNode x = *this;
-  if(abs(x.Position.x - getPrev()->Position.x) > Border::length) {
-    if(x.Position.x > 0)
-      x.Position.x -= Border::length * 2;
+  if(abs(x.position.x - getPrev()->position.x) > Border::length) {
+    if(x.position.x > 0)
+      x.position.x -= Border::length * 2;
     else
-      x.Position.x += Border::length * 2;
-  } else if(abs(x.Position.y - getPrev()->Position.y) > Border::length) {
-    if(x.Position.y > 0)
-      x.Position.y -= Border::length * 2;
+      x.position.x += Border::length * 2;
+  } else if(abs(x.position.y - getPrev()->position.y) > Border::length) {
+    if(x.position.y > 0)
+      x.position.y -= Border::length * 2;
     else
-      x.Position.y += Border::length * 2;
+      x.position.y += Border::length * 2;
   }
   return x;
 }
@@ -127,7 +127,7 @@ float AttackNode::getArea() {
   if(nodes.size() < 3)
     return 0;
   if(getTriangleIsRegular())
-    return calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+    return calculateTriangleArea(nodes[0]->position, nodes[1]->position, nodes[2]->position);
   return 0;
 }
 
@@ -135,7 +135,7 @@ float AttackNode::getArea(float theta) {
   if(nodes.size() < 3)
     return 0;
   if(getTriangleIsRegular(theta))
-    return calculateTriangleArea(nodes[0]->Position, nodes[1]->Position, nodes[2]->Position);
+    return calculateTriangleArea(nodes[0]->position, nodes[1]->position, nodes[2]->position);
   return 0;
 }
 
@@ -148,27 +148,27 @@ bool AttackNode::getTriangleIsRegular(float angleSum) {
   return getTriangleIsValid(angleSum);
 }
 
-void AttackNode::Render() {
-  DrawCircleV(Position, radius, WHITE);
+void AttackNode::render() {
+  DrawCircleV(position, radius, WHITE);
 }
 
-void AttackNode::Process(float delta) {
+void AttackNode::process(float delta) {
   lifetime += delta;
 
   if(nodes.size() >= 3) {
     AttackNode* next = getNext();
-    Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->Position);
+    Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->position);
     if(!las->shouldRender) {
       las->shouldRender = true;
       lifetime = Player::player->getDashManager()->regenRate + -lifetimeAfterAttack;
-      las->lookAt(next->Position);
+      las->lookAt(next->position);
       radius = defaultRadius;
     }
     las->length = Vector2Length(vectorToNext) - (next->radius + radius);
     las->width = sqrt(radius);
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
     // las->position yeah
-    las->Position = Position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
+    las->position = position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
     if(index == 0)
       manageAttack();
   } else if(lifetime <= 1)
@@ -202,7 +202,7 @@ void AttackNode::manageAttack() {
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
         effectivePos[i] =
-            Border::unwrapPositionRelative(en->Position, nodes[i]->Position);
+            Border::unwrapPositionRelative(en->position, nodes[i]->position);
 
       // then we can use a regular collision
       // checking collision circle triangle, easy peasy, lemon squeazy
@@ -211,12 +211,12 @@ void AttackNode::manageAttack() {
         avg = Vector2Add(avg, effectivePos[i]);
       avg = Vector2Scale(avg, 1.0f / 3.0f);
 
-      Vector2 vecToAvg = Vector2Subtract(avg, en->Position);
+      Vector2 vecToAvg = Vector2Subtract(avg, en->position);
       float dist = Vector2Length(vecToAvg);
       float r = en->radius;
 
       float min = dist < r ? dist : r;
-      Vector2 p = Vector2Add(en->Position, Vector2Scale(vecToAvg, min / dist));
+      Vector2 p = Vector2Add(en->position, Vector2Scale(vecToAvg, min / dist));
       if(CheckCollisionPointTriangle(p,
              effectivePos[0],
              effectivePos[1],
@@ -225,15 +225,15 @@ void AttackNode::manageAttack() {
     } else {
       float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
-        Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().Position;
+        Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().position;
         Vector2 closestPoint;
 
         // this is an external function written in haskell
-        getClosestPointFromLineAndPoint(&nodes[i]->Position,
+        getClosestPointFromLineAndPoint(&nodes[i]->position,
             &unwrappedNext,
-            &en->Position,
+            &en->position,
             &closestPoint);
-        float distance = Vector2Distance(closestPoint, en->Position);
+        float distance = Vector2Distance(closestPoint, en->position);
         minimumDistance = min(distance, minimumDistance);
       }
       if(minimumDistance <= en->radius)

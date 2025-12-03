@@ -9,14 +9,14 @@ class Particle : public Entity2D {
   float maxLifetime;
 
   public:
-    float Rotation;
-    float RotationalVelocity;
-    float Length;
-    Vector2 Velocity;
-    Color Colour;
+    float rotation;
+    float rotationalVelocity;
+    float length;
+    Vector2 velocity;
+    Color colour;
 
-    void Process(float delta) override;
-    void Render() override;
+    void process(float delta) override;
+    void render() override;
 
     float GetLifetime();
 

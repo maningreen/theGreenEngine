@@ -9,6 +9,11 @@
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
 
+namespace mod {
+  const std::string poolPath = "resources/mods/pool";
+  const std::string initPath = "resources/mods/init";
+};
+
 struct Mod {
   std::string name;
 
@@ -19,6 +24,10 @@ struct Mod {
   std::optional<sol::function> onEnemySpawn;
 
   Mod(std::string name, sol::function onInit);
+  Mod(fs::path);
+
+  // searches for a mod names so in `pool`
+  static std::optional<Mod> fromName(std::string name);
 
   // will return std::nullopt when there is no onInit
   static std::optional<Mod> fromTable(std::string name, sol::table);
@@ -28,7 +37,7 @@ struct Mod {
 
 class ModManager {
   private:
-    sol::state lua;
+    static sol::state lua;
 
     // this function doesn't call onInit, only sets up the lua
     void initLua();
@@ -67,10 +76,7 @@ class ModManager {
     // removes a mod.
     void removeMod(int i);
 
-    sol::state& getLua();
-
-    static const std::string poolPath;
-    static const std::string initPath;
+    static sol::state& getLua();
 };
 
 #endif

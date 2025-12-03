@@ -49,7 +49,7 @@ void Spiraler::manageStates(float delta) {
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToPoint), speed * delta);
     velocity = Vector2Add(velocity, velToAdd);
     //then if we're close enough to our target pos we break
-    if(Vector2DistanceSqr(Position, targetPosition) <= 100 * 100) {
+    if(Vector2DistanceSqr(position, targetPosition) <= 100 * 100) {
       swapToSpinning();
       setState(spinning);
     }
