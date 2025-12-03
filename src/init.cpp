@@ -11,6 +11,7 @@
 #include "inputManager.hpp"
 #include "sniper.hpp"
 #include "spiral.hpp"
+#include "console.hpp"
 #include "time.h"
 
 extern "C" {
@@ -19,10 +20,13 @@ extern "C" {
 
 // #define shader
 
+Console* console = new Console;
+
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
   root->addChild(new PostProcessingData());
+  root->addChild(console);
   Player* plr = new Player("Player", (Vector2){0, 0});
   root->addChild(plr);
   root->addChild(new Border());
@@ -67,4 +71,5 @@ void PostRendering(std::vector<Entity*>* entities) {
 #endif
 
   DrawFPS(0, 0);
+  console->postProcessingRender();
 }

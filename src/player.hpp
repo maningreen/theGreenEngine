@@ -19,7 +19,7 @@ class Player : public Entity2D {
 
     HealthManager* healthManager;
     DashManager dashManager;
-    InputManager* inputManager;
+    static InputManager* inputManager;
 
     CameraEntity* cam;
 
@@ -58,7 +58,7 @@ public:
 
   HealthManager* getHealthManager();
   DashManager* getDashManager();
-  InputManager* getInputManager();
+  static InputManager* getInputManager();
 
   static bool addEnemy(Enemy*);
   static bool removeEnemy(Enemy*);

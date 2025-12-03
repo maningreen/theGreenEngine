@@ -24,6 +24,8 @@
 #include <iostream>
 #include <string>
 
+InputManager* Player::inputManager = new InputManager(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey, keybinds());
+
 Key Player::upKey = KEY_W;
 Key Player::downKey = KEY_S;
 Key Player::leftKey = KEY_A;
@@ -32,7 +34,7 @@ Key Player::rightKey = KEY_D;
 Key Player::dashKey = KEY_SPACE;
 
 Key Player::shootKey = KEY_ENTER;
-Key Player::shootKeyMouse = MOUSE_LEFT_BUTTON;
+Key Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
 Player* Player::player = nullptr;
 
@@ -191,7 +193,8 @@ Player::Player(const std::string& name, Vector2 position)
   );
   addChild(healthManager);
 
-  inputManager = new InputManager(upKey, downKey, leftKey, rightKey, keybinds());
+  if(!inputManager)
+    inputManager = new InputManager(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey, keybinds());
   inputManager->addBind(keybind(
     shootKey,
     [this](){ 
@@ -241,11 +244,14 @@ Player::Player(const std::string& name, Vector2 position)
 Player::~Player() { 
   Enemy::setPlayer(nullptr); 
 
-  delete healthManager;
-  delete dashCooldownBar;
-  delete inputManager;
-  delete cam;
-  delete modManager;
+  if(getParent() == nullptr) {
+    delete healthManager;
+    delete dashCooldownBar;
+    delete inputManager;
+    inputManager = nullptr;
+    delete cam;
+    delete modManager;
+  }
 }
 
 void Player::init() { 
