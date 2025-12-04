@@ -7,6 +7,8 @@ class Console : public Entity {
   std::streambuf *oldCout;
   std::ostringstream newCout;
 
+  std::string typed;
+
 public:
   bool open;
 

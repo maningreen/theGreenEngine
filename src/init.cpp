@@ -20,13 +20,15 @@ extern "C" {
 
 // #define shader
 
-Console* console = new Console;
+Console* console;
 
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
   root->addChild(new PostProcessingData());
+  console = new Console;
   root->addChild(console);
+
   Player* plr = new Player("Player", (Vector2){0, 0});
   root->addChild(plr);
   root->addChild(new Border());
@@ -43,7 +45,15 @@ void PreRendering(std::vector<Entity*>* entities) {
   PostProcessingData* data = (PostProcessingData*)entities->front();
 
   BeginTextureMode(data->texture);
-  BeginMode2D((Camera2D){.offset = Vector2Zero(), .target = {-Border::length, -Border::length}, .rotation = 0, .zoom = 1});
+  BeginMode2D((Camera2D){
+    .offset = Vector2Zero(),
+    .target = {
+      -Border::length,
+      -Border::length
+    },
+    .rotation = 0,
+    .zoom = 1
+  });
 }
 
 void PostRendering(std::vector<Entity*>* entities) {
