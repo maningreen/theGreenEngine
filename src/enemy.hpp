@@ -48,6 +48,9 @@ class Enemy : public Entity2D {
     void death() override;
     void init() override;
 
+    virtual void onDeath() {};
+    virtual void onSpawn() {};
+
     virtual void manageStates(float delta) {};
     virtual void dropHealth() {};
 

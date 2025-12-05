@@ -1,7 +1,40 @@
+#include "customEnemy.hpp"
+#include "dasher.hpp"
+#include "enemy.hpp"
+#include "engine/entity.hpp"
 #include "mod.hpp"
 #include "player.hpp"
 #include "border.hpp"
 #include "player.hpp"
+#include "sniper.hpp"
+#include "spiral.hpp"
+#include <optional>
+#include <sol/forward.hpp>
+
+struct maybe {
+  void* value;
+  bool valid;
+
+  maybe() {
+    valid = false;
+    value = nullptr;
+  }
+
+  template<typename T>
+  maybe(T x) {
+    value = new T;
+    *(T*)value = x;
+  }
+
+  maybe(void* x) {
+    value = x;
+  }
+
+  ~maybe() {
+    if(valid)
+      delete (int*)value;
+  }
+};
 
 sol::state ModManager::lua;
 
@@ -189,11 +222,58 @@ void ModManager::initLua() {
     "addSpawnHook",
     &Enemy::addSpawnHook
   );
+  enemy.set_function(
+    "spawnEnemy",
+    [](Vector2 x){
+      Enemy* y = new Enemy(x); 
+      Entity::getRoot()->addChild(y);
+      return y;
+    }
+  );
+  enemy.set_function(
+    "spawnSpiraler",
+    [](Vector2 x){
+      Spiraler* y = new Spiraler(x); 
+      Entity::getRoot()->addChild(y);
+      return y;
+    }
+  );
+  enemy.set_function(
+    "spawnDasher",
+    [](Vector2 x){
+      Dasher* y = new Dasher(x); 
+      Entity::getRoot()->addChild(y);
+      return y;
+    }
+  );
+  enemy.set_function(
+    "spawnSniper",
+    [](Vector2 x){
+      Sniper* y = new Sniper(x); 
+      Entity::getRoot()->addChild(y);
+      return y;
+    }
+  );
+  // enemy.set_function(
+    // ""
+  // )
 
   sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
   nb["theta"] = &NodeBullet::theta;
   nb["lifetime"] = &NodeBullet::lifetime;
   nb["targetLifetime"] = &NodeBullet::targetLifetime;
+
+  sol::usertype<maybe> mb = lua.new_usertype<maybe>("maybe");
+  mb["valid"] = &maybe::valid;
+  mb["value"] = &maybe::value;
+
+  sol::table maybeTable = lua["Maybe"].get_or_create<sol::table>();
+  mb["just"] = [](void* x){
+    return maybe(x);
+  };
+  mb["nothing"] = [](){
+    return maybe();
+  };
 
   sol::table nodeBullet = lua["NodeBullet"].get_or_create<sol::table>();
   nodeBullet["speed"] = &NodeBullet::speed;
@@ -210,6 +290,16 @@ void ModManager::initLua() {
     return Border::getShortestPathToPoint(a, b);
   });
   border["getDistance"] = &Border::getDistance;
+
+  sol::table customEnemy = lua["CustomEnemy"].get_or_create<sol::table>();
+  customEnemy["addCustomEnemy"] = &CustomEnemy::addCustomEnemy;
+  customEnemy["spawnEnemy"] = [](std::string name, Vector2 p){
+    std::optional<CustomEnemy*> ret = CustomEnemy::spawnEnemy(name);
+    if(ret.has_value())
+      return maybe((void*)ret.value());
+    else 
+      return maybe();
+  };
 }
 
 void ModManager::loadMods(Entity2D* plr) {

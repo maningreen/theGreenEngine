@@ -165,95 +165,6 @@ There are multiple custom types defined, including:
   - enemy
   - player bullet
 
-There are also global tables defined
-  - Global
-    - `setFriction() :: Float -> Void`
-      - sets the global frictional constant
-      - example: `setFriction(1)`
-    - `getFriction() :: Float`
-      - gets the global frictional constant
-      - example: `getFriction()`
-  - Enemy
-    - `addDeathHook :: (Enemy -> Void) -> void`
-      - Provide a function, which takes in an `enemy` and returns `void`,
-      and this function will be called every time an enemy is killed
-      - example: 
-        ```lua
-        addDeathHook(function(enemy)
-            print("Enemy killed!")
-        end)
-        ```
-    - `addSpawnHook() :: (Enemy -> Void) -> Void`
-      - Similar to `addDeathHook`, Provide a function, which takes an `enemy`, and returns `void`
-      this function will be called every time an enemy is spawned
-      - example:
-      ```lua
-        addSpawnHook(function(enemy)
-            print("Enemy Spawned!")
-        end)
-      ```
-  - Border
-    - The border table is a set of abstract functions used to implemet wrapping.
-
-    - `length :: Float`
-      - the lenght from the origin (center) to one side. The total length of one side is `2 * length`
-
-    - `wrapEntity() :: Entity -> Void`
-      - if an "entity" (a base internal class) is out of bounds, it's position will be wrapped around to be inside the border.
-
-    - `wrapPos() :: Vector2 -> Vector2`
-      - if a vector2 is out of bounds, it's position will be wrapped around to be inside the border.
-
-    - `wrapPosX() :: Vector2 -> Vector2`
-      - if a vector2's X position is out of bounds, it's X position will be wrapped around to be inside the border.
-
-    - `wrapPosY() :: Vector2 -> Vector2`
-      - if a vector2's Y position is out of bounds, it's Y position will be wrapped around to be inside the border.
-
-    - `getShortestPathToPoint() :: Vector2 -> Vector2 -> Vector2`
-      - returns the effective equivilent of `b - a`, with the vector to, wrapped.
-
-    - `getDistance() :: Vector2 -> Vector2 -> Float`
-      - returns the effective distance between two points.
-  - NodeBullet
-
-    - `speed :: Float`
-      - the speed (px / s) of all the bullets.
-
-    - `radius :: Float`
-      - the visual radius of the bullets.
-
-    - `color :: Color`
-      - the color of the bullets.
-  - Player
-
-    - `defaultMaxHealth :: Float`
-      - the default maximum health of the player
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    - `defaultDashSpeed :: Float`
-      - the default dash speed (px / s) of the player
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    - `defaultDashTime :: Float`
-      - the default length a dash lasts (s) for the player
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    - `defaultDashControl :: Float`
-      - the default 'control' the player has over the direction a dash. (arbitrary, bigger == more)
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    - `defaultMaxDashCount :: Int`
-      - the default maximum amount of dashes the player has.
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    - `defaultDashCooldown :: Float`
-      - the default minimum amount of time between ending a dash and beginning a new one.
-      - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
-
-    -`particleSpawnTime`
-      - The time (s) between spawning the cool little exhaust particles.
-
 ### Types, in depth
 As mentioned there are multiple "types", implimented as classes in the back, but as tables for you, this is just if your curious, but doesn't amount to much.
 
@@ -435,7 +346,9 @@ Represents dashes, an abstract undefined resource, which is used for dashes.
 ##### Its youngest child Key
 
 Key is a number used to represent (get this) a key on the keyboard or a button on the mouse.
-"How do i find the value?", see [here](./keys.md), and just comb through
+"How do i find the value?", 2 ways:
+  1. For key A, use 'a', this will supply the ascii code
+  2. Comb through [./keys.md]
 
 ##### Its son keybind
 
@@ -548,7 +461,184 @@ The NodeBullet is a damageless bullet, which spawns an attack nod at its destina
 `targetLifetime :: Float`
 - the amount of time (s) the bullet will be alive.
 
-### A few more examples
+#### Maybe N
+
+A table that may or may not have another type.
+
+`valid :: Bool`
+- whether or not the type is valid
+
+`value :: N`
+- will cause an error if called unsafely.
+
+### Custom Enemies
+
+If you want to add a custom enemy, this is your guide.
+Enemies have some internal functions you must define first, then you must tell the game "hey please add this enemy into the rotation k? thx <3"
+
+Here's how to go about it.
+
+#### Defining an enemy
+
+Custom enemies are simply tables with a couple of internal functions,
+but in order to fully flesh out an enemy you must call a constructor,
+which takes in a table,
+the table must have the following attributes.
+Unless stated otherwise,
+all of the following are necessary.
+If you don't supply all required,
+it will inform you in the console.
+
+```lua
+{
+    manageStates = function(self, delta) end,
+    dropHealth = function(self) end,
+    onSpawn = function(self) end, -- OPTIONAL
+    onDeath = function(self) end, -- OPTIONAL
+    name = "example", -- the name used to find the enemy. *** MUST BE UNIQUE ***, if not, spawns undefined behavior
+    color = color(255, 255, 255),
+    radius = 100,
+    maxHealth = 10,
+    initialState = 1,
+}
+```
+
+This is a minimal example of a valid enemy.
+Beyond this, treat it like a standard enemy.
+
+But how do i add this enemy to the global pool? See the `CustomEnemy` table
+
+## Global tables
+
+Global tables generally have internal static variables, and or functions.
+These tables are effectively namespaces.
+
+### Global
+
+`setFriction() :: Float -> Void`
+  - sets the global frictional constant
+  - example: `setFriction(1)`
+`getFriction() :: Float`
+  - gets the global frictional constant
+  - example: `getFriction()`
+`getRoot() :: Entity`
+  - gets the "root" entity
+
+### Enemy
+`addDeathHook :: (Enemy -> Void) -> void`
+
+  - Provide a function, which takes in an `enemy` and returns `void`,
+  and this function will be called every time an enemy is killed
+  - example: 
+    ```lua
+    Enemy.addDeathHook(function(enemy)
+       print("Enemy killed!")
+    end)
+    ```
+`addSpawnHook() :: (Enemy -> Void) -> Void`
+  - Similar to `addDeathHook`, Provide a function, which takes an `enemy`, and returns `void`
+  this function will be called every time an enemy is spawned
+  - example:
+  ```lua
+  Enemy.addSpawnHook(function(enemy)
+    print("Enemy Spawned!")
+  end)
+  ```
+`spawnEnemy() :: Vector2 -> Enemy`
+  - This function spawns a dummy enemy at the coordinates specified
+  - Enemy returned is automatically added to the entity heirarchy
+`spawnSpiraler() :: Vector2 -> Enemy`
+  - This function spawns a spiraler enemy at the coordinates specified
+  - Enemy returned is automatically added to the entity heirarchy
+`spawnDasher() :: Vector2 -> Enemy`
+  - This function spawns a dasher enemy at the coordinates specified
+  - Enemy returned is automatically added to the entity heirarchy
+`spawnSniper() :: Vector2 -> Enemy`
+  - This function spawns a dasher enemy at the coordinates specified
+  - Enemy returned is automatically added to the entity heirarchy
+
+### Border
+The border table is a set of abstract functions used to implemet wrapping.
+
+`length :: Float`
+  - the lenght from the origin (center) to one side. The total length of one side is `2 * length`
+
+`wrapEntity() :: Entity -> Void`
+  - if an "entity" (a base internal class) is out of bounds, it's position will be wrapped around to be inside the border.
+
+`wrapPos() :: Vector2 -> Vector2`
+  - if a vector2 is out of bounds, it's position will be wrapped around to be inside the border.
+
+`wrapPosX() :: Vector2 -> Vector2`
+  - if a vector2's X position is out of bounds, it's X position will be wrapped around to be inside the border.
+
+`wrapPosY() :: Vector2 -> Vector2`
+  - if a vector2's Y position is out of bounds, it's Y position will be wrapped around to be inside the border.
+
+`getShortestPathToPoint() :: Vector2 -> Vector2 -> Vector2`
+ - returns the effective equivilent of `b - a`, with the vector to, wrapped.
+
+`getDistance() :: Vector2 -> Vector2 -> Float`
+  - returns the effective distance between two points.
+
+### NodeBullet
+
+`speed :: Float`
+  - the speed (px / s) of all the bullets.
+
+`radius :: Float`
+  - the visual radius of the bullets.
+
+`color :: Color`
+ - the color of the bullets.
+
+### Player
+
+`defaultMaxHealth :: Float`
+  - the default maximum health of the player
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`defaultDashSpeed :: Float`
+  - the default dash speed (px / s) of the player
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`defaultDashTime :: Float`
+  - the default length a dash lasts (s) for the player
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`defaultDashControl :: Float`
+  - the default 'control' the player has over the direction a dash. (arbitrary, bigger == more)
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`defaultMaxDashCount :: Int`
+  - the default maximum amount of dashes the player has.
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`defaultDashCooldown :: Float`
+  - the default minimum amount of time between ending a dash and beginning a new one.
+  - READ ONLY (if you try writing it *will* explode, and it *is* your fault)
+
+`particleSpawnTime :: Float`
+  - The time (s) between spawning the cool little exhaust particles.
+
+### CustomEnemy
+
+`addCustomEnemy() :: EnemyTable -> Void`
+  - adds a custom enemy to the global enemy pool.
+
+`spawnEnemy() :: String -> Vector2 -> Maybe Enemy`
+  - spawns an enemy at the given coordinates, searches for name.
+  - returns nothing if the given enemy's name was not found
+
+### Maybe
+
+`just :: a -> Maybe a`
+  - returns a maybe with a value.
+
+`nothing :: Maybe a`
+  - a maybe with no value.
+
+## A few more examples
 
 This mod will give one free dash.
 ```lua
