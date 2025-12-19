@@ -1,9 +1,14 @@
-math.randomseed(os.time())
+-- returns (-1) -> 1
+local function getRand()
+  local x = math.random()
+  local xPrime = x
+  return (xPrime - .5) * 2
+end
 
 return {
   onInit = function(plr)
-    plr.position.x = math.random(-Border.length, Border.length)
-    plr.position.y = math.random(-Border.length, Border.length)
+    -- plr.position.x = getRand() * Border.length
+    -- plr.position.y = getRand() * Border.length
     return 1
   end
 }

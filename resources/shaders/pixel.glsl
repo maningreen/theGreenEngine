@@ -8,12 +8,12 @@ in vec4 fragColor;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
-uniform vec2 screenDems;
+uniform float leng = 10;
 
 // Output fragment color
 out vec4 finalColor;
 
-uniform float pixelLength = .002;
+uniform float pixelLength = 5;
 
 vec4 to4Bit(vec4 i) {
   // we do 15 becase 2^4 - 1 is 15, so there're 15 shades of any colour in 4 bit
@@ -24,7 +24,7 @@ void main()
 {
   vec2 pos = fragTexCoord;
 
-  pos = vec2(floor(pos.x / pixelLength) * pixelLength, floor(pos.y / pixelLength) * pixelLength);
+  pos = vec2(floor(fragTexCoord.x / (pixelLength / leng)) * pixelLength / leng, floor(fragTexCoord.y / (pixelLength / leng)) * pixelLength / leng);
 
   vec4 col = texture(texture0, pos);
 
