@@ -17,18 +17,8 @@ in
         gnumake # build backend
         gcc # c++ compiler package
         ghc # haskell compiler
-        haskell-language-server
         sol2 # lib for lua
         lua # lua itself
       ]
       ++ raylibPackages;
-    shellHook = ''
-      rm compile_commands.json
-      echo "Creating compile_commands.json (for clangd)"
-      echo "Cleaning..."
-      make clean --quiet
-      echo "Building..."
-      ${pkgs.lib.getExe pkgs.bear} -- make -j $(nproc) --quiet
-      echo "compile_commands.json created!"
-    '';
   }

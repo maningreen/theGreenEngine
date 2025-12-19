@@ -18,33 +18,49 @@ extern "C" {
   extern void hs_init(int argc, char** argv);
 };
 
-// #define shader
+#define shader
 
-Console* console;
+Console* console = nullptr;
+CameraEntity* cameraEnt = nullptr;
+PostProcessingData* data = nullptr;
 
 void Init(Entity* root) {
-  hs_init(0, 0);
-  srand(time(0));
-  root->addChild(new PostProcessingData());
+  DEBUG;
   console = new Console;
-  root->addChild(console);
+  DEBUG;
+  hs_init(0, 0);
+  DEBUG;
+  srand(time(0));
+  DEBUG;
+  data = new PostProcessingData();
+  DEBUG;
+  root->addChild(data);
+  DEBUG;
+  root->addChild((Entity*)console);
+  DEBUG;
 
+  DEBUG;
   Player* plr = new Player("Player", (Vector2){0, 0});
-  root->addChild(plr);
-  root->addChild(new Border());
-  root->addChild(new Enemy({200, 200}));
-  root->addChild(new Enemy({1200, 200}));
+  DEBUG;
+  cameraEnt = plr->getCam();
+  DEBUG;
+  root->addChild((Entity*)plr);
+  DEBUG;
+  root->addChild((Entity*)new Border());
+  DEBUG;
+  root->addChild((Entity*)new Enemy({200, 200}));
+  DEBUG;
+  root->addChild((Entity*)new Enemy({1200, 200}));
+  DEBUG;
   // root->addChild(new Dasher({200, 200}));
   // root->addChild(new Spiraler({200, 200}));
   // root->addChild(new Sniper({200, 200}));
-  // InputManager* manager = new InputManager();
-  // root->addChild(manager);
 }
 
-void PreRendering(std::vector<Entity*>* entities) { 
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-
+void PreRendering(Entity* root) { 
+  DEBUG;
   BeginTextureMode(data->texture);
+  DEBUG;
   BeginMode2D((Camera2D){
     .offset = Vector2Zero(),
     .target = {
@@ -54,18 +70,20 @@ void PreRendering(std::vector<Entity*>* entities) {
     .rotation = 0,
     .zoom = 1
   });
+  DEBUG;
 }
 
-void PostRendering(std::vector<Entity*>* entities) {
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-  static CameraEntity* cameraEnt;
-  if(cameraEnt == nullptr)
-    cameraEnt = (CameraEntity*)Engine::searchTreeForEntity(entities, "Camera");
+void PostRendering(Entity* root) {
+  DEBUG;
   EndTextureMode();
+  DEBUG;
 
 #ifdef shader
+  DEBUG;
   BeginShaderMode(data->getShader());
+  DEBUG;
 #endif
+  DEBUG;
   BeginMode2D(
     (Camera2D){
       .offset = cameraEnt->Camera.offset, 
@@ -73,13 +91,43 @@ void PostRendering(std::vector<Entity*>* entities) {
       .rotation = 0, .zoom = cameraEnt->Camera.zoom
     }
   );
+  DEBUG;
 
-  DrawTexturePro(data->texture.texture, (Rectangle){0, 0, 3 * (float)data->texture.texture.width, 3 * -(float)data->texture.texture.height}, (Rectangle){-(float)data->texture.texture.width, -(float)data->texture.texture.height, 3 * (float)data->texture.texture.width, 3 * (float)data->texture.texture.height}, {0, 0}, 0, WHITE);
+  int countX = ceilf((float)GetScreenWidth() / Border::length) * 2 + 1;
+  int countY = ceilf((float)GetScreenHeight() / Border::length) * 2 + 1;
+  DEBUG;
+  DrawTexturePro(
+    data->texture.texture,
+    (Rectangle){
+      0,
+      0,
+      countX * (float)data->texture.texture.width,
+      countY * -(float)data->texture.texture.height
+    },
+    (Rectangle){
+      -((countX) / 2) * (float)data->texture.texture.width,
+      -((countY) / 2) * (float)data->texture.texture.height,
+      countX * (float)data->texture.texture.width,
+      countY * (float)data->texture.texture.height
+    },
+    (Vector2){
+      0,
+      0
+    },
+    0,
+    WHITE
+  );
+  DEBUG;
   EndMode2D();
+  DEBUG;
 #ifdef shader
+  DEBUG;
   EndShaderMode();
+  DEBUG;
 #endif
 
   DrawFPS(0, 0);
+  DEBUG;
   console->postProcessingRender();
+  DEBUG;
 }

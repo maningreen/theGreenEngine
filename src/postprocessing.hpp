@@ -7,20 +7,19 @@
 class PostProcessingData : public Entity {
   private:
     Shader pixelShader;
-    int pixelShaderScreenDimensionsLoc;
+    int lenLoc;
 
   public:
     RenderTexture2D texture;
     Vector2 screenDems;
 
-    virtual void render();
-    virtual void process(float data);
+    void render() override;
+    void process(float data) override;
 
     Shader getShader();
 
     PostProcessingData();
     ~PostProcessingData();
-
 };
 
 #endif

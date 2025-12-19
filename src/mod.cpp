@@ -1,22 +1,26 @@
 #include <filesystem>
-#include <sol/forward.hpp>
 #define SOL_ALL_SAFETIES_ON 1
+#include <sol/forward.hpp>
 
-#include <cstdio>
-#include <string>
 #include "mod.hpp"
+#include <cstdio>
 #include <sol/sol.hpp>
+#include <string>
 
 Mod::Mod(std::string n, sol::function init) {
   name = n;
   onInit = init;
 }
 
-#define MODTHING(var, table, functionName, key) if(sol::function function = table[key]) var.functionName = function; else var.functionName = std::nullopt
+#define MODTHING(var, table, functionName, key)                                \
+  if (sol::function function = table[key])                                     \
+    var.functionName = function;                                               \
+  else                                                                         \
+    var.functionName = std::nullopt
 
 std::optional<Mod> Mod::fromTable(std::string n, sol::table table) {
   sol::function onInit = table["onInit"];
-  if(!onInit.valid())
+  if (!onInit.valid())
     return std::nullopt;
   Mod x(n, onInit);
 

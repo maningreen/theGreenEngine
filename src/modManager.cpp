@@ -2,39 +2,16 @@
 #include "dasher.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
+#include "include.h"
 #include "mod.hpp"
 #include "player.hpp"
 #include "border.hpp"
 #include "player.hpp"
 #include "sniper.hpp"
 #include "spiral.hpp"
+#include <cstdio>
 #include <optional>
 #include <sol/forward.hpp>
-
-struct maybe {
-  void* value;
-  bool valid;
-
-  maybe() {
-    valid = false;
-    value = nullptr;
-  }
-
-  template<typename T>
-  maybe(T x) {
-    value = new T;
-    *(T*)value = x;
-  }
-
-  maybe(void* x) {
-    value = x;
-  }
-
-  ~maybe() {
-    if(valid)
-      delete (int*)value;
-  }
-};
 
 sol::state ModManager::lua;
 
@@ -60,7 +37,7 @@ void ModManager::onFire(Entity2D* x, NodeBullet* y) {
 
 void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
   for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++) {
-    if(m->onEnemyKill)
+    if(m->onEnemyKill.has_value())
       m->onEnemyKill.value()((Player*)x, y);
   }
 }
@@ -194,6 +171,7 @@ void ModManager::initLua() {
   sol::table global = lua["Global"].get_or_create<sol::table>();
   global.set_function("getFriction", [](){ return Entity2D::friction; });
   global.set_function("setFriction", [](float f){ Entity2D::friction = f; });
+  global.set_function("getPlayer", [](){ return (Player*)Enemy::getPlayer(); });
 
   en["position"] = &Enemy::position;
   en["velocity"] = &Enemy::velocity;
@@ -263,25 +241,14 @@ void ModManager::initLua() {
   nb["lifetime"] = &NodeBullet::lifetime;
   nb["targetLifetime"] = &NodeBullet::targetLifetime;
 
-  sol::usertype<maybe> mb = lua.new_usertype<maybe>("maybe");
-  mb["valid"] = &maybe::valid;
-  mb["value"] = &maybe::value;
-
-  sol::table maybeTable = lua["Maybe"].get_or_create<sol::table>();
-  mb["just"] = [](void* x){
-    return maybe(x);
-  };
-  mb["nothing"] = [](){
-    return maybe();
-  };
-
   sol::table nodeBullet = lua["NodeBullet"].get_or_create<sol::table>();
   nodeBullet["speed"] = &NodeBullet::speed;
   nodeBullet["radius"] = &NodeBullet::radius;
   nodeBullet["color"] = &NodeBullet::color;
 
   sol::table border = lua["Border"].get_or_create<sol::table>();
-  border["length"] = Border::length;
+  border["setLength"] = [](float l){ Border::length = l; };
+  border["getLength"] = [](){ return Border::length; };
   border["wrapEntity"] = &Border::wrapEntity;
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;
@@ -291,15 +258,32 @@ void ModManager::initLua() {
   });
   border["getDistance"] = &Border::getDistance;
 
-  sol::table customEnemy = lua["CustomEnemy"].get_or_create<sol::table>();
-  customEnemy["addCustomEnemy"] = &CustomEnemy::addCustomEnemy;
-  customEnemy["spawnEnemy"] = [](std::string name, Vector2 p){
-    std::optional<CustomEnemy*> ret = CustomEnemy::spawnEnemy(name);
-    if(ret.has_value())
-      return maybe((void*)ret.value());
-    else 
-      return maybe();
-  };
+  sol::table customEnTable = lua["CustomEnemy"].get_or_create<sol::table>();
+  customEnTable["addEnemy"] = &CustomEnemy::fromTable;
+  customEnTable["spawnEnemy"] = &CustomEnemy::spawnEnemy;
+
+  sol::usertype<CustomEnemy> customEn = lua.new_usertype<CustomEnemy>("customEnemy");
+  customEn["position"] = &CustomEnemy::position;
+  customEn["velocity"] = &CustomEnemy::velocity;
+  customEn["radius"] = &CustomEnemy::radius;
+  customEn["getStateTime"] = &CustomEnemy::getStateTime;
+  customEn["resetStateTime"] = &CustomEnemy::resetStateTime;
+  customEn["setState"] = &CustomEnemy::setState;
+  customEn["getState"] = &CustomEnemy::getState;
+  customEn["getHealth"] = &CustomEnemy::getHealthManager;
+  customEn["dropHealthPack"] = sol::overload(
+    [](CustomEnemy* self){
+      self->dropHealthPack();
+    },
+    [](CustomEnemy* self, float hp){
+      self->dropHealthPack(hp);
+    }
+  );
+  customEn["spawn"] = &CustomEnemy::onSpawnCustom;
+  customEn["death"] = &CustomEnemy::onDeathCustom;
+  customEn["manageState"] = &CustomEnemy::manageStateCustom;
+  customEn["dropHealth"] = &CustomEnemy::dropHealthCustom;
+  customEn["color"] = &CustomEnemy::colour;
 }
 
 void ModManager::loadMods(Entity2D* plr) {
@@ -319,8 +303,10 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
     return 1;
 
   // great, we continue
-  sol::table modTable = lua.script_file(path); // load the file
-  auto mod = Mod::fromTable(name, modTable); // parse the table
+  sol::lua_value modTable = lua.script_file(path); // load the file
+  if(!modTable.is<sol::table>()) 
+    return 1;
+  std::optional<Mod> mod = Mod::fromTable(name, modTable.as<sol::table>()); // parse the table
   if(mod.has_value()) // check validity
     addMod(mod.value(), plr); // if it's valid shablamo
 

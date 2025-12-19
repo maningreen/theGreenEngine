@@ -22,6 +22,7 @@ struct Mod {
   std::optional<sol::function> onFire;
   std::optional<sol::function> onEnemyKill;
   std::optional<sol::function> onEnemySpawn;
+  // std::optional<sol::function> process;
 
   Mod(std::string name, sol::function onInit);
   Mod(fs::path);
@@ -46,6 +47,9 @@ class ModManager {
 
     ModManager();
     ~ModManager();
+
+    // this function calls `process()` on all the mods
+    void process(float, Entity2D*);
 
     // this function calls `onDash` on all the mods
     void onDash(Entity2D*);

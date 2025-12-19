@@ -31,6 +31,8 @@ return {
     end,
     onKill = function()
     end
+    process = function()
+    end
 }
 ```
 
@@ -51,19 +53,23 @@ Here is a disection of all these functions:
 - onInit
   - called when mod is first added to the mod list, **required**
   - called once
-  - provides in arguments: player
+  - provides arguments: player
 - onDash
   - called every time the player has a valid dash
-  - provides in arguments: player
+  - provides arguments: player
 - onFire
   - called every time a valid bullet is shot
-  - provides in arguments: player, bullet
+  - provides arguments: player, bullet
 - onSpawn
   - called every time an enemy is spawned
-  - provides in arguments: player, enemy
+  - provides arguments: player, enemy
 - onKill
   - called every time an enemy is killed
-  - provides in arguments: player, enemy
+  - provides arguments: player, enemy
+- process
+  - called every frame
+  - provides arguments: player, delta
+    - delta is the time between the last frame
 
 FAQ:
   - Q: Do I need to define the arguments when defining the function?
@@ -109,6 +115,9 @@ return {
     end,
 
     onSpawn = function(player, enemy)
+    end,
+
+    process = function(delta, player) 
     end
 }
 ```
@@ -461,16 +470,6 @@ The NodeBullet is a damageless bullet, which spawns an attack nod at its destina
 `targetLifetime :: Float`
 - the amount of time (s) the bullet will be alive.
 
-#### Maybe N
-
-A table that may or may not have another type.
-
-`valid :: Bool`
-- whether or not the type is valid
-
-`value :: N`
-- will cause an error if called unsafely.
-
 ### Custom Enemies
 
 If you want to add a custom enemy, this is your guide.
@@ -491,12 +490,12 @@ it will inform you in the console.
 
 ```lua
 {
-    manageStates = function(self, delta) end,
-    dropHealth = function(self) end,
+    manageStates = function(self, delta) end, -- OPTIONAL
+    dropHealth = function(self) end, -- OPTIONAL
     onSpawn = function(self) end, -- OPTIONAL
     onDeath = function(self) end, -- OPTIONAL
     name = "example", -- the name used to find the enemy. *** MUST BE UNIQUE ***, if not, spawns undefined behavior
-    color = color(255, 255, 255),
+    color = color(255, 255, 255, 255),
     radius = 100,
     maxHealth = 10,
     initialState = 1,
@@ -525,6 +524,7 @@ These tables are effectively namespaces.
   - gets the "root" entity
 
 ### Enemy
+
 `addDeathHook :: (Enemy -> Void) -> void`
 
   - Provide a function, which takes in an `enemy` and returns `void`,
@@ -535,6 +535,7 @@ These tables are effectively namespaces.
        print("Enemy killed!")
     end)
     ```
+
 `addSpawnHook() :: (Enemy -> Void) -> Void`
   - Similar to `addDeathHook`, Provide a function, which takes an `enemy`, and returns `void`
   this function will be called every time an enemy is spawned
@@ -544,15 +545,19 @@ These tables are effectively namespaces.
     print("Enemy Spawned!")
   end)
   ```
+
 `spawnEnemy() :: Vector2 -> Enemy`
   - This function spawns a dummy enemy at the coordinates specified
   - Enemy returned is automatically added to the entity heirarchy
+
 `spawnSpiraler() :: Vector2 -> Enemy`
   - This function spawns a spiraler enemy at the coordinates specified
   - Enemy returned is automatically added to the entity heirarchy
+
 `spawnDasher() :: Vector2 -> Enemy`
   - This function spawns a dasher enemy at the coordinates specified
   - Enemy returned is automatically added to the entity heirarchy
+
 `spawnSniper() :: Vector2 -> Enemy`
   - This function spawns a dasher enemy at the coordinates specified
   - Enemy returned is automatically added to the entity heirarchy
@@ -626,17 +631,9 @@ The border table is a set of abstract functions used to implemet wrapping.
 `addCustomEnemy() :: EnemyTable -> Void`
   - adds a custom enemy to the global enemy pool.
 
-`spawnEnemy() :: String -> Vector2 -> Maybe Enemy`
+`spawnEnemy() :: String -> Vector2 -> Enemy`
   - spawns an enemy at the given coordinates, searches for name.
-  - returns nothing if the given enemy's name was not found
-
-### Maybe
-
-`just :: a -> Maybe a`
-  - returns a maybe with a value.
-
-`nothing :: Maybe a`
-  - a maybe with no value.
+  - will create undefined behavior if the enemy is invalid.
 
 ## A few more examples
 
@@ -732,6 +729,7 @@ This mod will make you feel bad.
 return {
   onInit = function() 
     print("you suck")
+    return 1
   end
 }
 ```

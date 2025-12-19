@@ -60,6 +60,8 @@ public:
   DashManager* getDashManager();
   static InputManager* getInputManager();
 
+  CameraEntity* getCam();
+
   static bool addEnemy(Enemy*);
   static bool removeEnemy(Enemy*);
 

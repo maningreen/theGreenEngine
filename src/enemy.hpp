@@ -14,8 +14,8 @@ class Enemy : public Entity2D {
     float stateTime;
     static Entity2D* plr;
 
-    HealthManager* healthManager;
-    void manageHealthBar(float radius);
+    HealthManager healthManager;
+    void manageHealthBar(float delta, float radius);
 
     static std::vector<std::function<void(Enemy*)>> onSpawnHooks;
     static std::vector<std::function<void(Enemy*)>> onDeathHooks;

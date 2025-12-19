@@ -7,11 +7,10 @@
 class BarManager : public Entity {
 private:
   Bar bar;
-  Vector2* positionPointer;
 
 public:
+  Vector2* positionPointer;
   Bar* getBar();
-  Vector2* getPositionPointer();
   float targetDistance;
 
   BarManager(Vector2 Position, float targetDistance, Bar childBar);

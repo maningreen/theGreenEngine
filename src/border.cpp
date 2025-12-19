@@ -1,5 +1,6 @@
 #include "border.hpp"
 #include "engine/entity.hpp"
+#include <iostream>
 #include <cmath>
 #include <unistd.h>
 

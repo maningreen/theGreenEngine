@@ -104,7 +104,7 @@ void Dasher::manageStates(float delta) {
     }
   } else
     std::cout << "WHAT THE FUCK YOUR STATE IS SHIT MAN HOW THE HELL DO YOU DO "
-              << "THIS\n(dasher)";
+              << "THIS\n(dasher)\n";
   // :D
 }
 

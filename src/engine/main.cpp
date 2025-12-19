@@ -11,7 +11,7 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
     manageChildrenProcess(&(*children)[i]->children, delta);
     if(!(*children)[i]->getValid()) {
       (*children)[i]->kill();
-      if(!(*children)[i]->getValid()) { // last chance!
+      if(!(*children)[i]->getValid()) { // last chance for redemption!
         children->erase(children->begin() + i--);
         continue;
       }
@@ -19,40 +19,40 @@ void manageChildrenProcess(std::vector<Entity*>* children, float delta) {
   }
 }
 
-void manageChildrenRendering(std::vector<Entity*>* children) {
-  for(Entity* child : *children) {
-    manageChildrenRendering(&child->children);
+void manageChildrenRendering(Entity* en) {
+  for(Entity* child : en->children) {
+    manageChildrenRendering(child);
     child->render();
   }
 }
 
 void Init(Entity* root);
 
-void PreRendering(std::vector<Entity*>* entities);
+void PreRendering(Entity* root);
 
-void PostRendering(std::vector<Entity*>* entities);
+void PostRendering(Entity* root);
 
 int main() {
-  Entity Root = Entity("Root", nullptr);
-  Entity::setRoot(&Root);
+  Entity root = Entity("Root", nullptr);
+  Entity::setRoot(&root);
 
   SetTargetFPS(60);
 
   InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-  Init(&Root);
+  Init(&root);
 
   float delta = 1.0f / 60.0f;
-  while(!WindowShouldClose() && Root.getValid()) {
-    manageChildrenProcess(&Root.children, delta);
+  while(!WindowShouldClose() && root.getValid()) {
+    manageChildrenProcess(&root.children, delta);
 
     BeginDrawing();
 
-    PreRendering(&Root.children);
+    PreRendering(&root);
 
-    manageChildrenRendering(&Root.children);
+    manageChildrenRendering(&root);
 
-    PostRendering(&Root.children);
+    PostRendering(&root);
 
     EndDrawing();
   }

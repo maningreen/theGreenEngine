@@ -9,9 +9,9 @@
 #include <cctype>
 #include <climits>
 #include <cstdio>
-#include <ios>
 #include <iostream>
 #include <sol/error.hpp>
+#include <sol/types.hpp>
 
 float Console::offset = 10;
 float Console::borderWidth = 10;
@@ -22,6 +22,7 @@ Color Console::border = GRAY;
 
 Console::Console() : Entity("Console") {
   open = false;
+  index = 0;
 
   oldCout = std::cout.rdbuf();
   std::cout.rdbuf(newCout.rdbuf());
@@ -32,16 +33,22 @@ void Console::death() {
 }
 
 void Console::process(float delta) {
-  if(!open) return;
-
   int x = GetKeyPressed();
+
+  if(x == KEY_GRAVE) {
+    open = !open;
+    return;
+  }
+
   if(!x) return;
 
   bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
 
   if(x == KEY_BACKSPACE) {
-    if(typed.length() > 0)
+    if(typed.length() > 0) {
       typed.pop_back();
+      index--;
+    }
   } else if(x == KEY_ENTER) {
     try {
       ModManager::getLua().script(typed);
@@ -54,10 +61,8 @@ void Console::process(float delta) {
     x = GetCharPressed();
     if(!x) return;
     if(shift) x = toupper(x);
-    if(x == '`') {
-      open = !open;
-    } else
     typed.push_back(x);
+    index++;
   }
 }
 
@@ -66,7 +71,7 @@ Console::~Console() {}
 void Console::postProcessingRender() {
   if(open) {
     Vector2 textDems = 
-      MeasureTextEx(GetFontDefault(), "the quick brown fox jumped over the lazy dog 1234567890 !@#$%^&*()_+~[]:\"',./<>?", 30, 1);
+      MeasureTextEx(GetFontDefault(), typed.empty() ? " " : typed.c_str(), 30, 2);
     const float spacing = 10;
     textDems.x += spacing * 2;
     textDems.y += spacing * 2;
@@ -80,7 +85,7 @@ void Console::postProcessingRender() {
     float height = GetScreenHeight();
     float width = GetScreenWidth();
 
-    float totalTextSpace = height - offset * 2 - textDems.y - borderWidth;
+    float totalTextSpace = height - offset * 2 - textDems.y - borderWidth + spacing;
 
     DrawRectangle(offset, offset, width - offset * 2, height - offset * 2, window);
 
@@ -93,7 +98,7 @@ void Console::postProcessingRender() {
       },
       (Vector2){
         0,
-        totalTextHeight - totalTextSpace
+        totalTextHeight - totalTextSpace + spacing
       },
       0,
       30,
@@ -124,5 +129,6 @@ void Console::postProcessingRender() {
       2,
       text
     );
+    DrawRectangle(offset + spacing + textDems.x, totalTextSpace, 10, textDems.y, text);
   }
 }

@@ -259,6 +259,8 @@ void Player::init() {
   modManager->loadMods(this);
 };
 
+CameraEntity* Player::getCam() { return cam; }
+
 float Player::getLifetime() { return lifetime; }
 
 HealthManager* Player::getHealthManager() { return healthManager; }
