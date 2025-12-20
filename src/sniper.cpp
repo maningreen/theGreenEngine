@@ -58,7 +58,16 @@ void Sniper::manageStates(float delta) {
   las->lookAt(getPlayer()->position);
   las->position = position;
   if(getState() == positioning) {
-    targetPosition = getClosestPointToPlayerWithDistance(std::clamp(Border::getDistance(position, getPlayer()->position), minDist, maxDist));
+    targetPosition = getClosestPointToPlayerWithDistance(
+      std::clamp(
+        Border::getDistance(
+            position, getPlayer(
+          )->position
+        ), 
+        minDist, 
+        maxDist
+      )
+    );
     Vector2 vectorToTarget = Border::getShortestPathToPoint(this, targetPosition);
     Vector2 velToAdd = Vector2Scale(Vector2Normalize(vectorToTarget), speed * delta);
     velocity = Vector2Add(velocity, velToAdd);

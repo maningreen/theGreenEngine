@@ -54,9 +54,13 @@ void ModManager::addModPartial(Mod x) {
 }
 
 void ModManager::addMod(Mod x, Entity2D* y) {
-  sol::function_result z = x.onInit((Player*)y);
-  if(!z.valid() || (int)z != 1) // didn't return anything, carry on || didn't return anything we care about
-    mods.push_back(x);
+  // if(!x.onInit.valid()) {
+    // return;
+    // sol::function_result z = x.onInit((Player*)y);
+    // if(!z.valid() || (int)z != 1) // didn't return anything, carry on || didn't return anything we care about
+      // mods.push_back(x);
+  // } else 
+    // mods.push_back(x);
 }
 
 void ModManager::removeMod(int i) {
@@ -247,8 +251,14 @@ void ModManager::initLua() {
   nodeBullet["color"] = &NodeBullet::color;
 
   sol::table border = lua["Border"].get_or_create<sol::table>();
-  border["setLength"] = [](float l){ Border::length = l; };
-  border["getLength"] = [](){ return Border::length; };
+  border["length"] = sol::property(
+    [](){ 
+      return Border::length;
+    }, [](float l){
+      Border::length = abs(l);
+      printf("SETTING\n");
+    }
+  );
   border["wrapEntity"] = &Border::wrapEntity;
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;
@@ -288,27 +298,27 @@ void ModManager::initLua() {
 
 void ModManager::loadMods(Entity2D* plr) {
   for(const fs::directory_entry& p : fs::directory_iterator(mod::initPath)) {
-    sol::table modTable = lua.script_file(p.path().string());
-    auto mod = Mod::fromTable(p.path().filename().string(), modTable);
-    if(mod.has_value())
-      addMod(mod.value(), plr);
+    // sol::table modTable = lua.script_file(p.path().string());
+    // auto mod = Mod::fromTable(p.path().filename().string(), modTable);
+    // if(mod.has_value())
+      // addMod(mod.value(), plr);
   }
 }
 
 int ModManager::loadMod(std::string name, Entity2D* plr) {
   // check if file is valid, if so we return 1
-  std::string path = mod::poolPath;
-  path.append(1, '/').append(name).append(".lua"); // we assume it fits in the format, with a .lua extention
-  if(!fs::exists(path))
-    return 1;
+  // std::string path = mod::poolPath;
+  // path.append(1, '/').append(name).append(".lua"); // we assume it fits in the format, with a .lua extention
+  // if(!fs::exists(path))
+    // return 1;
 
   // great, we continue
-  sol::lua_value modTable = lua.script_file(path); // load the file
-  if(!modTable.is<sol::table>()) 
-    return 1;
-  std::optional<Mod> mod = Mod::fromTable(name, modTable.as<sol::table>()); // parse the table
-  if(mod.has_value()) // check validity
-    addMod(mod.value(), plr); // if it's valid shablamo
+  // sol::lua_value modTable = lua.script_file(path); // load the file
+  // if(!modTable.is<sol::table>()) 
+    // return 1;
+  // std::optional<Mod> mod = Mod::fromTable(name, modTable.as<sol::table>()); // parse the table
+  // if(mod.has_value()) // check validity
+    // addMod(mod.value(), plr); // if it's valid shablamo
 
   return 0;
 }
