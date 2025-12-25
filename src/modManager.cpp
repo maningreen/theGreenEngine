@@ -68,7 +68,6 @@ sol::state& ModManager::getLua() {
 #define MOD(search, set) { sol::function func = result[search]; if(func.valid()) mod.set = func; }
 
 void ModManager::loadMods(Entity2D* plr) {
-  DEBUG;
   for(const fs::directory_entry& p : fs::directory_iterator(mod::initPath)) {
     sol::table result = lua.script_file(p.path().string());
     if(!result.valid()) continue;
@@ -79,10 +78,8 @@ void ModManager::loadMods(Entity2D* plr) {
     MOD("onDash", onDash);
     MOD("onFire", onFire);
     addMod(mod, plr);
-    DEBUG;
     // mods.push_front(mod);
     // mods.push_back(mod);
-    DEBUG;
   }
 }
 

@@ -22,9 +22,7 @@ Mod::Mod(std::string n) {
 }
 
 std::optional<Mod> Mod::fromPath(fs::path x) {
-  DEBUG;
   sol::function_result result = ModManager::getLua().script_file(x);
-  DEBUG;
   return fromTable(x.filename().string(), result);
 }
 

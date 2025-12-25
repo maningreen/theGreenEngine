@@ -188,7 +188,7 @@ void ModManager::initLua() {
   nodeBullet["color"] = &NodeBullet::color;
 
   sol::table border = lua["Border"].get_or_create<sol::table>();
-  border["length"] = Border::length;
+  border["length"] = sol::property([](){ return Border::length; }, [](float l){ Border::length = abs(l); });
   border["wrapEntity"] = &Border::wrapEntity;
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;

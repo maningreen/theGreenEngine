@@ -256,9 +256,7 @@ Player::~Player() {
 
 void Player::init() { 
   Enemy::setPlayer(); 
-  DEBUG;
   modManager->loadMods(this);
-  DEBUG;
 }
 
 float Player::getLifetime() { return lifetime; }
