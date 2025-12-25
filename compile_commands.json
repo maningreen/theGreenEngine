@@ -1,0 +1,353 @@
+[
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/afterimage.o",
+      "src/afterimage.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/afterimage.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/afterimage.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/enemyBullet.o",
+      "src/enemyBullet.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/enemyBullet.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/enemyBullet.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/engine/entity.o",
+      "src/engine/entity.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/engine/entity.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/engine/entity.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/bars.o",
+      "src/bars.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/bars.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/bars.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/engine/main.o",
+      "src/engine/main.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/engine/main.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/engine/main.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/bullet.o",
+      "src/bullet.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/bullet.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/bullet.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/camera.o",
+      "src/camera.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/camera.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/camera.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/engine/core.o",
+      "src/engine/core.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/engine/core.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/engine/core.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/include.o",
+      "src/include.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/include.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/include.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/laser.o",
+      "src/laser.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/laser.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/laser.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/nodeBullet.o",
+      "src/nodeBullet.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/nodeBullet.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/nodeBullet.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/particle.o",
+      "src/particle.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/particle.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/particle.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/attackNode.o",
+      "src/attackNode.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/attackNode.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/attackNode.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/dashManager.o",
+      "src/dashManager.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/dashManager.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/dashManager.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/healthPack.o",
+      "src/healthPack.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/healthPack.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/healthPack.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/inputManager.o",
+      "src/inputManager.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/inputManager.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/inputManager.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/spiral.o",
+      "src/spiral.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/spiral.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/spiral.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/barManager.o",
+      "src/barManager.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/barManager.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/barManager.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/console.o",
+      "src/console.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/console.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/console.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/border.o",
+      "src/border.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/border.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/border.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/customEnemy.o",
+      "src/customEnemy.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/customEnemy.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/customEnemy.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/dasher.o",
+      "src/dasher.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/dasher.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/dasher.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/enemy.o",
+      "src/enemy.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/enemy.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/enemy.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/healthManager.o",
+      "src/healthManager.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/healthManager.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/healthManager.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/postprocessing.o",
+      "src/postprocessing.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/postprocessing.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/postprocessing.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/sniper.o",
+      "src/sniper.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/sniper.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/sniper.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/gnd8f9h2ycxrfrvrga508c4n9cxy6720-gcc-wrapper-13.3.0/bin/g++",
+      "-c",
+      "-Iexternal",
+      "-o",
+      "build/init.o",
+      "src/init.cpp"
+    ],
+    "directory": "/home/green/documents/program/cpp/projects/engine",
+    "file": "/home/green/documents/program/cpp/projects/engine/src/init.cpp",
+    "output": "/home/green/documents/program/cpp/projects/engine/build/init.o"
+  }
+]

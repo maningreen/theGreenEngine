@@ -19,6 +19,10 @@ Bar* BarManager::getBar() {
   return &bar;
 }
 
+Vector2* BarManager::getPositionPointer() {
+  return positionPointer;
+}
+
 void BarManager::process(float delta) {
   if(!positionPointer) //should be 0 if not real
     return;

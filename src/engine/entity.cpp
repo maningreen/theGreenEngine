@@ -31,8 +31,8 @@ Entity::Entity(const std::string& name) : Parent(nullptr), name(name), valid(tru
 
 void Entity::addChild(Entity* child) {
   child->Parent = this;
-  children.push_back(child);
   child->init();
+  children.push_back(child);
 }
 
 void Entity::addTag(std::string tag) {

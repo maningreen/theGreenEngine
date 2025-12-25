@@ -9,25 +9,29 @@
 
 struct CustomEnemy : public Enemy {
 public:
+  sol::object data;
   sol::function manageStateCustom;
   sol::function dropHealthCustom;
   sol::function onDeathCustom;
   sol::function onSpawnCustom;
 
-  static std::unordered_map<std::string, std::optional<CustomEnemy>> customEnemies;
+  static std::unordered_map<std::string, CustomEnemy> customEnemies;
+
+public:
   void manageStates(float delta) override;
   void dropHealth() override;
   void onDeath() override;
   void onSpawn() override;
 
-  static void fromTable(sol::table);
-  static std::optional<CustomEnemy*> spawnEnemy(std::string name, Vector2 p);
+  static void addCustomEnemy(sol::table);
+  static std::optional<CustomEnemy> fromTable(sol::table);
+  static std::optional<CustomEnemy*> spawnEnemy(std::string name);
 
   CustomEnemy(
+    Vector2 position,
     Color color,
     float radius,
     int initialState,
-    float maxHealth,
     std::string name,
     sol::function spawn,
     sol::function drop,

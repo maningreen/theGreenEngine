@@ -8,7 +8,6 @@ class Console : public Entity {
   std::ostringstream newCout;
 
   std::string typed;
-  unsigned int index;
 
 public:
   bool open;

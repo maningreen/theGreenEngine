@@ -2,8 +2,6 @@
 #include "barManager.hpp"
 #include <iostream>
 
-#define MAX(a, b) (a < b ? b : a)
-
 HealthManager::HealthManager(float maxHealth, BarManager b) : BarManager(b), maxHealth(maxHealth), health(maxHealth) {
   initBar();
 }
@@ -48,7 +46,10 @@ float HealthManager::getMaxHealth() {
 }
 
 void HealthManager::setMaxHealth(float m) {
-  maxHealth = MAX(m, 0);
+  if(m >= 0)
+    maxHealth = m;
+  else
+    maxHealth = 0;
   setHealth(health);
 }
 
@@ -57,17 +58,16 @@ HealthManager::~HealthManager() {}
 void HealthManager::process(float delta) {
   setBarPercentage(health / maxHealth);
   getBar()->process(delta);
-  if(positionPointer== nullptr) {
+  if(!getPositionPointer()) //should be 0 if not real
     return;
-  }
   // now we know we gots to set our position
   getBar()->position = 
-    *positionPointer +
+    *getPositionPointer() +
       (!getBar()->ShrinkY 
         ? (Vector2){0, targetDistance} 
         : (Vector2){targetDistance, 0}) - 
     (!getBar()->ShrinkY 
-      ? (Vector2){getBar()->Dimensions.x / 2.0f, 0}
+      ? (Vector2){ getBar()->Dimensions.x / 2.0f, 0}
       : (Vector2){0, getBar()->Dimensions.y / 2.0f}
     ); 
 }

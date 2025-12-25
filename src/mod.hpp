@@ -6,6 +6,7 @@
 #include "engine/entity.hpp"
 #include <functional>
 #include <optional>
+#include <list>
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
 
@@ -17,15 +18,15 @@ namespace mod {
 struct Mod {
   std::string name;
 
-  sol::function onInit;
+  std::optional<sol::function> onInit;
   std::optional<sol::function> onDash;
   std::optional<sol::function> onFire;
   std::optional<sol::function> onEnemyKill;
   std::optional<sol::function> onEnemySpawn;
-  // std::optional<sol::function> process;
 
   Mod(std::string name, sol::function onInit);
-  Mod(fs::path);
+  Mod(std::string name);
+  static std::optional<Mod> fromPath(fs::path path);
 
   // searches for a mod names so in `pool`
   static std::optional<Mod> fromName(std::string name);
@@ -43,13 +44,10 @@ class ModManager {
     // this function doesn't call onInit, only sets up the lua
     void initLua();
   public:
-    std::vector<Mod> mods;
+    std::list<Mod> mods;
 
     ModManager();
     ~ModManager();
-
-    // this function calls `process()` on all the mods
-    void process(float, Entity2D*);
 
     // this function calls `onDash` on all the mods
     void onDash(Entity2D*);

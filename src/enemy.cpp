@@ -22,25 +22,25 @@ std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
 
 #define barDimensions (Vector2) {radius * 2, 10}
 
-Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos),
-  radius(DefaultRadius),
-  healthManager(10,
+Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
+  velocity = {0, 0};
+  targetPos = {0, 0};
+  radius = DefaultRadius;
+  healthManager = new HealthManager(10,
     BarManager(&position,
-      DefaultRadius * 1.5f,
+      radius * 1.5f,
       Bar(
         Vector2Zero(), 
-        {DefaultRadius * 2, 10},
+        barDimensions,
         RED, 
         DARKGRAY, 
         false
       )
     )
-  )
-{
-  velocity = {0, 0};
-  targetPos = {0, 0};
-  healthManager.getBar()->ShouldRender = true;
+  );
+  healthManager->getBar()->ShouldRender = true;
   colour = PINK;
+  addChild(healthManager);
   addTag(tag);
 }
 
@@ -52,10 +52,9 @@ void Enemy::death() {
     f < onSpawnHooks.data() + onDeathHooks.size();
     (*(f++))(this)
   );
-  if(healthManager.isDead()) {
-    onDeath();
+  if(healthManager->isDead())
     dropHealth(); 
-  } else 
+  else 
     valid = true;
 }
 
@@ -70,13 +69,13 @@ void Enemy::init() {
 }
 
 void Enemy::process(float delta) {
+  manageHealthBar(radius);
   position = position + velocity * delta;
   velocity = velocity * friction;
   stateTime += delta;
   if(plr != nullptr)
     manageStates(delta);
   Border::wrapEntity(this);
-  manageHealthBar(delta, radius);
 }
 
 void Enemy::render() {
@@ -84,7 +83,6 @@ void Enemy::render() {
   // hear me out:
   // circle :3
   DrawCircleV(position, radius, colour); // WHOOOOOO
-  healthManager.render();
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
@@ -93,10 +91,9 @@ Vector2 Enemy::getShortestVectorToPlayer() const {
   return Border::getShortestPathToPoint(position, plr->position);
 }
 
-void Enemy::manageHealthBar(float delta, float r) {
-  healthManager.process(delta);
-  healthManager.targetDistance = r * 1.5f;
-  if(healthManager.isDead())
+void Enemy::manageHealthBar(float r) {
+  healthManager->targetDistance = r * 1.5f;
+  if(healthManager->isDead())
     killDefered();
 }
 
@@ -130,8 +127,8 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // ish
   // so that's what we wanna do
   Vector2 vectorFromPlayer =
-      Vector2Normalize(shortestPathToPlayer) * -dist;
-  Vector2 globalPos = vectorFromPlayer + plr->position;
+      Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
+  Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->position);
   Vector2 vectorToGlobal = Border::wrapPos(globalPos);
   // then we do some shmath
   return vectorToGlobal;
@@ -155,7 +152,7 @@ float Enemy::getStateTime() const { return stateTime; }
 
 Entity2D* Enemy::getPlayer() { return plr; }
 
-HealthManager* Enemy::getHealthManager() { return &healthManager; }
+HealthManager* Enemy::getHealthManager() { return healthManager; }
 
 void Enemy::resetStateTime() { stateTime = 0; }
 

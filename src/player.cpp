@@ -256,13 +256,14 @@ Player::~Player() {
 
 void Player::init() { 
   Enemy::setPlayer(); 
+  DEBUG;
   modManager->loadMods(this);
-};
-
-CameraEntity* Player::getCam() { return cam; }
+  DEBUG;
+}
 
 float Player::getLifetime() { return lifetime; }
 
 HealthManager* Player::getHealthManager() { return healthManager; }
 DashManager* Player::getDashManager() { return &dashManager; }
 InputManager* Player::getInputManager() { return inputManager; }
+CameraEntity* Player::getCamera() { return cam; }
