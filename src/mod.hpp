@@ -32,7 +32,7 @@ struct Mod {
   static std::optional<Mod> fromName(std::string name);
 
   // will return std::nullopt when there is no onInit
-  static std::optional<Mod> fromTable(std::string name, sol::table);
+  static Mod fromTable(std::string name, sol::table);
 
   ~Mod();
 };
@@ -44,7 +44,7 @@ class ModManager {
     // this function doesn't call onInit, only sets up the lua
     void initLua();
   public:
-    std::list<Mod> mods;
+    std::vector<Mod> mods;
 
     ModManager();
     ~ModManager();

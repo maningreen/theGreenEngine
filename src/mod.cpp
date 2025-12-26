@@ -10,6 +10,10 @@
 Mod::Mod(std::string n, sol::function init) {
   name = n;
   onInit = init;
+  onDash = std::nullopt;
+  onFire = std::nullopt;
+  onEnemyKill = std::nullopt;
+  onEnemySpawn = std::nullopt;
 }
 
 Mod::Mod(std::string n) {
@@ -35,12 +39,10 @@ std::optional<Mod> Mod::fromPath(fs::path x) {
       var.functionName = std::nullopt;                                         \
   }
 
-std::optional<Mod> Mod::fromTable(std::string n, sol::table table) {
-  sol::function onInit = table["onInit"];
-  if(!onInit.valid())
-    return std::nullopt;
-  Mod x(n, onInit);
+Mod Mod::fromTable(std::string n, sol::table table) {
+  Mod x(n);
 
+  MODTHING(x, table, onInit, "onInit");
   MODTHING(x, table, onDash, "onDash");
   MODTHING(x, table, onFire, "onFire");
   MODTHING(x, table, onEnemyKill, "onKill");

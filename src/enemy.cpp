@@ -44,18 +44,23 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   addTag(tag);
 }
 
-Enemy::~Enemy() {}
+Enemy::~Enemy() {
+  DEBUG;
+}
 
 void Enemy::death() { 
+  DEBUG;
   for(
     std::function<void(Enemy *)>* f = onDeathHooks.data(); 
     f < onSpawnHooks.data() + onDeathHooks.size();
     (*(f++))(this)
   );
-  if(healthManager->isDead())
-    dropHealth(); 
-  else 
-    valid = true;
+  DEBUG;
+  // if(healthManager->isDead())
+    // dropHealth(); 
+  // else 
+    // valid = true;
+  DEBUG;
 }
 
 void Enemy::init() { 

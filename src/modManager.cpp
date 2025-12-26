@@ -32,9 +32,9 @@ void ModManager::onFire(Entity2D* x, NodeBullet* y) {
 }
 
 void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
-  for(Mod& m : mods)
-    if(m.onEnemyKill.has_value())
-      m.onEnemyKill.value()((Player*)x, y);
+  for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++)
+    if(m->onEnemyKill.has_value()) 
+      m->onEnemyKill.value()((Player*)x, y);
 }
 
 void ModManager::onEnemySpawn(Entity2D* x, Enemy* y) {
@@ -94,9 +94,8 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
 
   // great, we continue
   sol::table modTable = lua.script_file(path); // load the file
-  auto mod = Mod::fromTable(name, modTable); // parse the table
-  if(mod.has_value()) // check validity
-    addMod(mod.value(), plr); // if it's valid shablamo
+  Mod mod = Mod::fromTable(name, modTable); // parse the table
+  addMod(mod, plr); // if it's valid shablamo
 
   return 0;
 }
