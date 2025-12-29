@@ -6,15 +6,17 @@
 #include <cmath>
 #include <cstdio>
 
-DashManager::DashManager(unsigned dashCount,
+DashManager::DashManager(
+  unsigned dashCount,
   float dashLength,
   float dashRegenDelay,
   float dashControl,
   float dashSpeed)
   : maxDashCount(dashCount), length(dashLength),
     regenDelay(dashRegenDelay), control(dashControl),
-    speed(dashSpeed) {
-  progress = 0;
+    speed(dashSpeed) 
+{
+  progress = maxDashCount;
   regenRate = 1;
   dashing = false;
   deltaDash = 0;

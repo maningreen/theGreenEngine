@@ -104,7 +104,7 @@ void ModManager::initLua() {
   im["removeVectorBind"] = &InputManager::removeVectorBind;
   im["removeBind"] = &InputManager::removeBind;
 
-   sol::usertype<Enemy> en = lua.new_usertype<Enemy>(
+  sol::usertype<Enemy> en = lua.new_usertype<Enemy>(
     "enemy",
     sol::constructors<Enemy(Vector2)>()
   );
@@ -133,49 +133,28 @@ void ModManager::initLua() {
   en["color"] = &Enemy::colour;
 
   sol::table enemy = lua["Enemy"].get_or_create<sol::table>();
-  enemy.set_function(
-    "addDeathHook",
-    &Enemy::addDeathHook
-  );
-  enemy.set_function(
-    "addSpawnHook",
-    &Enemy::addSpawnHook
-  );
-  enemy.set_function(
-    "spawnEnemy",
-    [](Vector2 x){
-      Enemy* y = new Enemy(x); 
-      Entity::getRoot()->addChild(y);
-      return y;
-    }
-  );
-  enemy.set_function(
-    "spawnSpiraler",
-    [](Vector2 x){
-      Spiraler* y = new Spiraler(x); 
-      Entity::getRoot()->addChild(y);
-      return y;
-    }
-  );
-  enemy.set_function(
-    "spawnDasher",
-    [](Vector2 x){
-      Dasher* y = new Dasher(x); 
-      Entity::getRoot()->addChild(y);
-      return y;
-    }
-  );
-  enemy.set_function(
-    "spawnSniper",
-    [](Vector2 x){
-      Sniper* y = new Sniper(x); 
-      Entity::getRoot()->addChild(y);
-      return y;
-    }
-  );
-  // enemy.set_function(
-    // ""
-  // )
+  enemy["addDeathHook"] = &Enemy::addDeathHook;
+  enemy["addSpawnHook"] = &Enemy::addSpawnHook;
+  enemy[ "spawnEnemy"] = [](Vector2 x){
+    Enemy* y = new Enemy(x); 
+    Entity::getRoot()->addChild(y);
+    return y;
+  };
+  enemy[ "spawnSpiraler"] = [](Vector2 x){
+    Spiraler* y = new Spiraler(x); 
+    Entity::getRoot()->addChild(y);
+    return y;
+  };
+  enemy[ "spawnDasher"] = [](Vector2 x){
+    Dasher* y = new Dasher(x); 
+    Entity::getRoot()->addChild(y);
+    return y;
+  };
+  enemy[ "spawnSniper"] = [](Vector2 x){
+    Sniper* y = new Sniper(x); 
+    Entity::getRoot()->addChild(y);
+    return y;
+  };
 
   sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
   nb["theta"] = &NodeBullet::theta;
@@ -188,14 +167,19 @@ void ModManager::initLua() {
   nodeBullet["color"] = &NodeBullet::color;
 
   sol::table border = lua["Border"].get_or_create<sol::table>();
-  border["length"] = sol::property([](){ return Border::length; }, [](float l){ Border::length = abs(l); });
+  border["length"] = sol::property(
+    [](){ 
+      return Border::length; 
+    }, 
+    [](float l){
+      Border::length = abs(l);
+    }
+  );
   border["wrapEntity"] = &Border::wrapEntity;
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;
   border["wrapPosY"] = &Border::wrapPosY;
-  border["getShortestPathToPoint"] = sol::overload([](Vector2 a, Vector2 b){
-    return Border::getShortestPathToPoint(a, b);
-  });
+  border["getShortestPathToPoint"] = [](const Vector2 a, const Vector2 b){ return Border::getShortestPathToPoint(a, b); };
   border["getDistance"] = &Border::getDistance;
 
   sol::table customEnTable = lua["CustomEnemy"].get_or_create<sol::table>();

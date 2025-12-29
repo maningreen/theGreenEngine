@@ -38,6 +38,8 @@ int main() {
 
   SetTargetFPS(60);
 
+  srand(time(0));
+
   InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
   Init(&Root);
