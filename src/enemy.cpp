@@ -11,7 +11,6 @@
 
 float Enemy::DefaultRadius = 30;
 float Enemy::Speed = 4000;
-Entity2D* Enemy::plr = nullptr;
 
 float Enemy::droppedHealthHP = 1;
 
@@ -50,6 +49,7 @@ Enemy::~Enemy() {
 void Enemy::death() { 
   for(std::function<void(Enemy*)> f : onDeathHooks)
     f(this);
+  onDeath();
   if(healthManager->isDead())
     dropHealth(); 
   else 
@@ -57,12 +57,8 @@ void Enemy::death() {
 }
 
 void Enemy::init() { 
-  setPlayer(); 
-  for(
-    std::function<void(Enemy *)>* f = onSpawnHooks.data(); 
-    f < onSpawnHooks.data() + onSpawnHooks.size();
-    (*(f++))(this)
-  );
+  for(std::function<void(Enemy*)> f : onSpawnHooks)
+    f(this);
   onSpawn();
 }
 
@@ -71,7 +67,7 @@ void Enemy::process(float delta) {
   position = position + velocity * delta;
   velocity = velocity * friction;
   stateTime += delta;
-  if(plr != nullptr)
+  if(Player::player != nullptr)
     manageStates(delta);
   Border::wrapEntity(this);
 }
@@ -84,23 +80,15 @@ void Enemy::render() {
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
-  if(plr == nullptr)
+  if(Player::player == nullptr)
     return Vector2Zero();
-  return Border::getShortestPathToPoint(position, plr->position);
+  return Border::getShortestPathToPoint(position, Player::player->position);
 }
 
 void Enemy::manageHealthBar(float r) {
   healthManager->targetDistance = r * 1.5f;
   if(healthManager->isDead())
     killDefered();
-}
-
-void Enemy::setPlayer() {
-  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->children, "Player");
-}
-
-void Enemy::setPlayer(Entity2D* p) { 
-  plr = p; 
 }
 
 void Enemy::addSpawnHook(std::function<void (Enemy *)> x) {
@@ -113,7 +101,7 @@ void Enemy::addDeathHook(std::function<void (Enemy *)> x) {
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // normalize the offset
-  if(plr == nullptr)
+  if(Player::player == nullptr)
     return Vector2Zero();
   Vector2 shortestPathToPlayer = getShortestVectorToPlayer();
   // lets get a model
@@ -126,7 +114,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // so that's what we wanna do
   Vector2 vectorFromPlayer =
       Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
-  Vector2 globalPos = Vector2Add(vectorFromPlayer, plr->position);
+  Vector2 globalPos = Vector2Add(vectorFromPlayer, Player::player->position);
   Vector2 vectorToGlobal = Border::wrapPos(globalPos);
   // then we do some shmath
   return vectorToGlobal;
@@ -147,8 +135,6 @@ float Enemy::getAngleToPlayer() const {
 void ManageStates() {}
 
 float Enemy::getStateTime() const { return stateTime; }
-
-Entity2D* Enemy::getPlayer() { return plr; }
 
 HealthManager* Enemy::getHealthManager() { return healthManager; }
 

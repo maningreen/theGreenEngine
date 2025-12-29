@@ -12,7 +12,6 @@ class Enemy : public Entity2D {
     unsigned char state;
 
     float stateTime;
-    static Entity2D* plr;
 
     HealthManager* healthManager;
     void manageHealthBar(float radius);
@@ -59,10 +58,6 @@ class Enemy : public Entity2D {
 
     Enemy(Vector2 position);
     ~Enemy();
-
-    static void setPlayer();
-    static void setPlayer(Entity2D* address);
-    static Entity2D* getPlayer();
 
     static float DefaultRadius;
     static float Speed;

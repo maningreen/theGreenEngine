@@ -60,7 +60,7 @@ void Dasher::manageStates(float delta) {
     velocity = Vector2Add(velocity, velToAdd);
     // step 5
     // if we close enough we swap states
-    if(Vector2DistanceSqr(getPlayer()->position, position) <=
+    if(Vector2DistanceSqr(Player::player->position, position) <=
         maximumDist * maximumDist)
       // we close enough :D
       setState(winding);
@@ -89,14 +89,14 @@ void Dasher::manageStates(float delta) {
     if(getStateTime() > dashTime)
       setState(recovery);
     // we also gotta check some collision shtuff
-    if(Vector2DistanceSqr(position, getPlayer()->position) <
+    if(Vector2DistanceSqr(position, Player::player->position) <
         (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       // for psuedo i-frames
-      ((Player*)getPlayer())->getHealthManager()->applyDamage(damage);
+      Player::player->getHealthManager()->applyDamage(damage);
       setState(recovery);
       // then we do a bounce
       Vector2 scaledOffset =
-          Vector2Normalize(Vector2Subtract(getPlayer()->position, position));
+          Vector2Normalize(Player::player->position - position);
       scaledOffset = {scaledOffset.x > 0 ? -scaledOffset.x : scaledOffset.x,
           scaledOffset.y > 0 ? -scaledOffset.y : scaledOffset.y};
       velocity =

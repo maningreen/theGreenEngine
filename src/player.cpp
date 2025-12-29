@@ -242,8 +242,6 @@ Player::Player(const std::string& name, Vector2 position)
 }
 
 Player::~Player() { 
-  Enemy::setPlayer(nullptr); 
-
   if(getParent() == nullptr) {
     delete healthManager;
     delete dashCooldownBar;
@@ -255,7 +253,6 @@ Player::~Player() {
 }
 
 void Player::init() { 
-  Enemy::setPlayer(); 
   modManager->loadMods(this);
 }
 
