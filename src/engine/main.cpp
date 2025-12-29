@@ -33,6 +33,7 @@ void PreRendering(std::vector<Entity*>* entities);
 void PostRendering(std::vector<Entity*>* entities);
 
 int main() {
+  SetTraceLogLevel(LOG_NONE);
   Entity Root = Entity("Root", nullptr);
   Entity::setRoot(&Root);
 
