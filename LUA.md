@@ -752,4 +752,4 @@ return {
 
 ## Credits
 
-The amazing library used for the lua, is [sol](https://github.com/ThePhD/sol), if you are taking any inspiration, I highly recommend this library.
+The amazing library used for the lua runtime, is [sol](https://github.com/ThePhD/sol), if you are taking any inspiration, I highly recommend this library.
