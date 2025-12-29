@@ -21,25 +21,25 @@ ModManager::~ModManager() {}
 
 void ModManager::onDash(Entity2D* x) {
   for(Mod& x : mods)
-    if(x.onDash.has_value())
+    if(x.onDash.has_value() && x.onDash.value())
       x.onDash.value()(x);
 }
 
 void ModManager::onFire(Entity2D* x, NodeBullet* y) {
   for(Mod& m : mods)
-    if(m.onFire.has_value())
+    if(m.onFire.has_value() && m.onFire.value())
       m.onFire.value()((Player*)x, y);
 }
 
 void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
   for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++)
-    if(m->onEnemyKill.has_value()) 
+    if(m->onEnemyKill.has_value() && m->onEnemyKill.value()) 
       m->onEnemyKill.value()((Player*)x, y);
 }
 
 void ModManager::onEnemySpawn(Entity2D* x, Enemy* y) {
   for(Mod& m : mods)
-    if(m.onEnemySpawn)
+    if(m.onEnemySpawn.has_value() && m.onEnemySpawn.value())
       (m.onEnemySpawn.value())((Player*)x, y);
 }
 
@@ -65,7 +65,12 @@ sol::state& ModManager::getLua() {
   return lua;
 }
 
-#define MOD(search, set) { sol::function func = result[search]; if(func.valid()) mod.set = func; }
+#define MOD(search, set) \
+  sol::function set = result[search]; \
+  if(set.valid())      \
+    mod.set = set;     \
+  else                 \
+    mod.set = std::nullopt;
 
 void ModManager::loadMods(Entity2D* plr) {
   for(const fs::directory_entry& p : fs::directory_iterator(mod::initPath)) {
@@ -78,8 +83,6 @@ void ModManager::loadMods(Entity2D* plr) {
     MOD("onDash", onDash);
     MOD("onFire", onFire);
     addMod(mod, plr);
-    // mods.push_front(mod);
-    // mods.push_back(mod);
   }
 }
 
@@ -94,6 +97,7 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
 
   // great, we continue
   sol::table modTable = lua.script_file(path); // load the file
+  if(!modTable.valid()) return 1;
   Mod mod = Mod::fromTable(name, modTable); // parse the table
   addMod(mod, plr); // if it's valid shablamo
 
