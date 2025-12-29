@@ -1,5 +1,16 @@
-{pkgs ? import <nixpkgs> {}, ...}: let
-  raylibPackages = with pkgs; [
+{
+  pkgs ? import <nixpkgs> { },
+  ...
+}:
+pkgs.mkShell {
+  packages = with pkgs; [
+    gnumake # build backend
+    gcc # c++ compiler package
+    ghc # haskell compiler
+    haskell-language-server
+    sol2 # lib for lua
+    lua # lua itself
+
     libGL
 
     # X11 dependencies
@@ -10,16 +21,4 @@
     xorg.libXinerama
     xorg.libXrandr
   ];
-in
-  pkgs.mkShell {
-    packages = with pkgs;
-      [
-        gnumake # build backend
-        gcc # c++ compiler package
-        ghc # haskell compiler
-        haskell-language-server
-        sol2 # lib for lua
-        lua # lua itself
-      ]
-      ++ raylibPackages;
-  }
+}
