@@ -11,7 +11,7 @@ getLinFuncFromPoints a b = (+ c) . (* m)
 -- mx + b... except b is already a variable so it's c instead
  where
   m = getSlopeBetweenPoints a b
-  c = -m * getX a + getY a
+  c = (-m) * getX a + getY a
 
 getSlopeBetweenPoints :: (Floating a) => Vector2 -> Vector2 -> a
 getSlopeBetweenPoints (Vector2 x1 y1) (Vector2 x2 y2) = realToFrac $ (y2 - y1) / (x2 - x1)
