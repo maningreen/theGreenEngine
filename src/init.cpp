@@ -10,6 +10,7 @@
 #include "raylib.h"
 #include "inputManager.hpp"
 #include "sniper.hpp"
+#include "cursor.hpp"
 #include "spiral.hpp"
 #include "time.h"
 
@@ -26,6 +27,7 @@ void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
   root->addChild(new PostProcessingData());
+  root->addChild(new Cursor());
 
   Player* plr = new Player("Player", (Vector2){0, 0});
   root->addChild(plr);
