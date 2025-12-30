@@ -6,6 +6,7 @@
 #include <optional>
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
+#include <map>
 
 struct CustomEnemy : public Enemy {
 public:

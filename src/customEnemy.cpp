@@ -48,33 +48,32 @@ std::optional<CustomEnemy> CustomEnemy::fromTable(sol::table x) {
   auto c = x["color"];
   auto s = x["initialState"];
   auto spawn = x["onSpawn"];
-  auto name = x["name"];
+  std::optional<std::string> name = x["name"];
   auto drop = x["dropHealth"];
   auto state = x["manageState"];
   auto death = x["onDeath"];
-  if(!(r && name && s && c && spawn && drop && state && death)) {
-    DEBUG;
+  if(!(r && name && s && c && spawn && drop && state && death))
     return std::nullopt;
-  } else {
-    DEBUG;
-    return CustomEnemy(c, r, name, s, spawn, drop, state, death);
-  }
+  else
+    return CustomEnemy(c, r, s, name.value(), spawn, drop, state, death);
 }
 
 void CustomEnemy::addCustomEnemy(sol::table x) {
   std::optional<CustomEnemy> t = fromTable(x);
-  if(t.has_value()) customEnemies.try_emplace(t.value().name, t.value());
+  if(t.has_value()) {
+    CustomEnemy val = t.value();
+    auto y = customEnemies.emplace(val.name, val);
+    std::cout << "name: " << y.first->second.name << '\n';
+  }
 }
 
 std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name, Vector2 p) {
   auto x = customEnemies.find(name);
-  printf("%d\n", x == customEnemies.end());
   if(x != customEnemies.end()) {
     CustomEnemy* y = new CustomEnemy(x->second);
     y->position = p;
     getRoot()->addChild(y);
     return y;
-  } else {
+  } else
     return std::nullopt;
-  }
 }
