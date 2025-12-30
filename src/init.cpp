@@ -19,14 +19,15 @@ extern "C" {
 };
 
 CameraEntity* cameraEnt;
+PostProcessingData* data;
 
-#define shader
-
+#define shader shading
 
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
-  root->addChild(new PostProcessingData());
+  data = new PostProcessingData();
+  root->addChild(data);
   root->addChild(new Cursor());
 
   Player* plr = new Player("Player", (Vector2){0, 0});
@@ -42,9 +43,7 @@ void Init(Entity* root) {
   // root->addChild(manager);
 }
 
-void PreRendering(std::vector<Entity*>* entities) { 
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-
+void PreRendering(Entity* root) { 
   BeginTextureMode(data->texture);
   BeginMode2D((Camera2D){
     .offset = Vector2Zero(),
@@ -57,11 +56,10 @@ void PreRendering(std::vector<Entity*>* entities) {
   });
 }
 
-void PostRendering(std::vector<Entity*>* entities) {
-  PostProcessingData* data = (PostProcessingData*)entities->front();
-  static CameraEntity* cameraEnt;
+void PostRendering(Entity* root) {
+  PostProcessingData* data = (PostProcessingData*)root->children.front();
   if(cameraEnt == nullptr)
-    cameraEnt = (CameraEntity*)Engine::searchTreeForEntity(entities, "Camera");
+    cameraEnt = (CameraEntity*)Engine::searchTreeForEntity(&root->children, "Camera");
   EndTextureMode();
 
 #ifdef shader

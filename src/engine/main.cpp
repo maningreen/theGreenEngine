@@ -28,9 +28,9 @@ void manageChildrenRendering(std::vector<Entity*>* children) {
 
 void Init(Entity* root);
 
-void PreRendering(std::vector<Entity*>* entities);
+void PreRendering(Entity* root);
 
-void PostRendering(std::vector<Entity*>* entities);
+void PostRendering(Entity* root);
 
 int main() {
   SetTraceLogLevel(LOG_NONE);
@@ -51,11 +51,11 @@ int main() {
 
     BeginDrawing();
 
-    PreRendering(&Root.children);
+    PreRendering(&Root);
 
     manageChildrenRendering(&Root.children);
 
-    PostRendering(&Root.children);
+    PostRendering(&Root);
 
     EndDrawing();
   }
