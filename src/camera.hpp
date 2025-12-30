@@ -5,25 +5,27 @@
 #include "engine/entity.hpp"
 
 class CameraEntity : public Entity {
-  public:
-    Camera2D Camera;
-    Entity2D* Follow;
-    Vector2 ShakeVector;
-    float Jitterness;
+private:
+  void manageCameraShake(float delta);
+  void manageCameraMotion(float delta);
 
-    Vector2 getMousePosition();
+public:
+  Camera2D camera;
+  Entity2D* follow;
+  Vector2 shakeVector;
+  float jitterness;
 
-    void ManageCameraShake(float delta);
-    void ManageCameraMotion(float delta);
+  Vector2 getMousePosition();
 
-    void process(float delta);
-    void render();
+  void process(float delta);
+  void render();
 
-    CameraEntity(std::string name, Entity2D* target);
-    ~CameraEntity();
+  CameraEntity(std::string name, Entity2D* target);
+  ~CameraEntity();
 
-    static float Smoothing;
-    static float DefaultZoom;
+  static float Smoothing;
+  static float DefaultZoom;
+  static float mouseLean;
 };
 
 #endif
