@@ -73,8 +73,8 @@ void PostRendering(std::vector<Entity*>* entities) {
     }
   );
 
-  unsigned int renderXCount = 2 * (ceil((int)GetScreenWidth() / Border::length) + 1) - 1;
-  unsigned int renderYCount = 2 * (ceil((int)GetScreenHeight() / Border::length) + 1) - 1;
+  unsigned int renderXCount = 2 * ceil((int)GetScreenWidth() / Border::length) + 1;
+  unsigned int renderYCount = 2 * ceil((int)GetScreenHeight() / Border::length) + 1;
   DrawTexturePro(
     data->texture.texture,
     (Rectangle){

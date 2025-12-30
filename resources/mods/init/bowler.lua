@@ -59,7 +59,6 @@ return {
     CustomEnemy.addEnemy(en)
     print("test")
     CustomEnemy.spawnEnemy("bowling", vector2(300, 300))
-    Enemy.spawnDasher(vector2(30, 30))
     return 1
   end
 }
