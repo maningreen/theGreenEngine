@@ -461,16 +461,6 @@ The NodeBullet is a damageless bullet, which spawns an attack nod at its destina
 `targetLifetime :: Float`
 - the amount of time (s) the bullet will be alive.
 
-#### Maybe N
-
-A table that may or may not have another type.
-
-`valid :: Bool`
-- whether or not the type is valid
-
-`value :: N`
-- will cause an error if called unsafely.
-
 ### Custom Enemies
 
 If you want to add a custom enemy, this is your guide.
@@ -628,17 +618,9 @@ The border table is a set of abstract functions used to implemet wrapping.
 `addCustomEnemy() :: EnemyTable -> Void`
   - adds a custom enemy to the global enemy pool.
 
-`spawnEnemy() :: String -> Vector2 -> Maybe Enemy`
+`spawnEnemy() :: String -> Vector2 -> Optional Enemy`
   - spawns an enemy at the given coordinates, searches for name.
   - returns nothing if the given enemy's name was not found
-
-### Maybe
-
-`just :: a -> Maybe a`
-  - returns a maybe with a value.
-
-`nothing :: Maybe a`
-  - a maybe with no value.
 
 ## A few more examples
 

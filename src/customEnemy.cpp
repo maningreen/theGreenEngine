@@ -8,7 +8,6 @@
 std::unordered_map<std::string, CustomEnemy> CustomEnemy::customEnemies;
 
 CustomEnemy::CustomEnemy(
-  Vector2 p,
   Color c,
   float r,
   int state, 
@@ -17,7 +16,7 @@ CustomEnemy::CustomEnemy(
   sol::function drop,
   sol::function manageState,
   sol::function death
-) : Enemy(p) {
+) : Enemy(Vector2Zero()) {
   name = n;
   colour = c;
   radius = r;
@@ -45,33 +44,37 @@ void CustomEnemy::onSpawn() {
 }
 
 std::optional<CustomEnemy> CustomEnemy::fromTable(sol::table x) {
-  auto p = x["position"];
   auto r = x["radius"];
   auto c = x["color"];
   auto s = x["initialState"];
   auto spawn = x["onSpawn"];
   auto name = x["name"];
   auto drop = x["dropHealth"];
-  auto manageState = x["manageState"];
+  auto state = x["manageState"];
   auto death = x["onDeath"];
-  if(!(p && r && name && s && c && spawn && drop && manageState && death))
+  if(!(r && name && s && c && spawn && drop && state && death)) {
+    DEBUG;
     return std::nullopt;
-  else return CustomEnemy(p, c, r, name, s, spawn, drop, manageState, death);
+  } else {
+    DEBUG;
+    return CustomEnemy(c, r, name, s, spawn, drop, state, death);
+  }
 }
 
 void CustomEnemy::addCustomEnemy(sol::table x) {
-  std::optional<CustomEnemy> c = fromTable(x);
-  if(!c) return;
-  else customEnemies.emplace(c.value().name, c.value());
+  std::optional<CustomEnemy> t = fromTable(x);
+  if(t.has_value()) customEnemies.try_emplace(t.value().name, t.value());
 }
 
-std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name) {
+std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name, Vector2 p) {
   auto x = customEnemies.find(name);
-  if(x == customEnemies.end())
-    return std::nullopt;
-  else {
+  printf("%d\n", x == customEnemies.end());
+  if(x != customEnemies.end()) {
     CustomEnemy* y = new CustomEnemy(x->second);
+    y->position = p;
     getRoot()->addChild(y);
     return y;
-  } 
+  } else {
+    return std::nullopt;
+  }
 }

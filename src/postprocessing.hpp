@@ -5,22 +5,19 @@
 #include "include.h"
 
 class PostProcessingData : public Entity {
-  private:
-    Shader pixelShader;
-    int pixelShaderScreenDimensionsLoc;
+private:
+  Shader pixelShader;
+  int lengthLoc;
 
-  public:
-    RenderTexture2D texture;
-    Vector2 screenDems;
+public:
+  RenderTexture2D texture;
 
-    virtual void render();
-    virtual void process(float data);
+  virtual void process(float data);
 
-    Shader getShader();
+  Shader getShader();
 
-    PostProcessingData();
-    ~PostProcessingData();
-
+  PostProcessingData();
+  ~PostProcessingData();
 };
 
 #endif

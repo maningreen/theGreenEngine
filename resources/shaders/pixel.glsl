@@ -8,7 +8,7 @@ in vec4 fragColor;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
-uniform float leng = 10;
+uniform float length = 100;
 
 // Output fragment color
 out vec4 finalColor;
@@ -24,7 +24,7 @@ void main()
 {
   vec2 pos = fragTexCoord;
 
-  pos = vec2(floor(fragTexCoord.x / (pixelLength / leng)) * pixelLength / leng, floor(fragTexCoord.y / (pixelLength / leng)) * pixelLength / leng);
+  pos = vec2(floor(fragTexCoord.x / (pixelLength / length)) * pixelLength / length, floor(fragTexCoord.y / (pixelLength / length)) * pixelLength / length);
 
   vec4 col = texture(texture0, pos);
 

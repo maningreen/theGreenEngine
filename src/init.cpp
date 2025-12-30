@@ -19,7 +19,7 @@ extern "C" {
 
 CameraEntity* cameraEnt;
 
-// #define shader
+#define shader
 
 
 void Init(Entity* root) {
@@ -73,7 +73,27 @@ void PostRendering(std::vector<Entity*>* entities) {
     }
   );
 
-  DrawTexturePro(data->texture.texture, (Rectangle){0, 0, 3 * (float)data->texture.texture.width, 3 * -(float)data->texture.texture.height}, (Rectangle){-(float)data->texture.texture.width, -(float)data->texture.texture.height, 3 * (float)data->texture.texture.width, 3 * (float)data->texture.texture.height}, {0, 0}, 0, WHITE);
+  DrawTexturePro(
+    data->texture.texture,
+    (Rectangle){
+      0,
+      0,
+      3 * (float)data->texture.texture.width,
+      3 * -(float)data->texture.texture.height
+    }, 
+    (Rectangle){
+      -(float)data->texture.texture.width,
+      -(float)data->texture.texture.height,
+      3 * (float)data->texture.texture.width,
+      3 * (float)data->texture.texture.height
+    }, 
+    {
+      0, 
+      0
+    }, 
+    0, 
+    WHITE
+  );
   EndMode2D();
 #ifdef shader
   EndShaderMode();

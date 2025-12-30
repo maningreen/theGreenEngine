@@ -19,9 +19,7 @@ private:
 
   static void manageAttack();
 
-  // returns -1 when unable to calculate.
-  static float getArea();
-  static float getArea(float angleSum);
+  static float getPerimeter();
 
   static bool getTriangleIsRegular();
   static bool getTriangleIsRegular(float angleSum);

@@ -25,10 +25,9 @@ public:
 
   static void addCustomEnemy(sol::table);
   static std::optional<CustomEnemy> fromTable(sol::table);
-  static std::optional<CustomEnemy*> spawnEnemy(std::string name);
+  static std::optional<CustomEnemy*> spawnEnemy(std::string name, Vector2 p);
 
   CustomEnemy(
-    Vector2 position,
     Color color,
     float radius,
     int initialState,

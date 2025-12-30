@@ -7,9 +7,8 @@ end
 
 return {
   onInit = function(plr)
-    plr.position.x = getRand() * Border.length()
-    plr.position.y = getRand() * Border.length()
-    print("YADLAKJSDLKAJSDl;")
+    plr.position.x = getRand() * Border.getLength()
+    plr.position.y = getRand() * Border.getLength()
     return 1
   end
 }

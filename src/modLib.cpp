@@ -167,14 +167,8 @@ void ModManager::initLua() {
   nodeBullet["color"] = &NodeBullet::color;
 
   sol::table border = lua["Border"].get_or_create<sol::table>();
-  border["length"] = sol::property(
-    [](){ 
-      return Border::length; 
-    }, 
-    [](float l){
-      Border::length = abs(l);
-    }
-  );
+  border["setLength"] = [](float l){ Border::length = abs(l); };
+  border["getLength"] = [](){ return Border::length; };
   border["wrapEntity"] = &Border::wrapEntity;
   border["wrapPos"] = &Border::wrapPos;
   border["wrapPosX"] = &Border::wrapPosX;
@@ -183,7 +177,7 @@ void ModManager::initLua() {
   border["getDistance"] = &Border::getDistance;
 
   sol::table customEnTable = lua["CustomEnemy"].get_or_create<sol::table>();
-  customEnTable["addEnemy"] = &CustomEnemy::fromTable;
+  customEnTable["addEnemy"] = &CustomEnemy::addCustomEnemy;
   customEnTable["spawnEnemy"] = &CustomEnemy::spawnEnemy;
 
   sol::usertype<CustomEnemy> customEn = lua.new_usertype<CustomEnemy>("customEnemy");

@@ -24,7 +24,7 @@ float AttackNode::defaultRadius = 30;
 float AttackNode::lifetimeAfterAttack = 1.5;
 std::vector<AttackNode*> AttackNode::nodes;
 
-float AttackNode::damage = 60000;
+float AttackNode::damage = 600;
 
 AttackNode::AttackNode(Vector2 p)
     : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
@@ -122,21 +122,11 @@ AttackNode AttackNode::unwrapRelative() {
   return x;
 }
 
-// returns 0 if invalid triangle
-float AttackNode::getArea() {
-  if(nodes.size() < 3)
-    return 0;
-  if(getTriangleIsRegular())
-    return calculateTriangleArea(nodes[0]->position, nodes[1]->position, nodes[2]->position);
-  return 0;
-}
-
-float AttackNode::getArea(float theta) {
-  if(nodes.size() < 3)
-    return 0;
-  if(getTriangleIsRegular(theta))
-    return calculateTriangleArea(nodes[0]->position, nodes[1]->position, nodes[2]->position);
-  return 0;
+float AttackNode::getPerimeter() {
+  float sigma = 0; // sigma as in the greek letter for summation, not brainrot
+  for(int i = 1; i < nodes.size(); i++)
+    sigma += Vector2Length(Border::getShortestPathToPoint(nodes[i - 1]->position, nodes[i]->position));;
+  return sigma;
 }
 
 bool AttackNode::getTriangleIsRegular() {
@@ -185,7 +175,6 @@ void AttackNode::manageAttack() {
   if(nodes.size() < 3)
     return;
 
-  float area = getArea();
   bool validTriangle = getTriangleIsRegular();
 
   std::vector<Entity*> enemies =
@@ -201,8 +190,7 @@ void AttackNode::manageAttack() {
 
       Vector2 effectivePos[nodes.size()];
       for(int i = 0; i < nodes.size(); i++)
-        effectivePos[i] =
-            Border::unwrapPositionRelative(en->position, nodes[i]->position);
+        effectivePos[i] = Border::unwrapPositionRelative(en->position, nodes[i]->position);
 
       // then we can use a regular collision
       // checking collision circle triangle, easy peasy, lemon squeazy
@@ -221,7 +209,7 @@ void AttackNode::manageAttack() {
              effectivePos[0],
              effectivePos[1],
              effectivePos[2]))
-        ((Enemy*)en)->getHealthManager()->applyDamage(damage / area);
+        ((Enemy*)en)->getHealthManager()->applyDamage(damage / getPerimeter());
     } else {
       float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
@@ -230,14 +218,14 @@ void AttackNode::manageAttack() {
 
         // this is an external function written in haskell
         getClosestPointFromLineAndPoint(&nodes[i]->position,
-            &unwrappedNext,
-            &en->position,
-            &closestPoint);
+          &unwrappedNext,
+          &en->position,
+          &closestPoint);
         float distance = Vector2Distance(closestPoint, en->position);
         minimumDistance = min(distance, minimumDistance);
       }
       if(minimumDistance <= en->radius)
-        en->killDefered();
+        en->getHealthManager()->applyDamage(damage / getPerimeter());
     }
   }
 }
