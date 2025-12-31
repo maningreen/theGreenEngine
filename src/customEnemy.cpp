@@ -64,11 +64,8 @@ std::optional<CustomEnemy> CustomEnemy::fromTable(sol::table x) {
 
 void CustomEnemy::addCustomEnemy(sol::table x) {
   std::optional<CustomEnemy> t = fromTable(x);
-  if(t.has_value()) {
-    CustomEnemy val = t.value();
-    auto y = customEnemies.emplace(val.name, val);
-    std::cout << "name: " << y.first->second.name << '\n';
-  }
+  if(t.has_value())
+    customEnemies.emplace(t.value().name, t.value());
 }
 
 std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name, Vector2 p) {
