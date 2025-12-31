@@ -76,6 +76,9 @@ public:
 
   static const float defaultSpeed;
 
+  static const float defaultShakeMag;
+  static float shakeMag;
+
   static const float defaultDashSpeed;
   static const float defaultDashTime;
   static const float defaultDashControl;

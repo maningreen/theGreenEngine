@@ -21,6 +21,13 @@ bool getTriangleIsValid(float angleSum);
 
 bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
 
+// returns a random float from 0 to 1
+float randomNormalized1();
+// returns a random float from -1 to 1
+float randomNormalized2();
+// returns a random normalized vector.
+Vector2 randomVector();
+
 #define vecsToRec(a, b) (Rectangle){a.x, a.y, b.x, b.y}
 
 #define DEBUG printf("Passed line: %d, in file: %s, in function %s\n", __LINE__, __FILE__, __FUNCTION__)

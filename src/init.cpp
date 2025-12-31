@@ -21,7 +21,7 @@ extern "C" {
 CameraEntity* cameraEnt;
 PostProcessingData* data;
 
-#define shader shading
+// #define shader shading
 
 void Init(Entity* root) {
   hs_init(0, 0);
@@ -67,9 +67,9 @@ void PostRendering(Entity* root) {
 #endif
   BeginMode2D(
     (Camera2D){
-      .offset = cameraEnt->Camera.offset, 
-      .target = Vector2Subtract(cameraEnt->Camera.target, (Vector2){-Border::length, -Border::length}), 
-      .rotation = 0, .zoom = cameraEnt->Camera.zoom
+      .offset = cameraEnt->camera.offset, 
+      .target = Vector2Subtract(cameraEnt->camera.target, (Vector2){-Border::length, -Border::length}), 
+      .rotation = 0, .zoom = cameraEnt->camera.zoom
     }
   );
 

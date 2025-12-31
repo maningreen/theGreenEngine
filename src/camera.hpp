@@ -20,6 +20,9 @@ public:
   void process(float delta);
   void render();
 
+  // magnitude is in px.
+  void applyShake(float magnitude);
+
   CameraEntity(std::string name, Entity2D* target);
   ~CameraEntity();
 

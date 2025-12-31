@@ -70,3 +70,18 @@ bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Ve
   return Vector2Distance(finalPos, localPos) <= radius;
 }
 
+float randomNormalized1() {
+  return (float)rand() / (float)RAND_MAX;
+}
+
+float randomNormalized2() {
+  return (randomNormalized1() - 1) * 2;
+}
+
+Vector2 randomVector() {
+  float x = (float)rand();
+  return (Vector2){
+    cos(x),
+    sin(x),
+  };
+}

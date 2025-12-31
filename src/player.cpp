@@ -55,6 +55,9 @@ const float distance = 50;
 
 float Player::hitboxRadius = 25;
 
+const float Player::defaultShakeMag = 10;
+float Player::shakeMag = Player::defaultShakeMag;
+
 #define barDimensions (Vector2){10, 100}
 
 void Player::manageInput(float delta, Vector2 input) {
@@ -75,6 +78,7 @@ void Player::beginDash(Vector2 input) {
     dashManager.beginDash(dashDirection);
     dashManager.removeDashProgress();
     modManager->onDash(this);
+    cam->applyShake(shakeMag);
   }
 }
 
@@ -163,8 +167,9 @@ void Player::manageDash(float delta) {
 
 void Player::fireBullet() {
   int nodeBulletCount = Engine::getAllChildrenWithTag(this, NodeBullet::tag).size();
-  int nodeCount = AttackNode::getNodes().size();
-  if(dashManager.getAvailableDashes() > 0 && nodeCount + nodeBulletCount < 3) {
+  int attackNodeCount = AttackNode::getNodes().size();
+  if(dashManager.getAvailableDashes() > 0 && attackNodeCount + nodeBulletCount < 3) {
+    cam->applyShake(shakeMag);
     dashManager.removeDashProgress();
     addChild(new NodeBullet(position, cam->getMousePosition(), rotation));
   }
@@ -214,17 +219,23 @@ Player::Player(const std::string& name, Vector2 position)
       this->beginDash(i); 
     }
   ));
-  inputManager->addVectorBind([this](float delta, Vector2 i) {
+  inputManager->addVectorBind(
+    [this](float delta, Vector2 i) {
       this->manageInput(delta, i);
-  });
+    }
+  );
 
-  Enemy::addSpawnHook([this](Enemy* x){
-    this->modManager->onEnemySpawn(this, x);
-  });
+  Enemy::addSpawnHook(
+    [this](Enemy* x){
+      this->modManager->onEnemySpawn(this, x);
+    }
+  );
 
-  Enemy::addDeathHook([this](Enemy* x){
-    this->modManager->onEnemyKill(this, x);
-  });
+  Enemy::addDeathHook(
+    [this](Enemy* x){
+      this->modManager->onEnemyKill(this, x);
+    }
+  );
 
   addChild(inputManager);
 
@@ -250,6 +261,7 @@ Player::~Player() {
     delete cam;
     delete modManager;
   }
+  player = nullptr;
 }
 
 void Player::init() { 

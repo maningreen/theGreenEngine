@@ -54,6 +54,10 @@ void CameraEntity::render() {
   ClearBackground(BLACK);
 }
 
+void CameraEntity::applyShake(float magnitude) {
+  shakeMag += magnitude;
+}
+
 CameraEntity::~CameraEntity() {}
 
 CameraEntity::CameraEntity(std::string name, Entity2D* target) : Entity(name) {
