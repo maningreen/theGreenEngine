@@ -28,19 +28,23 @@ CustomEnemy::CustomEnemy(
 }
 
 void CustomEnemy::manageStates(float delta) {
-  manageStateCustom(this, delta);
+  if(manageStateCustom.valid())
+    manageStateCustom(this, delta);
 }
 
 void CustomEnemy::onDeath() {
-  onDeathCustom(this);
+  if(onDeathCustom.valid())
+    onDeathCustom(this);
 }
 
 void CustomEnemy::dropHealth() {
-  dropHealthCustom(this);
+  if(dropHealthCustom.valid())
+    dropHealthCustom(this);
 }
 
 void CustomEnemy::onSpawn() {
-  onSpawnCustom(this);
+  if(onSpawnCustom.valid())
+    onSpawnCustom(this);
 }
 
 std::optional<CustomEnemy> CustomEnemy::fromTable(sol::table x) {
