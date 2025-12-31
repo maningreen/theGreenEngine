@@ -34,6 +34,8 @@ public:
 
   void kill();
   void killDefered();
+  // deallocates the child and removes it from the parent's entity list
+  void killAsChild();
 
   Entity* getParent();
 

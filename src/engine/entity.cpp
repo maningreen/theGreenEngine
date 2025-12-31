@@ -71,8 +71,7 @@ void Entity::kill() {
 
   if(valid) return; // maybe revived itself
 
-  int len = children.size();
-  for(int i = 0; i < len; i++) {
+  while(children.size()) {
     children.back()->kill();
 
     if(children.back()->getValid()) delete children.back();
@@ -80,6 +79,18 @@ void Entity::kill() {
     children.pop_back();
   }
   delete this;
+}
+
+void Entity::killAsChild() {
+  int i = 0;
+  for(Entity* x : getParent()->children) {
+    if(x == this) {
+      getParent()->children.erase(getParent()->children.begin() + i);
+      break;
+    }
+    i++;
+  }
+  kill();
 }
 
 bool Entity::getValid() {
