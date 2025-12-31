@@ -13,7 +13,7 @@ public:
   Camera2D camera;
   Entity2D* follow;
   Vector2 shakeVector;
-  float jitterness;
+  float shakeMag;
 
   Vector2 getMousePosition();
 
@@ -23,7 +23,7 @@ public:
   CameraEntity(std::string name, Entity2D* target);
   ~CameraEntity();
 
-  static float Smoothing;
+  static float smoothing;
   static float DefaultZoom;
   static float mouseLean;
 };

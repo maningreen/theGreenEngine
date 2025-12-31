@@ -2,12 +2,12 @@
 #include "camera.hpp"
 #include "engine/entity.hpp"
 #include "raylib.h"
+#include "include.h"
 #include <string>
 
-float CameraEntity::Smoothing = 10;
+float CameraEntity::smoothing = 10;
 float CameraEntity::DefaultZoom = 0.3;
 float CameraEntity::mouseLean = 0.1;
-float smoothing = 0.15;
 
 #define mouseLean .1
 
@@ -17,8 +17,14 @@ Vector2 CameraEntity::getMousePosition() {
 }
 
 void CameraEntity::manageCameraShake(float delta) {
-  Vector2 baseOff = (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-  camera.offset = Vector2Add(baseOff, Vector2Scale(Vector2Subtract(GetMousePosition(), camera.offset), -mouseLean));
+  Vector2 baseOffset = (Vector2){
+    GetScreenWidth() / 2.0f,
+    GetScreenHeight() / 2.0f
+  };
+  Vector2 mouseOffset = Vector2Scale(GetMousePosition() - camera.offset, -mouseLean);
+  shakeVector = Vector2Normalize(shakeVector) + randomVector();
+  shakeMag = Lerp(shakeMag, 0, smoothing * delta);
+  camera.offset = baseOffset + mouseOffset + Vector2Scale(shakeVector, shakeMag);
 }
 
 void CameraEntity::manageCameraMotion(float delta) {
@@ -36,7 +42,7 @@ void CameraEntity::manageCameraMotion(float delta) {
     else
       camera.target.y += 2 * Border::length;
   }
-  camera.target = Vector2Lerp(camera.target, follow->position, smoothing);
+  camera.target = Vector2Lerp(camera.target, follow->position, smoothing * delta);
 }
 
 void CameraEntity::process(float delta) {
@@ -53,6 +59,5 @@ CameraEntity::~CameraEntity() {}
 CameraEntity::CameraEntity(std::string name, Entity2D* target) : Entity(name) {
   follow = target;
   camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
-  jitterness = 0;
   shakeVector = (Vector2){0, 0};
 }
