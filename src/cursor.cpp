@@ -11,8 +11,7 @@ float Cursor::waveSpeed = PI;
 float Cursor::waveAmplitude = 10;
 unsigned Cursor::markCount = 4;
 
-Cursor::Cursor() : Entity2D("cursor", GetMousePosition()) {
-  HideCursor();
+Cursor::Cursor() : Entity2D("cursor", (Vector2){0, 0}) {
   sigmaDelta = 0;
 }
 
@@ -22,6 +21,7 @@ Cursor::~Cursor() {
 
 void Cursor::process(float delta) {
   sigmaDelta += delta;
+  if(!Player::player) return;
   position = Border::wrapPos(Player::player->getCamera()->getMousePosition());
 }
 
