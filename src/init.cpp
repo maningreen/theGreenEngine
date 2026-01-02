@@ -21,7 +21,7 @@ extern "C" {
 CameraEntity* cameraEnt;
 PostProcessingData* data;
 
-// #define shader shading
+#define shader shading
 
 void Init(Entity* root) {
   hs_init(0, 0);

@@ -33,7 +33,7 @@ void PreRendering(Entity* root);
 void PostRendering(Entity* root);
 
 int main() {
-  SetTraceLogLevel(LOG_NONE);
+  // SetTraceLogLevel(LOG_NONE);
   Entity Root = Entity("Root", nullptr);
   Entity::setRoot(&Root);
 

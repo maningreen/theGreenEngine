@@ -15,18 +15,27 @@ out vec4 finalColor;
 
 uniform float pixelLength = 5;
 
-vec4 to4Bit(vec4 i) {
-  // we do 15 becase 2^4 - 1 is 15, so there're 15 shades of any colour in 4 bit
-  return floor(i * 15) / 15;
+vec4 pallette(vec4 i) {
+  // we want to greyscale it first, well get the brightness
+  float brightness = (i.r + i.g + i.b + i.a) / 4;
+  if(brightness > .75)
+    return vec4(.908, .843, .65, 1);
+  else
+    return i;
 }
 
-void main()
-{
-  vec2 pos = fragTexCoord;
+vec2 pixelize(vec2 x) {
+  float ratio = length / pixelLength;
+  return vec2(
+    floor(x.x * ratio) / ratio,
+    floor(x.y * ratio) / ratio
+  );
+}
 
-  pos = vec2(floor(fragTexCoord.x / (pixelLength / length)) * pixelLength / length, floor(fragTexCoord.y / (pixelLength / length)) * pixelLength / length);
+void main() {
+  vec2 pos = pixelize(fragTexCoord);
 
-  vec4 col = texture(texture0, pos);
+  vec4 col = pallette(texture(texture0, pos));
 
-  finalColor = vec4(to4Bit(col));
+  finalColor = col;
 }
