@@ -737,6 +737,17 @@ return {
 }
 ```
 
+This mod will change the radius of the taurus the game sits upon. (it makes the game smaller)
+```lua
+return {
+  onInit = function()
+    Border.setLength(Border.getLength() / 2)
+    return 1
+  end,
+  description = "cuts the size of the world in half"
+}
+```
+
 ## Credits
 
 The amazing library used for the lua runtime, is [sol](https://github.com/ThePhD/sol), if you are taking any inspiration, I highly recommend this library.
