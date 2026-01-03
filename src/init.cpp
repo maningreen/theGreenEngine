@@ -18,7 +18,7 @@ extern "C" {
   extern void hs_init(int argc, char** argv);
 };
 
-// #define TEXTURE
+#define TEXTURE
 #ifdef TEXTURE
 #define SHADER
 #endif
