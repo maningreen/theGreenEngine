@@ -17,6 +17,7 @@ namespace mod {
 
 struct Mod {
   std::string name;
+  std::string description;
 
   std::optional<sol::function> onInit;
   std::optional<sol::function> onDash;

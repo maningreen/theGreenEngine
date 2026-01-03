@@ -59,5 +59,6 @@ return {
     CustomEnemy.addEnemy(en)
     CustomEnemy.spawnEnemy("bowling", vector2(300, 300))
     return 1
-  end
+  end,
+  description = "adds a simple enemy"
 }

@@ -9,6 +9,7 @@
 
 Mod::Mod(std::string n, sol::function init) {
   name = n;
+  description = "";
   onInit = init;
   onDash = std::nullopt;
   onFire = std::nullopt;
@@ -18,6 +19,7 @@ Mod::Mod(std::string n, sol::function init) {
 
 Mod::Mod(std::string n) {
   name = n;
+  description = "";
   onInit = std::nullopt;
   onDash = std::nullopt;
   onFire = std::nullopt;
@@ -47,6 +49,11 @@ Mod Mod::fromTable(std::string n, sol::table table) {
   MODTHING(x, table, onFire, "onFire");
   MODTHING(x, table, onEnemyKill, "onKill");
   MODTHING(x, table, onEnemySpawn, "onSpawn");
+
+  std::optional<std::string> str = table["description"];
+  if(str.has_value()) x.description = str.value();
+
+  std::cout << x.description << '\n';
 
   return x;
 }

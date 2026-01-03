@@ -8,5 +8,6 @@ return {
     plr.position.x = getRand() * Border.getLength()
     plr.position.y = getRand() * Border.getLength()
     return 1
-  end
+  end,
+  description = "a default mod which randomizes the player's position on spawn"
 }
