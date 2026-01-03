@@ -8,15 +8,15 @@ in vec4 fragColor;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
-uniform float length = 100;
+uniform float borderLength = 100;
 
 // Output fragment color
 out vec4 finalColor;
 
 uniform float pixelLength = 5;
 
-const int count = 15;
-vec4 palletteArr[count] = vec4[](
+uniform int paletteSize = 15;
+uniform vec4 paletteArray[15] = vec4[](
   vec4(0.0627, 0.0039, 0.0471, 1.0), // #10010C
   vec4(0.0824, 0.0039, 0.0627, 1.0), // #150110
   vec4(0.1333, 0.0000, 0.0980, 1.0), // #220119
@@ -38,19 +38,19 @@ vec4 pallette(vec4 i) {
   // we want to greyscale it first, well get the brightness
   float minDelta = 1e20;
   int minI = 0;
-  for(int j = 0; j < count; ++j) {
-    vec4 diff = palletteArr[j] - i;
+  for(int j = 0; j < paletteSize; ++j) {
+    vec4 diff = paletteArray[j] - i;
     float delta = dot(diff.rgb, diff.rgb);
     if(delta < minDelta) {
       minDelta = delta;
       minI = j;
     }
   }
-  return vec4(mix(palletteArr[minI], i, 0.1).rgb, i.a); // lerp it a little so that way it keeps gradients
+  return vec4(mix(paletteArray[minI], i, 0.1).rgb, i.a); // lerp it a little so that way it keeps gradients
 }
 
 vec2 pixelize(vec2 x) {
-  float ratio = length / pixelLength;
+  float ratio = borderLength / pixelLength;
   return vec2(
     floor(x.x * ratio) / ratio,
     floor(x.y * ratio) / ratio
@@ -60,7 +60,5 @@ vec2 pixelize(vec2 x) {
 void main() {
   vec2 pos = pixelize(fragTexCoord);
 
-  vec4 col = pallette(texture(texture0, pos));
-
-  finalColor = col;
+  finalColor = pallette(texture(texture0, pos));
 }

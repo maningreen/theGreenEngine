@@ -7,7 +7,7 @@
 PostProcessingData::PostProcessingData() : Entity("Data") {
   texture = LoadRenderTexture(2 * Border::length, 2 * Border::length);
   pixelShader = LoadShader(0, "resources/shaders/pixel.glsl");
-  lengthLoc = GetShaderLocation(pixelShader, "length");
+  lengthLoc = GetShaderLocation(pixelShader, "borderLength");
   SetShaderValue(pixelShader, lengthLoc, &Border::length, SHADER_UNIFORM_FLOAT);
   addTag("PostProcessingData");
 }
