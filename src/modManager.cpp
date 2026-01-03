@@ -103,3 +103,17 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
 
   return 0;
 }
+
+std::list<std::string> ModManager::listPoolMods() {
+  std::list<std::string> arr;
+  for(const fs::directory_entry& path : fs::directory_iterator(mod::initPath))
+    arr.
+    push_front(
+      path.
+      path().
+      filename().
+      replace_extension("").
+      string()
+    );
+  return arr;
+}

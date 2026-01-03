@@ -75,6 +75,9 @@ class ModManager {
     // expects format: (poolPath)/(mod).lua
     int loadMod(std::string mod, Entity2D* plr);
 
+    // lists all possible mods to be loaded
+    std::list<std::string> listPoolMods();
+
     // removes a mod.
     void removeMod(int i);
 
