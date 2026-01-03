@@ -15,6 +15,7 @@ sol::state ModManager::lua;
 
 ModManager::ModManager() : mods({}) {
   initLua();
+  std::cout << pickRandomPoolMod() << '\n';
 }
 
 ModManager::~ModManager() {}
@@ -116,4 +117,12 @@ std::list<std::string> ModManager::listPoolMods() {
       string()
     );
   return arr;
+}
+
+std::string ModManager::pickRandomPoolMod() {
+  std::list<std::string> arr = listPoolMods();
+  int r = rand() % arr.size();
+  for(int i = 0; i < r; i++)
+    arr.pop_front();
+  return arr.front();
 }

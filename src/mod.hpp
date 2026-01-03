@@ -77,6 +77,8 @@ class ModManager {
 
     // lists all possible mods to be loaded
     std::list<std::string> listPoolMods();
+    // picks a random pool mod to be loaded
+    std::string pickRandomPoolMod();
 
     // removes a mod.
     void removeMod(int i);
