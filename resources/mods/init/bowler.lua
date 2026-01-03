@@ -57,7 +57,6 @@ local en = {
 return {
   onInit = function()
     CustomEnemy.addEnemy(en)
-    print("test")
     CustomEnemy.spawnEnemy("bowling", vector2(300, 300))
     return 1
   end

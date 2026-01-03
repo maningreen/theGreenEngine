@@ -1,8 +1,6 @@
 -- returns (-1) -> 1
 local function getRand()
-  local x = math.random()
-  local xPrime = x
-  return (xPrime - .5) * 2
+  return (math.random() - .5) * 2
 end
 
 return {
