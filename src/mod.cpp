@@ -53,8 +53,6 @@ Mod Mod::fromTable(std::string n, sol::table table) {
   std::optional<std::string> str = table["description"];
   if(str.has_value()) x.description = str.value();
 
-  std::cout << x.description << '\n';
-
   return x;
 }
 
