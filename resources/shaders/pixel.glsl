@@ -15,6 +15,8 @@ out vec4 finalColor;
 
 uniform float pixelLength = 5;
 
+uniform float mixing = 0.1;
+
 uniform int paletteSize = 15;
 uniform vec4 paletteArray[15] = vec4[](
   vec4(0.0627, 0.0039, 0.0471, 1.0), // #10010C
@@ -46,7 +48,7 @@ vec4 pallette(vec4 i) {
       minI = j;
     }
   }
-  return vec4(mix(paletteArray[minI], i, 0.1).rgb, i.a); // lerp it a little so that way it keeps gradients
+  return vec4(mix(paletteArray[minI], i, mixing).rgb, i.a); // lerp it a little so that way it keeps gradients
 }
 
 vec2 pixelize(vec2 x) {
