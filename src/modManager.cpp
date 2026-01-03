@@ -15,7 +15,6 @@ sol::state ModManager::lua;
 
 ModManager::ModManager() : mods({}) {
   initLua();
-  std::cout << pickRandomPoolMod() << '\n';
 }
 
 ModManager::~ModManager() {}
@@ -66,28 +65,13 @@ sol::state& ModManager::getLua() {
   return lua;
 }
 
-#define MOD(search, set)              \
-  sol::function set = result[search]; \
-  if(set.valid())                     \
-    mod.set = set;                    \
-  else                                \
-    mod.set = std::nullopt;
-
 void ModManager::loadMods(Entity2D* plr) {
   for(const fs::directory_entry& p : fs::directory_iterator(mod::initPath)) {
-    sol::table result = lua.script_file(p.path().string());
-    if(!result.valid()) continue;
-    Mod mod = Mod(p.path().filename().string());
-    MOD("onInit", onInit);
-    MOD("onKill", onEnemyKill);
-    MOD("onSpawn", onEnemySpawn);
-    MOD("onDash", onDash);
-    MOD("onFire", onFire);
-    addMod(mod, plr);
+    std::optional<Mod> mod = Mod::fromPath(p.path());
+    if(mod.has_value())
+      addMod(mod.value(), plr);
   }
 }
-
-#undef MOD
 
 int ModManager::loadMod(std::string name, Entity2D* plr) {
   // check if file is valid, if so we return 1
@@ -96,11 +80,9 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
   if(!fs::exists(path))
     return 1;
 
-  // great, we continue
-  sol::table modTable = lua.script_file(path); // load the file
-  if(!modTable.valid()) return 1;
-  Mod mod = Mod::fromTable(name, modTable); // parse the table
-  addMod(mod, plr); // if it's valid shablamo
+  std::optional<Mod> mod = Mod::fromPath(path); 
+  if(mod.has_value())
+    addMod(mod.value(), plr); // if it's valid shablamo
 
   return 0;
 }
