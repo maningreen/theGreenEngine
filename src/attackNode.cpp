@@ -205,11 +205,9 @@ void AttackNode::manageAttack() {
       for(int i = 0; i < nodes.size(); i++) {
         if(i == closestI) {
           effectivePos[i] = nodes[i]->position;
-        DrawRectangleV(effectivePos[i], {100, 100}, WHITE);
           continue;
         }
         effectivePos[i] = Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
-        DrawRectangleV(effectivePos[i], {100, 100}, WHITE);
       }
 
       // then we can use a regular collision
