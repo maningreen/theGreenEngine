@@ -30,7 +30,8 @@ return {
     onSpawn = function()
     end,
     onKill = function()
-    end
+    end,
+    description = "do nothing"
 }
 ```
 
@@ -41,7 +42,8 @@ return {
     onInit = function(player) 
         print(player.speed)
         player.speed = player.speed * 2
-    end
+    end,
+    description = "print then double player speed"
 }
 ```
 
@@ -49,7 +51,7 @@ But these functions don't have arguments!, they do.
 
 Here is a disection of all these functions:
 - onInit
-  - called when mod is first added to the mod list, **required**
+  - called when mod is first added to the mod list
   - called once
   - provides in arguments: player
 - onDash
@@ -64,6 +66,9 @@ Here is a disection of all these functions:
 - onKill
   - called every time an enemy is killed
   - provides in arguments: player, enemy
+- description
+  - an expected, but optional string used to describe the mod,
+    especially important when making an upgrade / pool mod.
 
 FAQ:
   - Q: Do I need to define the arguments when defining the function?
@@ -71,9 +76,6 @@ FAQ:
 
   - Q: Do I need to define the arguments in order when defining the function?
     - A: Yes, otherwise the program will throw a hissy fit (crash)
-
-  - Q: Do I *really* need to define an onInit?
-    - A: Yeah, sorry... If you hate it, nag me, and in the meantime use `onInit = function() end`
 
   - Q: What if I have an item that's not specified in the return?
     - A: We ignore it
@@ -109,7 +111,9 @@ return {
     end,
 
     onSpawn = function(player, enemy)
-    end
+    end,
+
+    description = "Print a familiar greeting."
 }
 ```
 
@@ -145,7 +149,8 @@ return {
     onDash = function()
         print("hey, you dashed!")
         return 1
-    end
+    end,
+    description = "unloading example"
 }
 ```
 
