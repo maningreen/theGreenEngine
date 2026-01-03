@@ -46,7 +46,7 @@ vec4 pallette(vec4 i) {
       minI = j;
     }
   }
-  return mix(palletteArr[minI], i, 0.1); // lerp it a little so that way it keeps gradients
+  return vec4(mix(palletteArr[minI], i, 0.1).rgb, i.a); // lerp it a little so that way it keeps gradients
 }
 
 vec2 pixelize(vec2 x) {
