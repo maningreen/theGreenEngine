@@ -18,16 +18,23 @@ extern "C" {
   extern void hs_init(int argc, char** argv);
 };
 
-CameraEntity* cameraEnt;
-PostProcessingData* data;
+// #define TEXTURE
+#ifdef TEXTURE
+#define SHADER
+#endif
 
-#define shader shading
+CameraEntity* cameraEnt;
+#ifdef TEXTURE
+PostProcessingData* data;
+#endif
 
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
+#ifdef TEXTURE
   data = new PostProcessingData();
   root->addChild(data);
+#endif
   root->addChild(new Cursor());
 
   Player* plr = new Player("Player", (Vector2){0, 0});
@@ -44,6 +51,7 @@ void Init(Entity* root) {
 }
 
 void PreRendering(Entity* root) { 
+#ifdef TEXTURE
   BeginTextureMode(data->texture);
   BeginMode2D((Camera2D){
     .offset = Vector2Zero(),
@@ -54,17 +62,24 @@ void PreRendering(Entity* root) {
     .rotation = 0,
     .zoom = 1
   });
+#endif
+#ifndef TEXTURE
+  BeginMode2D(cameraEnt->camera);
+#endif
 }
 
 void PostRendering(Entity* root) {
   PostProcessingData* data = (PostProcessingData*)root->children.front();
   if(cameraEnt == nullptr)
     cameraEnt = (CameraEntity*)Engine::searchTreeForEntity(&root->children, "Camera");
+#ifdef TEXTURE
   EndTextureMode();
+#endif
 
-#ifdef shader
+#ifdef SHADER
   BeginShaderMode(data->getShader());
 #endif
+#ifdef TEXTURE
   BeginMode2D(
     (Camera2D){
       .offset = cameraEnt->camera.offset, 
@@ -72,9 +87,11 @@ void PostRendering(Entity* root) {
       .rotation = 0, .zoom = cameraEnt->camera.zoom
     }
   );
+#endif
 
   unsigned int renderXCount = 2 * ceil((int)GetScreenWidth() / Border::length) + 1;
   unsigned int renderYCount = 2 * ceil((int)GetScreenHeight() / Border::length) + 1;
+#ifdef TEXTURE
   DrawTexturePro(
     data->texture.texture,
     (Rectangle){
@@ -96,8 +113,9 @@ void PostRendering(Entity* root) {
     0, 
     WHITE
   );
+#endif
   EndMode2D();
-#ifdef shader
+#ifdef SHADER
   EndShaderMode();
 #endif
 
