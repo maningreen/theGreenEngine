@@ -140,6 +140,8 @@ bool AttackNode::getTriangleIsRegular(float angleSum) {
 
 void AttackNode::render() {
   DrawCircleV(position, radius, WHITE);
+  if(index == 0)
+    manageAttack();
 }
 
 void AttackNode::process(float delta) {
@@ -159,8 +161,6 @@ void AttackNode::process(float delta) {
     // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
     // las->position yeah
     las->position = position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
-    if(index == 0)
-      manageAttack();
   } else if(lifetime <= 1)
     radius = ease(1 - lifetime) * defaultRadius;
   if(lifetime >= getMaxLifetime())
@@ -188,12 +188,32 @@ void AttackNode::manageAttack() {
       // however, sometimes it needs to be unwrapped, otherwise it's considered
       // having a much larger area than it should
 
+      // figure out which node is closest to this john
+      int closestI;
+      {
+        float minDist = INFINITY;
+        for(int i = 0; i < nodes.size(); i++) {
+          float d = Vector2DistanceSqr(nodes[i]->position, en->position);
+          if(minDist > d) {
+            minDist = d;
+            closestI = i;
+          }
+        }
+      }
+
       Vector2 effectivePos[nodes.size()];
-      for(int i = 0; i < nodes.size(); i++)
-        effectivePos[i] = Border::unwrapPositionRelative(en->position, nodes[i]->position);
+      for(int i = 0; i < nodes.size(); i++) {
+        if(i == closestI) {
+          effectivePos[i] = nodes[i]->position;
+        DrawRectangleV(effectivePos[i], {100, 100}, WHITE);
+          continue;
+        }
+        effectivePos[i] = Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
+        DrawRectangleV(effectivePos[i], {100, 100}, WHITE);
+      }
 
       // then we can use a regular collision
-      // checking collision circle triangle, easy peasy, lemon squeazy
+      // checking collision circle triangle, easy peasy, lemon squeezy
       Vector2 avg = Vector2Zero();
       for(int i = 0; i < 3; i++)
         avg = Vector2Add(avg, effectivePos[i]);
@@ -204,12 +224,15 @@ void AttackNode::manageAttack() {
       float r = en->radius;
 
       float min = dist < r ? dist : r;
-      Vector2 p = Vector2Add(en->position, Vector2Scale(vecToAvg, min / dist));
-      if(CheckCollisionPointTriangle(p,
-             effectivePos[0],
-             effectivePos[1],
-             effectivePos[2]))
-        ((Enemy*)en)->getHealthManager()->applyDamage(damage / getPerimeter());
+      Vector2 p = en->position + Vector2Scale(vecToAvg, min / dist);
+      if(
+        CheckCollisionPointTriangle(
+          p,
+          effectivePos[0],
+          effectivePos[1],
+          effectivePos[2]
+        )
+      ) en->getHealthManager()->applyDamage(damage / getPerimeter());
     } else {
       float minimumDistance = INFINITY;
       for(int i = 0; i < 3; i++) {
@@ -217,10 +240,12 @@ void AttackNode::manageAttack() {
         Vector2 closestPoint;
 
         // this is an external function written in haskell
-        getClosestPointFromLineAndPoint(&nodes[i]->position,
+        getClosestPointFromLineAndPoint(
+          &nodes[i]->position,
           &unwrappedNext,
           &en->position,
-          &closestPoint);
+          &closestPoint
+        );
         float distance = Vector2Distance(closestPoint, en->position);
         minimumDistance = min(distance, minimumDistance);
       }
