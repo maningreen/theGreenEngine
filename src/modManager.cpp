@@ -65,11 +65,11 @@ sol::state& ModManager::getLua() {
   return lua;
 }
 
-#define MOD(search, set) \
+#define MOD(search, set)              \
   sol::function set = result[search]; \
-  if(set.valid())      \
-    mod.set = set;     \
-  else                 \
+  if(set.valid())                     \
+    mod.set = set;                    \
+  else                                \
     mod.set = std::nullopt;
 
 void ModManager::loadMods(Entity2D* plr) {
