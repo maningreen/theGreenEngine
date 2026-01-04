@@ -4,6 +4,8 @@
 #include "engine/entity.hpp"
 
 class PostProcessing : public Entity {
+private:
+  Shader paletteShader;
 public:
   void process(float delta) override;
 

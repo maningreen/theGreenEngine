@@ -59,5 +59,5 @@ void PostRendering(Entity* root) {
   // BeginMode2D(cameraEnt->camera);
   // managePostRendering(root);
   // EndMode2D();
-  // DrawFPS(0, 0);
+  DrawFPS(0, 0);
 }

@@ -5,10 +5,12 @@
 PostProcessing::PostProcessing() : Entity("PostProcessing") {
   pixelLength = 10;
   texture = LoadRenderTexture(2 * Border::length / pixelLength, 2 * Border::length / pixelLength);
+  paletteShader = LoadShader(NULL, "resources/shaders/palette.glsl");
 }
 
 PostProcessing::~PostProcessing() {
   UnloadRenderTexture(texture);
+  UnloadShader(paletteShader);
 }
 
 void PostProcessing::process(float delta) {
@@ -37,6 +39,7 @@ void PostProcessing::preRender() {
 void PostProcessing::postRender() {
   EndMode2D();
   EndTextureMode();
+  BeginShaderMode(paletteShader);
 
   Camera2D* cam = &Player::player->getCamera()->camera;
   BeginMode2D(
@@ -73,4 +76,5 @@ void PostProcessing::postRender() {
   );
   DrawCircle(0, 0, 100, WHITE);
   EndMode2D();
+  EndShaderMode();
 }
