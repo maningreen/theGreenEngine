@@ -4,7 +4,6 @@
 #include "raylib.h"
 #include "include.h"
 #include <string>
-#include <iostream>
 
 float CameraEntity::smoothing = 10;
 float CameraEntity::DefaultZoom = 0.3;
