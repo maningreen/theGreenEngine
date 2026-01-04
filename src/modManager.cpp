@@ -89,7 +89,7 @@ int ModManager::loadMod(std::string name, Entity2D* plr) {
 
 std::list<std::string> ModManager::listPoolMods() {
   std::list<std::string> arr;
-  for(const fs::directory_entry& path : fs::directory_iterator(mod::initPath))
+  for(const fs::directory_entry& path : fs::directory_iterator(mod::poolPath))
     arr.
     push_front(
       path.
@@ -107,4 +107,9 @@ std::string ModManager::pickRandomPoolMod() {
   for(int i = 0; i < r; i++)
     arr.pop_front();
   return arr.front();
+}
+
+ModManager* ModManager::get() {
+  static ModManager x;
+  return &x;
 }

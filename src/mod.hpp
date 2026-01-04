@@ -44,11 +44,11 @@ class ModManager {
 
     // this function doesn't call onInit, only sets up the lua
     void initLua();
-  public:
-    std::vector<Mod> mods;
-
     ModManager();
     ~ModManager();
+  public:
+    static ModManager* get();
+    std::vector<Mod> mods;
 
     // this function calls `onDash` on all the mods
     void onDash(Entity2D*);
@@ -77,9 +77,9 @@ class ModManager {
     int loadMod(std::string mod, Entity2D* plr);
 
     // lists all possible mods to be loaded
-    std::list<std::string> listPoolMods();
+    static std::list<std::string> listPoolMods();
     // picks a random pool mod to be loaded
-    std::string pickRandomPoolMod();
+    static std::string pickRandomPoolMod();
 
     // removes a mod.
     void removeMod(int i);
