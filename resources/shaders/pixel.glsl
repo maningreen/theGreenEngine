@@ -17,8 +17,8 @@ uniform float pixelLength = 5;
 
 uniform float mixing = 0.1;
 
-uniform int paletteSize = 15;
-uniform vec4 paletteArray[15] = vec4[](
+const int paletteSize = 15;
+uniform vec4 paletteArray[paletteSize] = vec4[](
   vec4(0.0627, 0.0039, 0.0471, 1.0), // #10010C
   vec4(0.0824, 0.0039, 0.0627, 1.0), // #150110
   vec4(0.1333, 0.0000, 0.0980, 1.0), // #220119
@@ -37,7 +37,6 @@ uniform vec4 paletteArray[15] = vec4[](
 );
 
 vec4 pallette(vec4 i) {
-  // we want to greyscale it first, well get the brightness
   float minDelta = 1e20;
   int minI = 0;
   for(int j = 0; j < paletteSize; ++j) {
