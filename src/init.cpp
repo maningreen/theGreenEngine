@@ -14,6 +14,8 @@
 #include "spiral.hpp"
 #include "time.h"
 
+#include "store.hpp"
+
 extern "C" {
   extern void hs_init(int argc, char** argv);
 };
@@ -28,6 +30,12 @@ CameraEntity* cameraEnt;
   PostProcessingData* data;
 #endif // TEXTURE
 
+void managePostRendering(Entity* en) {
+  for(Entity* kid : en->children)
+    managePostRendering(kid);
+  en->postProcessingRender();
+}
+
 void Init(Entity* root) {
   hs_init(0, 0);
   srand(time(0));
@@ -36,6 +44,7 @@ void Init(Entity* root) {
   root->addChild(data);
 #endif // TEXTURE
   root->addChild(new Cursor());
+  root->addChild(new Store());
 
   Player* plr = new Player("Player", (Vector2){0, 0});
   root->addChild(plr);
@@ -77,9 +86,10 @@ void PostRendering(Entity* root) {
 #endif // TEXTURE
 
 #ifdef SHADER
-  BeginShaderMode(data->getShader());
+  BeginShaderMode(data->getPixelShader());
 #endif // SHADER
 #ifdef TEXTURE
+  BeginTextureMode(data->texture);
   BeginMode2D(
     (Camera2D){
       .offset = cameraEnt->camera.offset, 
@@ -87,11 +97,8 @@ void PostRendering(Entity* root) {
       .rotation = 0, .zoom = cameraEnt->camera.zoom
     }
   );
-#endif // TEXTURE
-
-  unsigned int renderXCount = 2 * ceil((int)GetScreenWidth() / Border::length) + 1;
-  unsigned int renderYCount = 2 * ceil((int)GetScreenHeight() / Border::length) + 1;
-#ifdef TEXTURE
+  unsigned int renderXCount = ceil((int)GetScreenWidth() / (Border::length * cameraEnt->zoom)) + 2;
+  unsigned int renderYCount = ceil((int)GetScreenHeight() / (Border::length * cameraEnt->zoom)) + 2;
   DrawTexturePro(
     data->texture.texture,
     (Rectangle){
@@ -118,6 +125,10 @@ void PostRendering(Entity* root) {
 #ifdef SHADER
   EndShaderMode();
 #endif // SHADER
+
+  BeginMode2D(cameraEnt->camera);
+  managePostRendering(root);
+  EndMode2D();
 
   DrawFPS(0, 0);
 }
