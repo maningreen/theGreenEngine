@@ -50,9 +50,14 @@ Mod Mod::fromTable(std::string n, sol::table table) {
   MODTHING(x, table, onEnemyKill, "onKill");
   MODTHING(x, table, onEnemySpawn, "onSpawn");
 
-  std::optional<std::string> str = table["description"];
-  if(str.has_value()) x.description = str.value();
+  x.description = (std::string)table["description"];
+  return x;
+}
 
+std::optional<Mod> Mod::fromName(std::string name) {
+  std::string n = mod::poolPath;
+  n.append(1, '/').append(name).append(".lua");
+  Mod x = fromPath(n).value();
   return x;
 }
 

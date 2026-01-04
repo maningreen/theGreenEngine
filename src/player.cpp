@@ -180,8 +180,10 @@ Player::Player(const std::string& name, Vector2 position)
       defaultDashTime,
       defaultDashRegenDelay,
       defaultDashControl,
-      defaultDashSpeed),
-    Entity2D(name, position) {
+      defaultDashSpeed
+    ),
+    Entity2D(name, position) 
+{
 
   Player::player = this;
 
@@ -249,7 +251,7 @@ Player::Player(const std::string& name, Vector2 position)
   cam = new CameraEntity("Camera", this);
   addChild(cam);
 
-  modManager = new ModManager;
+  modManager = ModManager::get();
 }
 
 Player::~Player() { 
@@ -259,9 +261,8 @@ Player::~Player() {
     delete inputManager;
     inputManager = nullptr;
     delete cam;
-    delete modManager;
   }
-  player = nullptr;
+  Player::player = nullptr;
 }
 
 void Player::init() { 
