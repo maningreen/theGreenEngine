@@ -60,4 +60,6 @@ void PostRendering(Entity* root) {
   // managePostRendering(root);
   // EndMode2D();
   DrawFPS(0, 0);
+
+  data->postPostRender();
 }

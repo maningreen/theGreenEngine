@@ -74,7 +74,9 @@ void PostProcessing::postRender() {
     0, 
     WHITE
   );
-  DrawCircle(0, 0, 100, WHITE);
   EndMode2D();
+}
+
+void PostProcessing::postPostRender() {
   EndShaderMode();
 }

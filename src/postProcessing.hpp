@@ -11,6 +11,7 @@ public:
 
   void preRender();
   void postRender();
+  void postPostRender();
 
   float pixelLength;
   RenderTexture texture;
