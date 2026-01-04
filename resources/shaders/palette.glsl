@@ -32,7 +32,7 @@ uniform vec4 paletteArray[paletteSize] = vec4[](
   vec4(1.0000, 0.9490, 0.8706, 1.0)  // #FFF2DE
 );
 
-vec4 pallette(vec4 i) {
+vec4 palette(vec4 i) {
   float minDelta = 1e20;
   int minI = 0;
   for(int j = 0; j < paletteSize; ++j) {
@@ -47,5 +47,5 @@ vec4 pallette(vec4 i) {
 }
 
 void main() {
-  finalColor = vec4(1, 0, 0, 1);
+  finalColor = palette(texture(texture0, fragTexCoord));
 }
