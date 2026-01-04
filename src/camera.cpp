@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "include.h"
 #include <string>
+#include <iostream>
 
 float CameraEntity::smoothing = 10;
 float CameraEntity::DefaultZoom = 0.3;
@@ -48,6 +49,9 @@ void CameraEntity::manageCameraMotion(float delta) {
 void CameraEntity::process(float delta) {
   manageCameraMotion(delta);
   manageCameraShake(delta);
+  float m = GetMouseWheelMove();
+  zoom += m * (zoom / 2);
+  camera.zoom = zoom;
 }
 
 void CameraEntity::render() {
@@ -64,4 +68,5 @@ CameraEntity::CameraEntity(std::string name, Entity2D* target) : Entity(name) {
   follow = target;
   camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
   shakeVector = (Vector2){0, 0};
+  zoom = DefaultZoom;
 }

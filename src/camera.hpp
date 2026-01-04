@@ -14,6 +14,7 @@ public:
   Entity2D* follow;
   Vector2 shakeVector;
   float shakeMag;
+  float zoom;
 
   Vector2 getMousePosition();
 
