@@ -26,8 +26,7 @@ Entity::~Entity() {}
 
 Entity::Entity(const std::string& name, Entity* parent) : Parent(parent), name(name), valid(true) {}
 
-Entity::Entity(const std::string& name) : Parent(nullptr), name(name), valid(true) {
-}
+Entity::Entity(const std::string& name) : Parent(nullptr), name(name), valid(true) {}
 
 void Entity::addChild(Entity* child) {
   child->Parent = this;
