@@ -56,9 +56,11 @@ void PreRendering(Entity* root) {
 
 void PostRendering(Entity* root) {
   data->postRender();
-  // BeginMode2D(cameraEnt->camera);
-  // managePostRendering(root);
-  // EndMode2D();
+
+  BeginMode2D(Player::player->getCamera()->camera);
+  managePostRendering(root);
+  EndMode2D();
+
   DrawFPS(0, 0);
 
   data->postPostRender();
