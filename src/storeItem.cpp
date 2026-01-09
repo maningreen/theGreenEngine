@@ -24,7 +24,10 @@ StoreItem::StoreItem(Mod& m, Vector2 p) :
   hovered = 0;
 }
 
+float theta = 0;
+
 void StoreItem::process(float delta) {
+  theta += delta;
   Vector2 mousePos = Border::wrapPos(Player::player->getCamera().getMousePosition());
   if(CheckCollisionPointRec(mousePos, (Rectangle){ position.x, position.y, length, length })) {
     if(hovered < 1)
@@ -37,13 +40,22 @@ void StoreItem::process(float delta) {
     hovered = 0;
 }
 
+
 void StoreItem::render() {
-  DrawRectangleV(
-    position,
-    (Vector2){
-      length,
-      length
+  const float e = ease(hovered);
+  const float l = .5f * length * e;
+  DrawRectanglePro(
+    (Rectangle){
+      position.x + length / 2.0f,
+      position.y + length / 2.0f,
+      length + l,
+      length + l
     },
+    (Vector2){
+      (length + l) / 2.0f,
+      (length + l) / 2.0f
+    },
+    e * sin(theta) * 30,
     WHITE
   );
 }

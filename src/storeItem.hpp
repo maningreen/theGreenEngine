@@ -7,6 +7,7 @@
 class StoreItem : public Entity2D {
 private:
   static float ease(float x);
+  bool purchased;
 
   void purchase();
 public:
