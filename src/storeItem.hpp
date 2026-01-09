@@ -7,6 +7,8 @@
 class StoreItem : public Entity2D {
 private:
   static float ease(float x);
+
+  void purchase();
 public:
   Mod mod;
 
@@ -20,6 +22,8 @@ public:
 
   static float length;
   static float padding;
+
+  static std::vector<std::function<void(StoreItem&)>> purchaseHooks;
 };
 
 #endif

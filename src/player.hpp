@@ -59,6 +59,7 @@ public:
   HealthManager& getHealthManager();
   DashManager& getDashManager();
   CameraEntity& getCamera();
+  ModManager& getModManager();
   static InputManager* getInputManager();
 
   static bool addEnemy(Enemy*);

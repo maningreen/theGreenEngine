@@ -15,6 +15,8 @@
 float StoreItem::length = 200;
 float StoreItem::padding = 100;
 
+std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
+
 #define BORDER_WIDTH 10
 
 StoreItem::StoreItem(Mod& m, Vector2 p) :
@@ -27,6 +29,8 @@ void StoreItem::process(float delta) {
   if(CheckCollisionPointRec(mousePos, (Rectangle){ position.x, position.y, length, length })) {
     if(hovered < 1)
       hovered += delta;
+    else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) // is released lets people drag away
+      purchase();
   } else if(hovered > 0)
     hovered -= delta;
   if(hovered < 0)
@@ -91,4 +95,11 @@ void StoreItem::postProcessingRender() {
 float StoreItem::ease(float x) {
   // thanks easings.net for this
   return x < 0.5 ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
+}
+
+void StoreItem::purchase() {
+  for(std::function<void (StoreItem &)> f : purchaseHooks)
+    f(*this);
+  killDefered();
+  Player::player->getModManager().addMod(mod, Player::player);
 }

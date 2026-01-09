@@ -275,3 +275,4 @@ HealthManager& Player::getHealthManager() { return *healthManager; }
 DashManager& Player::getDashManager() { return dashManager; }
 InputManager* Player::getInputManager() { return inputManager; }
 CameraEntity& Player::getCamera() { return *cam; }
+ModManager& Player::getModManager() { return *modManager; }

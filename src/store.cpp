@@ -23,6 +23,12 @@ Store::Store() : Entity("StoreManager") {
     ); 
     arr.erase(arr.begin() + n);
   }
+
+  StoreItem::purchaseHooks.push_back(
+    [this](StoreItem& x){
+      this->killDefered();
+    }
+  );
 }
 
 void Store::process(float delta) {}
