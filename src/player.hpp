@@ -56,9 +56,9 @@ public:
 
   Vector2 getInput();
 
-  HealthManager* getHealthManager();
-  DashManager* getDashManager();
-  CameraEntity* getCamera();
+  HealthManager& getHealthManager();
+  DashManager& getDashManager();
+  CameraEntity& getCamera();
   static InputManager* getInputManager();
 
   static bool addEnemy(Enemy*);

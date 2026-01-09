@@ -6,7 +6,7 @@
 #include <string>
 
 float CameraEntity::smoothing = 10;
-float CameraEntity::DefaultZoom = 0.3;
+float CameraEntity::defaultZoom = 0.3;
 float CameraEntity::mouseLean = 0.1;
 
 #define mouseLean .1
@@ -48,9 +48,6 @@ void CameraEntity::manageCameraMotion(float delta) {
 void CameraEntity::process(float delta) {
   manageCameraMotion(delta);
   manageCameraShake(delta);
-  float m = GetMouseWheelMove();
-  zoom += m * (zoom / 2);
-  camera.zoom = zoom;
 }
 
 void CameraEntity::render() {
@@ -65,7 +62,6 @@ CameraEntity::~CameraEntity() {}
 
 CameraEntity::CameraEntity(std::string name, Entity2D* target) : Entity(name) {
   follow = target;
-  camera = {{0, 0}, {0, 0}, 0, DefaultZoom};
+  camera = {{0, 0}, {0, 0}, 0, defaultZoom};
   shakeVector = (Vector2){0, 0};
-  zoom = DefaultZoom;
 }

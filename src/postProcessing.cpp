@@ -2,10 +2,14 @@
 #include "border.hpp"
 #include "player.hpp"
 
+const std::string PostProcessing::palletPath = "resources/shaders/palette.glsl";
+
+#define SHADER
+
 PostProcessing::PostProcessing() : Entity("PostProcessing") {
   pixelLength = 10;
   texture = LoadRenderTexture(2 * Border::length / pixelLength, 2 * Border::length / pixelLength);
-  paletteShader = LoadShader(NULL, "resources/shaders/palette.glsl");
+  paletteShader = LoadShader(NULL, palletPath.c_str());
 }
 
 PostProcessing::~PostProcessing() {
@@ -37,11 +41,14 @@ void PostProcessing::preRender() {
 }
 
 void PostProcessing::postRender() {
+  // DrawCircle(0, 0, 150, BLUE);
   EndMode2D();
   EndTextureMode();
+#ifdef SHADER
   BeginShaderMode(paletteShader);
+#endif
 
-  Camera2D* cam = &Player::player->getCamera()->camera;
+  Camera2D* cam = &Player::player->getCamera().camera;
   BeginMode2D(
     (Camera2D){
       .offset = cam->offset, 
@@ -75,8 +82,14 @@ void PostProcessing::postRender() {
     WHITE
   );
   EndMode2D();
+#ifdef SHADER
+  EndShaderMode();
+#endif
 }
 
 void PostProcessing::postPostRender() {
-  EndShaderMode();
+}
+
+Shader& PostProcessing::getShader() {
+  return paletteShader;
 }

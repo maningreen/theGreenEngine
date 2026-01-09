@@ -7,14 +7,9 @@
 const Color HealthPack::col = RED;
 const float HealthPack::decayRate = .9;
 const float HealthPack::playerPickupRadius = 200;
-Player* HealthPack::plr = nullptr;
 
-HealthPack::HealthPack(Vector2 p, float h) : Entity2D("HealthPack", p), health(h), velCart({0, 0}), velPol(0), isAttracted(false) {
-  setPlayer();
-}
-HealthPack::HealthPack(Vector2 p, Vector2 v, float h) : Entity2D("HealthPack", p), health(h), velCart(v), velPol(0), isAttracted(false) {
-  setPlayer();
-}
+HealthPack::HealthPack(Vector2 p, float h) : Entity2D("HealthPack", p), health(h), velCart({0, 0}), velPol(0), isAttracted(false) {}
+HealthPack::HealthPack(Vector2 p, Vector2 v, float h) : Entity2D("HealthPack", p), health(h), velCart(v), velPol(0), isAttracted(false) {}
 HealthPack::~HealthPack() {}
 
 float HealthPack::getRadiusForHealth() {
@@ -29,18 +24,14 @@ void HealthPack::render() {
   DrawCircleV(position, r, col);
 }
 
-void HealthPack::setPlayer() {
-  plr = (Player*)Engine::searchTreeForEntity(&getRoot()->children, "Player");
-}
-
 void HealthPack::process(float delta) {
   // ok so the way i do this is really weird, we have two methods of movement, cartesian and polar
   // cartesien is for when we're just chillin and moving about *before* we get picked up
   // the latter however is for when we're picked up, so that way it's a generally consistent time to be
   // picked up (also it looks really cool)
-  if(plr == nullptr)
+  if(Player::player == nullptr)
     return;
-  const Vector2 offset = Vector2Subtract(plr->position, position);
+  const Vector2 offset = Vector2Subtract(Player::player->position, position);
   if (!isAttracted) {
     position = Vector2Add(position, Vector2Scale(velCart, delta));
     velCart = Vector2Scale(velCart, delta * friction);
@@ -59,7 +50,7 @@ void HealthPack::process(float delta) {
     }
   } else {
     const float cutoffDistance = 50;
-    plr->getHealthManager()->applyHealing(health);
+    Player::player->getHealthManager().applyHealing(health);
     velPol += delta * 100;
     const Vector2 velToAdd = Vector2Scale(offset, velPol * delta);
     position = Vector2Add(position, velToAdd);

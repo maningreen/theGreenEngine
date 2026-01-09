@@ -6,9 +6,6 @@
 
 class HealthPack : public Entity2D {
 private:
-  static Player* plr;
-  void setPlayer();
-
   bool isAttracted;
 public:
   float health;

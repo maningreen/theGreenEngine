@@ -1,4 +1,5 @@
 #include "store.hpp"
+#include "storeItem.hpp"
 
 Store::Store() : Entity("StoreManager") {
   // load mods from the pool
@@ -11,15 +12,17 @@ Store::Store() : Entity("StoreManager") {
       arr.erase(arr.begin() + n);
       return;
     }
-    mods.push_back(mod.value());
+    addChild(
+      new StoreItem(
+        mod.value(),
+        (Vector2){
+          2 * StoreItem::length * (float)i - StoreItem::length * 2.5f,
+          -StoreItem::length / 2.5f
+        }
+      )
+    ); 
     arr.erase(arr.begin() + n);
   }
 }
 
 void Store::process(float delta) {}
-
-void Store::postProcessingRender() {
-  for(int i = 0; i < mods.size(); i++) {
-    DrawText(mods[i].description.c_str(), 0, 100 * i, 300, WHITE);
-  }
-}

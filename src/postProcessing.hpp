@@ -18,6 +18,10 @@ public:
 
   PostProcessing();
   ~PostProcessing();
+
+  Shader& getShader();
+
+  static const std::string palletPath;
 };
 
 #endif

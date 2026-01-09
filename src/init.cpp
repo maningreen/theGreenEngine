@@ -46,8 +46,6 @@ void Init(Entity* root) {
   // root->addChild(new Dasher({200, 200}));
   // root->addChild(new Spiraler({200, 200}));
   // root->addChild(new Sniper({200, 200}));
-  // InputManager* manager = new InputManager();
-  // root->addChild(manager);
 }
 
 void PreRendering(Entity* root) { 
@@ -57,8 +55,10 @@ void PreRendering(Entity* root) {
 void PostRendering(Entity* root) {
   data->postRender();
 
-  BeginMode2D(Player::player->getCamera()->camera);
+  BeginMode2D(Player::player->getCamera().camera);
+
   managePostRendering(root);
+
   EndMode2D();
 
   DrawFPS(0, 0);

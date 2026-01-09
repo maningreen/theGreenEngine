@@ -271,7 +271,7 @@ void Player::init() {
 
 float Player::getLifetime() { return lifetime; }
 
-HealthManager* Player::getHealthManager() { return healthManager; }
-DashManager* Player::getDashManager() { return &dashManager; }
+HealthManager& Player::getHealthManager() { return *healthManager; }
+DashManager& Player::getDashManager() { return dashManager; }
 InputManager* Player::getInputManager() { return inputManager; }
-CameraEntity* Player::getCamera() { return cam; }
+CameraEntity& Player::getCamera() { return *cam; }

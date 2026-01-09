@@ -92,7 +92,7 @@ void Dasher::manageStates(float delta) {
     if(Vector2DistanceSqr(position, Player::player->position) <
         (Player::hitboxRadius + radius) * (Player::hitboxRadius + radius)) {
       // for psuedo i-frames
-      Player::player->getHealthManager()->applyDamage(damage);
+      Player::player->getHealthManager().applyDamage(damage);
       setState(recovery);
       // then we do a bounce
       Vector2 scaledOffset =

@@ -29,7 +29,7 @@ Mod::Mod(std::string n) {
 
 std::optional<Mod> Mod::fromPath(fs::path x) {
   sol::function_result result = ModManager::getLua().script_file(x);
-  return fromTable(x.filename().string(), result);
+  return fromTable(x.filename().replace_extension("").string(), result);
 }
 
 #define MODTHING(var, table, functionName, key)                                \
