@@ -1,5 +1,8 @@
 #include "store.hpp"
+#include "engine/core.h"
 #include "storeItem.hpp"
+
+std::string Store::tag = "StoreItem";
 
 Store::Store() : Entity("StoreManager") {
   // load mods from the pool
@@ -12,21 +15,22 @@ Store::Store() : Entity("StoreManager") {
       arr.erase(arr.begin() + n);
       return;
     }
-    addChild(
-      new StoreItem(
-        mod.value(),
-        (Vector2){
-          2 * StoreItem::length * (float)i - StoreItem::length * 2.5f,
-          -StoreItem::length / 2.5f
-        }
-      )
-    ); 
+    StoreItem* x = new StoreItem(
+      mod.value(),
+      (Vector2){
+        2 * StoreItem::length * (float)i - StoreItem::length * 2.5f,
+        -StoreItem::length / 2.5f
+      }
+    );
+    x->addTag(tag);
+    addChild(x);
     arr.erase(arr.begin() + n);
   }
 
   StoreItem::purchaseHooks.push_back(
     [this](StoreItem& x){
-      this->killDefered();
+      for(Entity* item : Engine::getAllChildrenWithTag(this, tag))
+        ((StoreItem*)item)->setState(StoreItem::Passing);
     }
   );
 }

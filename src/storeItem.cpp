@@ -1,7 +1,8 @@
 #include "storeItem.hpp"
 #include "player.hpp"
 #include "border.hpp"
-#include <iostream>
+#include "stdio.h"
+#include "include.h"
 
 #define vec4(a, b, c, d) \
   (Color){(unsigned char)((a) * 255), (unsigned char)((b) * 255), (unsigned char)((c) * 255), (unsigned char)((d) * 255)}
@@ -21,33 +22,52 @@ std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
 
 StoreItem::StoreItem(Mod& m, Vector2 p) :
   Entity2D(m.name, p), mod(m) {
+  setState(Neutral);
+  sigmaDelta = 0;
+  sigmaDeltaPrime = 0;
   hovered = 0;
 }
 
-float theta = 0;
-
 void StoreItem::process(float delta) {
-  theta += delta;
+  sigmaDelta += delta;
   Vector2 mousePos = Border::wrapPos(Player::player->getCamera().getMousePosition());
-  if(CheckCollisionPointRec(mousePos, (Rectangle){ position.x, position.y, length, length })) {
-    if(hovered < 1)
-      hovered += delta;
-    else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) // is released lets people drag away
-      purchase();
-  } else if(hovered > 0)
-    hovered -= delta;
-  if(hovered < 0)
-    hovered = 0;
+  bool isHovered =
+    state != Passing && CheckCollisionPointRec(mousePos, (Rectangle){ position.x, position.y, length, length });
+  switch (state) {
+     case Passing:
+      if(sigmaDelta >= 1)
+        killDefered();
+    break;
+    case Hovered:
+      if(!isHovered)
+        setState(Neutral);
+      else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        purchase();
+      }
+    break;
+    case Neutral:
+      if(isHovered)
+        setState(Hovered);
+    break;
+  }
+  if(isHovered)
+    hovered = std::min(hovered + delta, 1.0f);
+  else
+    hovered = std::max(hovered - delta, 0.0f);
 }
 
-
 void StoreItem::render() {
-  const float e = ease(hovered);
-  const float l = .5f * length * e;
+  float e = ease(hovered);
+  float l;
+  {
+    l = .5f * length * e;
+    if(state == Passing)
+      l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
+  }
   DrawRectanglePro(
     (Rectangle){
-      position.x + length / 2.0f,
-      position.y + length / 2.0f,
+      position.x + (length) / 2.0f,
+      position.y + (length) / 2.0f,
       length + l,
       length + l
     },
@@ -55,16 +75,13 @@ void StoreItem::render() {
       (length + l) / 2.0f,
       (length + l) / 2.0f
     },
-    e * sin(theta) * 30,
+    30 * sin(sigmaDeltaPrime + sigmaDelta) * hovered,
     WHITE
   );
 }
 
 void StoreItem::postProcessingRender() {
-  if(Player::player == nullptr) return;
-  float e = ease(hovered);
-
-  // Camera2D& cam = Player::player->getCamera().camera;
+  float e = ease(std::min(hovered, 1.0f));
 
   std::string str = mod.name;
   str.append(1, '\n').append(5, '-').append(1, '\n').append(mod.description);
@@ -110,8 +127,14 @@ float StoreItem::ease(float x) {
 }
 
 void StoreItem::purchase() {
+  Player::player->getModManager().addMod(mod, Player::player);
   for(std::function<void (StoreItem &)> f : purchaseHooks)
     f(*this);
-  killDefered();
-  Player::player->getModManager().addMod(mod, Player::player);
+  setState(Passing);
+}
+
+void StoreItem::setState(enum State s) {
+  state = s;
+  sigmaDeltaPrime = sigmaDelta;
+  sigmaDelta = 0;
 }
