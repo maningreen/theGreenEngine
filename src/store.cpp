@@ -35,4 +35,6 @@ Store::Store() : Entity("StoreManager") {
   );
 }
 
-void Store::process(float delta) {}
+void Store::process(float delta) {
+  if(children.size() == 0) killDefered();
+}

@@ -135,6 +135,6 @@ void StoreItem::purchase() {
 
 void StoreItem::setState(enum State s) {
   state = s;
-  sigmaDeltaPrime = sigmaDelta;
+  sigmaDeltaPrime += sigmaDelta;
   sigmaDelta = 0;
 }
