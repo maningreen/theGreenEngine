@@ -49,7 +49,7 @@ const float Player::defaultDashCooldown = 1.5;
 const float Player::defaultDashRegenDelay = .7;
 const unsigned Player::defaultMaxDashCount = 3;
 
-float Player::particleSpawnTime = 1.0f / 30.0f;
+float Player::particleSpawnTime = 1.0f / 60.0f;
 
 const float distance = 50;
 
@@ -64,9 +64,24 @@ void Player::manageInput(float delta, Vector2 input) {
   velocity = input * delta * speed + velocity;
   manageDash(delta);
 
-  if((dashManager.isDashing() || Vector2LengthSqr(input)) && fmodf(lifetime, particleSpawnTime) <= 1.0 / 60.0f)
-    addChild(new Particle(position,
-      Vector2Scale(velocity + Vector2Scale(input, speed * delta), -1)));
+  if((dashManager.isDashing() || Vector2LengthSqr(input))) {
+    while(deltaParticle >= particleSpawnTime) {
+      deltaParticle -= particleSpawnTime;
+      addChild(
+        new Particle(
+          position,
+          Vector2Scale(
+            velocity + 
+            Vector2Scale(
+              input,
+              speed * delta
+            ),
+            -1
+          )
+        )
+      );
+    }
+  }
 }
 
 void Player::beginDash(Vector2 input) {
@@ -114,7 +129,7 @@ void Player::render() {
 }
 
 void Player::process(float delta) {
-  lifetime += delta;
+  deltaParticle += delta;
 
   position = position + velocity * delta;
   velocity = velocity * Entity2D::friction;
@@ -268,8 +283,6 @@ Player::~Player() {
 void Player::init() { 
   modManager->loadMods(this);
 }
-
-float Player::getLifetime() { return lifetime; }
 
 HealthManager& Player::getHealthManager() { return *healthManager; }
 DashManager& Player::getDashManager() { return dashManager; }

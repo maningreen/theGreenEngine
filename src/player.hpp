@@ -13,7 +13,7 @@
 
 class Player : public Entity2D {
   private:
-    float lifetime;
+    float deltaParticle;
 
     Bar* dashCooldownBar;
 
@@ -52,7 +52,6 @@ public:
   void process(float delta) override;
   void render() override;
   void init() override;
-  float getLifetime();
 
   Vector2 getInput();
 
