@@ -21,7 +21,7 @@ void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c,
 
 
 float AttackNode::defaultRadius = 30;
-float AttackNode::lifetimeAfterAttack = 1.5;
+float AttackNode::lifetimeAfterAttack = 2.5;
 std::vector<AttackNode*> AttackNode::nodes;
 
 float AttackNode::damage = 600;
@@ -57,7 +57,7 @@ int AttackNode::getIndex() {
   return -1;
 }
 
-float AttackNode::getMaxLifetime() { return 2 * Player::player->getDashManager().regenRate; }
+float AttackNode::getMaxLifetime() { return 3.5 * Player::player->getDashManager().regenRate; }
 
 std::vector<AttackNode*> AttackNode::getNodes() { return nodes; }
 
