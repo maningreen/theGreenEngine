@@ -65,6 +65,7 @@ void Player::manageInput(float delta, Vector2 input) {
   manageDash(delta);
 
   if((dashManager.isDashing() || Vector2LengthSqr(input))) {
+    deltaParticle += delta;
     while(deltaParticle >= particleSpawnTime) {
       deltaParticle -= particleSpawnTime;
       addChild(
@@ -129,8 +130,6 @@ void Player::render() {
 }
 
 void Player::process(float delta) {
-  deltaParticle += delta;
-
   position = position + velocity * delta;
   velocity = velocity * Entity2D::friction;
 
