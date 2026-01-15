@@ -16,12 +16,8 @@
 
 #include "store.hpp"
 
-extern "C" {
-  extern void hs_init(int argc, char** argv);
-};
-
-CameraEntity* cameraEnt;
-PostProcessing* data;
+CameraEntity* cameraEnt = nullptr;
+PostProcessing* data = nullptr;
 
 void managePostRendering(Entity* en) {
   for(Entity* kid : en->children)
@@ -30,11 +26,10 @@ void managePostRendering(Entity* en) {
 }
 
 void Init(Entity* root) {
-  hs_init(0, 0);
   srand(time(0));
 
-  root->addChild(new Cursor());
   root->addChild(new Store());
+  root->addChild(new Cursor());
   data = new PostProcessing();
   root->addChild(data);
 

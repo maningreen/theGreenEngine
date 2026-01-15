@@ -2,6 +2,11 @@
 #include <csignal>
 #include <vector>
 
+extern "C" {
+  extern void hs_init(int argc, char** argv);
+  extern void hs_exit();
+};
+
 #define baseScreenScalar 1000
 #define initialScreenDimensions (Vector2){baseScreenScalar * 16/9, baseScreenScalar / (16 / 9)}
 
@@ -33,7 +38,8 @@ void PreRendering(Entity* root);
 void PostRendering(Entity* root);
 
 int main() {
-  // SetTraceLogLevel(LOG_NONE);
+  hs_init(0, 0);
+  SetTraceLogLevel(LOG_NONE);
   Entity Root = Entity("Root", nullptr);
   Entity::setRoot(&Root);
 
@@ -61,4 +67,6 @@ int main() {
   }
 
   CloseWindow();
+
+  hs_exit();
 }
