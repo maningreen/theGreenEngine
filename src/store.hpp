@@ -9,6 +9,10 @@ class Store : public Entity {
 private:
   static std::string tag;
   std::vector<StoreItem> items;
+  bool closing;
+  float closingTime;
+
+  static float ease(float x);
 public:
   Store();
   void process(float delta) override;
