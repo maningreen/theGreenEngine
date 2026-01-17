@@ -5,7 +5,6 @@
 #include "raylib.h"
 #include "border.hpp"
 #include "spiral.hpp"
-#include "dasher.hpp"
 #include "sniper.hpp"
 
 void ModManager::initLua() {
@@ -144,11 +143,6 @@ void ModManager::initLua() {
   };
   enemy[ "spawnSpiraler"] = [](Vector2 x){
     Spiraler* y = new Spiraler(x); 
-    Entity::getRoot()->addChild(y);
-    return y;
-  };
-  enemy[ "spawnDasher"] = [](Vector2 x){
-    Dasher* y = new Dasher(x); 
     Entity::getRoot()->addChild(y);
     return y;
   };

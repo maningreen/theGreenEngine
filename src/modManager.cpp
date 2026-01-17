@@ -1,13 +1,10 @@
 #include "customEnemy.hpp"
-#include "dasher.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "mod.hpp"
 #include "player.hpp"
 #include "border.hpp"
 #include "player.hpp"
-#include "sniper.hpp"
-#include "spiral.hpp"
 #include <optional>
 #include <sol/forward.hpp>
 
