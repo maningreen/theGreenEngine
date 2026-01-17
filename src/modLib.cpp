@@ -22,6 +22,8 @@ void ModManager::initLua() {
   vec["subtract"] = &Vector2Subtract;
   vec["scale"] = &Vector2Scale;
   vec["lerp"] = &Vector2Lerp;
+  vec["length"] = &Vector2Length;
+  vec["lengthSqr"] = &Vector2LengthSqr;
   lua["vector2"] = [](float a, float b){ return (Vector2){a, b}; };
 
   sol::usertype<Color> col = lua.new_usertype<Color>("color");
@@ -180,15 +182,19 @@ void ModManager::initLua() {
   customEnTable["addEnemy"] = &CustomEnemy::addCustomEnemy;
   customEnTable["spawnEnemy"] = &CustomEnemy::spawnEnemy;
 
+  sol::table plrTbl = lua["Player"].get_or_create<sol::table>();
+  plrTbl["hitBoxRadius"] = Player::hitboxRadius;
+
   sol::usertype<CustomEnemy> customEn = lua.new_usertype<CustomEnemy>("customEnemy");
   customEn["position"] = &CustomEnemy::position;
   customEn["velocity"] = &CustomEnemy::velocity;
   customEn["radius"] = &CustomEnemy::radius;
   customEn["data"] = &CustomEnemy::data;
-  customEn["getStateTime"] = &CustomEnemy::getStateTime;
+  customEn["getStateTime"] = [](CustomEnemy* self){
+    return self->getStateTime();
+  };
   customEn["resetStateTime"] = &CustomEnemy::resetStateTime;
-  customEn["setState"] = &CustomEnemy::setState;
-  customEn["getState"] = &CustomEnemy::getState;
+  customEn["state"] = sol::property(&CustomEnemy::getState, &CustomEnemy::setState);
   customEn["getHealth"] = &CustomEnemy::getHealthManager;
   customEn["dropHealthPack"] = sol::overload(
     [](CustomEnemy* self){
