@@ -39,6 +39,7 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
   );
   healthManager->getBar()->ShouldRender = true;
   colour = PINK;
+  stateTime = 0;
   addChild(healthManager);
   addTag(tag);
 }
@@ -120,7 +121,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   return vectorToGlobal;
 }
 
-unsigned char Enemy::getState() const { return state; }
+int Enemy::getState() const { return state; }
 
 void Enemy::setState(unsigned char s) {
   state = s;

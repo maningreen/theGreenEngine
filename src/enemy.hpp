@@ -9,7 +9,7 @@
 
 class Enemy : public Entity2D {
 private:
-  unsigned char state;
+  int state;
 
   float stateTime;
 
@@ -32,7 +32,7 @@ public:
   HealthManager* getHealthManager();
 
   void setState(unsigned char s);
-  unsigned char getState() const;
+  int getState() const;
 
   float getStateTime() const;
   void resetStateTime();
