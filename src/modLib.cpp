@@ -4,7 +4,6 @@
 #include "enemy.hpp"
 #include "raylib.h"
 #include "border.hpp"
-#include "spiral.hpp"
 #include "sniper.hpp"
 
 void ModManager::initLua() {
@@ -141,11 +140,6 @@ void ModManager::initLua() {
     Entity::getRoot()->addChild(y);
     return y;
   };
-  enemy[ "spawnSpiraler"] = [](Vector2 x){
-    Spiraler* y = new Spiraler(x); 
-    Entity::getRoot()->addChild(y);
-    return y;
-  };
   enemy[ "spawnSniper"] = [](Vector2 x){
     Sniper* y = new Sniper(x); 
     Entity::getRoot()->addChild(y);
@@ -187,6 +181,7 @@ void ModManager::initLua() {
   customEn["getStateTime"] = [](CustomEnemy* self){
     return self->getStateTime();
   };
+  customEn["getClosestPointToPlayerWithDistance"] = &CustomEnemy::getClosestPointToPlayerWithDistance;
   customEn["resetStateTime"] = &CustomEnemy::resetStateTime;
   customEn["state"] = sol::property(&CustomEnemy::getState, &CustomEnemy::setState);
   customEn["getHealth"] = &CustomEnemy::getHealthManager;
@@ -203,4 +198,15 @@ void ModManager::initLua() {
   customEn["manageState"] = &CustomEnemy::manageStateCustom;
   customEn["dropHealth"] = &CustomEnemy::dropHealthCustom;
   customEn["color"] = &CustomEnemy::colour;
+  customEn["fireBullet"] = sol::overload(
+    [](CustomEnemy& self, float a, float b, Color c){
+      self.fireBullet(a, b, c);
+    },
+    [](CustomEnemy& self, float a, float b, float l, Color c){
+      self.fireBullet(a, b, l, c);
+    },
+    [](CustomEnemy& self, float a, float b, float l, float d, Color c){
+      self.fireBullet(a, b, l, d, c);
+    }
+  );
 }

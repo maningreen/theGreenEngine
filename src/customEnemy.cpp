@@ -56,25 +56,47 @@ std::optional<CustomEnemy> CustomEnemy::fromTable(sol::table x) {
   auto drop = x["dropHealth"];
   auto state = x["manageState"];
   auto death = x["onDeath"];
-  if(!(r && name && s && c && spawn && drop && state && death))
+  if(!(r && name && s && c && spawn && drop && state && death)) {
+    if(!r.valid())
+      std::cout << "missing radius\n";
+    if(!name.has_value()) 
+      std::cout << "missing name\n";
+    if(!s.valid())
+      std::cout << "missing initialState\n";
+    if(!c.valid())
+      std::cout << "missing color\n";
+    if(!spawn.valid())
+      std::cout << "missing onSpawn\n";
+    if(!drop.valid())
+      std::cout << "missing dropHealth\n";
+    if(!state.valid())
+      std::cout << "missing manageState\n";
+    if(!death.valid())
+      std::cout << "missing onDeath\n";
     return std::nullopt;
+  }
   else
     return CustomEnemy(c, r, s, name.value(), spawn, drop, state, death);
 }
 
 void CustomEnemy::addCustomEnemy(sol::table x) {
   std::optional<CustomEnemy> t = fromTable(x);
-  if(t.has_value())
+  if(t.has_value()) {
     customEnemies.emplace(t.value().name, t.value());
+  } else
+    DEBUG;
 }
 
 std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name, Vector2 p) {
   auto x = customEnemies.find(name);
-  if(x != customEnemies.end()) {
-    CustomEnemy* y = new CustomEnemy(x->second);
-    y->position = p;
-    getRoot()->addChild(y);
-    return y;
-  } else
-    return std::nullopt;
+  for(auto item : customEnemies) {
+    if(item.first == name) {
+      CustomEnemy* y = new CustomEnemy(item.second);
+      y->position = p;
+      getRoot()->addChild(y);
+      return y;
+    }
+  }
+  DEBUG;
+  return std::nullopt;
 }

@@ -19,6 +19,7 @@ float calculateTriangleArea(Vector2 a, Vector2 b, Vector2 c);
 // (pi radians)
 bool getTriangleIsValid(float angleSum);
 
+// radians
 bool CheckCollisionCircleRecEx(Vector2 center, float radius, Vector2 rectPos, Vector2 dimensions, float angle);
 
 // returns a random float from 0 to 1

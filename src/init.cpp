@@ -10,7 +10,6 @@
 #include "inputManager.hpp"
 #include "sniper.hpp"
 #include "cursor.hpp"
-#include "spiral.hpp"
 #include "time.h"
 
 #include "store.hpp"
