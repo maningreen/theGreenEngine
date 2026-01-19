@@ -31,21 +31,17 @@ local dasher = {
     local distToPlr = vecToPlr:length()
     vecToPlr = vecToPlr:normalize()
     if this.state == Dasher.states.following then
-
       local velToAdd = vecToPlr:normalize():scale(Dasher.speed)
       this.velocity = this.velocity:add(velToAdd:scale(delta))
       if vecToPlr:lengthSqr() <= Dasher.attackDist * Dasher.attackDist then
         this.state = Dasher.states.winding
       end
-
     elseif this.state == Dasher.states.winding then
-
       this.velocity = this.velocity:add(vecToPlr:scale(-this:getStateTime() * Dasher.windupSpeed))
       if this:getStateTime() > Dasher.windupTime then
         this.state = Dasher.states.dashing
         this.velocity = vector2(0, 0)
       end
-
     elseif this.state == Dasher.states.dashing then
       this.velocity = vecToPlr:scale(Dasher.dashSpeed * delta)
 
@@ -57,13 +53,14 @@ local dasher = {
 
         -- reflect
         local scaledOffset = plr.position:subtract(this.position):normalize()
-        scaledOffset = vector2(scaledOffset.x > 0 and -scaledOffset.x or scaledOffset.x, scaledOffset.y > 0 and -scaledOffset.y or scaledOffset.y)
+        scaledOffset = vector2(scaledOffset.x > 0 and -scaledOffset.x or scaledOffset.x,
+          scaledOffset.y > 0 and -scaledOffset.y or scaledOffset.y)
         this.velocity = vector2(scaledOffset.x * this.velocity.x, scaledOffset.y * this.velocity.y)
       end
     elseif this.state == Dasher.states.recovery then
       if this.velocity:lengthSqr() < Dasher.recoveryTau * Dasher.recoveryTau then
         this:resetStateTime()
-      elseif(this:getStateTime() > Dasher.recoveryTime) then
+      elseif (this:getStateTime() > Dasher.recoveryTime) then
         this.state = Dasher.states.following
       end
     end
@@ -76,5 +73,6 @@ return {
   description = "adds the base enemies",
   onInit = function()
     CustomEnemy.addEnemy(dasher)
+    -- CustomEnemy.spawnEnemy(dasher.name, vector2(100, 100))
   end
 }

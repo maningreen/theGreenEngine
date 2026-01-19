@@ -61,7 +61,7 @@ local spiral = {
     end
   end,
   onDeath = function() end,
-  maxHealth = 1
+  maxHealth = Spiraler.startingHealth
 }
 
 return {
