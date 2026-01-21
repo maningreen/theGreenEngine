@@ -13,6 +13,7 @@
 #include "time.h"
 
 #include "store.hpp"
+#include "button.hpp"
 
 CameraEntity* cameraEnt = nullptr;
 PostProcessing* data = nullptr;
@@ -36,6 +37,18 @@ void Init(Entity* root) {
   root->addChild(new Border());
   root->addChild(new Enemy({200, 200}));
   root->addChild(new Enemy({1200, 200}));
+  root->addChild(
+    new Button(
+      (Vector2){
+        -2000,
+        0
+      },
+      "Start Game",
+      [](Button& t){
+        Entity::getRoot()->killDefered();
+        t.killDefered();
+      })
+  );
   // root->addChild(new Dasher({200, 200}));
   // root->addChild(new Spiraler({200, 200}));
   // root->addChild(new Sniper({200, 200}));
