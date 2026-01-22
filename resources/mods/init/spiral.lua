@@ -16,10 +16,6 @@ Spiraler = {
   shotTime = .1,
 }
 
-local function getNewTarget(this)
-  this:getClosestPointToPlayerWithDistance(Spiraler.targetDist)
-end
-
 local spiral = {
   radius = Spiraler.defaultRadius,
   color = color(0, 0, 255, 255),
@@ -27,7 +23,7 @@ local spiral = {
   name = "spiraler",
   onSpawn = function(this)
     this.data = {
-      targetPosition = getNewTarget(this)
+      targetPosition = Border.getRandomPoint()
     }
     this.state = Spiraler.states.firing
   end,
@@ -68,6 +64,6 @@ return {
   description = "adds the spiraler enemies",
   onInit = function()
     CustomEnemy.addEnemy(spiral)
-    CustomEnemy.spawnEnemy("spiraler", vector2(1000, 1000))
+    return 1
   end
 }
