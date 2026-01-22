@@ -16,6 +16,9 @@
 float StoreItem::length = 200;
 float StoreItem::padding = 100;
 
+Color StoreItem::defaultColour = SEPERATORCOLOUR;
+Color StoreItem::hoveredColour = WHITE;
+
 std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
 
 #define BORDER_WIDTH 10
@@ -102,7 +105,7 @@ void StoreItem::render() {
       (length + l) / 2.0f
     },
     30 * sin(sigmaDeltaPrime + sigmaDelta) * e,
-    WHITE
+    ColorLerp(defaultColour, hoveredColour, e)
   );
 }
 

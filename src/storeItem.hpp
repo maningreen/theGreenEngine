@@ -38,6 +38,9 @@ private:
   float hovered;
 
   enum State state;
+
+  static Color defaultColour;
+  static Color hoveredColour;
 };
 
 #endif
