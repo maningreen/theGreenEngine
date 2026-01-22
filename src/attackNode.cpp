@@ -13,10 +13,8 @@
 #define min(a, b) (a < b ? a : b)
 
 extern "C" {
-float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY,
-    float cX, float cY);
-void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c,
-    Vector2* out);
+  float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY, float cX, float cY);
+  void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c, Vector2* out);
 };
 
 
@@ -27,7 +25,8 @@ std::vector<AttackNode*> AttackNode::nodes;
 float AttackNode::damage = 600;
 
 AttackNode::AttackNode(Vector2 p)
-    : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
+    : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius)
+{
   las = new Laser(position, 0, 500, WHITE);
   las->shouldRender = false;
   addChild(las);
