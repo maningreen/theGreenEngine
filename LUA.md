@@ -209,6 +209,12 @@ The following are the various methods and properties these classes hold.
   local lerped = a:lerp(b, .5) -- == vector2(.5, .5)
   ```
 
+`length() :: Vector2 -> Float`
+- a member function, returns the length of a vector
+
+`lengthSqr() :: Vector2 -> Float`
+- a member function, returns the length squared of a vector
+
 #### Color
 
 `r :: u8`
@@ -727,8 +733,6 @@ return {
 
 This mod will randomize the players position
 ```lua
-math.randomseed(os.time())
-
 return {
   onInit = function(plr) 
     plr.position.x = math.random(-Border.length, Border.length)
