@@ -47,7 +47,7 @@ const float Player::defaultDashSpeed = 3000;
 const float Player::defaultDashControl = 3;
 const float Player::defaultDashCooldown = 1.5;
 const float Player::defaultDashRegenDelay = .7;
-const unsigned Player::defaultMaxDashCount = 3;
+const unsigned Player::defaultMaxDashCount = 4;
 
 float Player::particleSpawnTime = 1.0f / 60.0f;
 
@@ -61,7 +61,7 @@ float Player::shakeMag = Player::defaultShakeMag;
 #define barDimensions (Vector2){10, 100}
 
 void Player::manageInput(float delta, Vector2 input) {
-  velocity = input * delta * speed + velocity;
+  velocity += input * delta * speed;
   manageDash(delta);
 
   if((dashManager.isDashing() || Vector2LengthSqr(input))) {
