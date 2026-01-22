@@ -165,6 +165,7 @@ void ModManager::initLua() {
   border["wrapPosY"] = &Border::wrapPosY;
   border["getShortestPathToPoint"] = [](const Vector2 a, const Vector2 b){ return Border::getShortestPathToPoint(a, b); };
   border["getDistance"] = &Border::getDistance;
+  border["getRandomPoint"] = &Border::getRandomPosInBorder;
 
   sol::table customEnTable = lua["CustomEnemy"].get_or_create<sol::table>();
   customEnTable["addEnemy"] = &CustomEnemy::addCustomEnemy;
