@@ -30,11 +30,37 @@ StoreItem::StoreItem(Mod& m, Vector2 p) :
 
 void StoreItem::process(float delta) {
   sigmaDelta += delta;
-  Vector2 mousePos = Border::wrapPos(Player::player->getCamera().getMousePosition());
-  bool isHovered =
-    state != Passing && CheckCollisionPointRec(mousePos, (Rectangle){ position.x, position.y, length, length });
+  bool isHovered;
+  {
+    float l;
+    {
+      l = .5f * length * ease(hovered);
+      if(state == Passing)
+        l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
+    }
+
+    Vector2 mousePos = Border::wrapPos(Player::player->getCamera().getMousePosition());
+    Vector2 relativeMousePos = mousePos - position - (Vector2){length / 2, length / 2};
+    float theta = 30 * sin(sigmaDeltaPrime + sigmaDelta) * hovered * DEG2RAD;
+    Vector2 angleVec = (Vector2){
+      cos(theta),
+      -sin(theta) // the - here is to *undo* the transformation
+    };
+
+    relativeMousePos = (Vector2){
+      relativeMousePos.x * angleVec.x - relativeMousePos.y * angleVec.y, // [ cos(theta), 0 ]
+      relativeMousePos.y * angleVec.x + relativeMousePos.x * angleVec.y  // [ 0, sin(theta) ] i think
+    } + (Vector2){(length + l) / 2, (length + l) / 2}; // undo centering
+
+    isHovered =
+      relativeMousePos.x <= length + l &&
+      relativeMousePos.y <= length + l &&
+      relativeMousePos.x >= 0 &&
+      relativeMousePos.y >= 0;
+  }
+
   switch (state) {
-     case Passing:
+    case Passing:
       if(sigmaDelta >= 1)
         killDefered();
     break;
@@ -75,7 +101,7 @@ void StoreItem::render() {
       (length + l) / 2.0f,
       (length + l) / 2.0f
     },
-    30 * sin(sigmaDeltaPrime + sigmaDelta) * hovered,
+    30 * sin(sigmaDeltaPrime + sigmaDelta) * e,
     WHITE
   );
 }
@@ -99,7 +125,6 @@ void StoreItem::postProcessingRender() {
   }
 
   Vector2 thingPos =
-    // cam.target - cam.offset / cam.zoom +
     position + 
     (Vector2){-dems.x / 2, -300 - dems.y};
   DrawRectangleV(
@@ -123,7 +148,10 @@ void StoreItem::postProcessingRender() {
 
 float StoreItem::ease(float x) {
   // thanks easings.net for this
-  return x < 0.5 ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
+  return 
+    x < 0.5
+      ? 16 * x * x * x * x * x
+      : 1 - std::pow(-2 * x + 2, 5) / 2;
 }
 
 void StoreItem::purchase() {
