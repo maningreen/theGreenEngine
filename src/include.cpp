@@ -85,3 +85,8 @@ Vector2 randomVector() {
     sin(x),
   };
 }
+
+std::ostream& operator<<(std::ostream& out, Vector2 b) {
+  out << b.x << ' ' << b.y;
+  return out;
+}

@@ -29,6 +29,8 @@ float randomNormalized2();
 // returns a random normalized vector.
 Vector2 randomVector();
 
+std::ostream& operator<<(std::ostream&, Vector2);
+
 #define DEBUG printf("Passed line: %d, in file: %s, in function %s\n", __LINE__, __FILE__, __FUNCTION__)
 
 #endif
