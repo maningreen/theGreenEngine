@@ -21,8 +21,7 @@ Cursor::~Cursor() {
 
 void Cursor::process(float delta) {
   sigmaDelta += delta;
-  if(!Player::player) return;
-  position = Border::wrapPos(Player::player->getCamera().getMousePosition());
+  position = Border::wrapPos(Player::get().getCamera().getMousePosition());
 }
 
 void Cursor::render() {

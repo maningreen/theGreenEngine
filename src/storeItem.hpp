@@ -10,7 +10,8 @@ public:
   enum State {
     Hovered,
     Neutral,
-    Passing
+    Passing,
+    Opening
   };
   Mod mod;
 
@@ -28,7 +29,7 @@ public:
   static float length;
   static float padding;
 
-  static std::vector<std::function<void(StoreItem&)>> purchaseHooks;
+  static std::vector<std::function<bool(StoreItem&)>> purchaseHooks;
 
 private:
   static float ease(float x);

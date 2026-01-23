@@ -29,9 +29,7 @@ void HealthPack::process(float delta) {
   // cartesien is for when we're just chillin and moving about *before* we get picked up
   // the latter however is for when we're picked up, so that way it's a generally consistent time to be
   // picked up (also it looks really cool)
-  if(Player::player == nullptr)
-    return;
-  const Vector2 offset = Vector2Subtract(Player::player->position, position);
+  const Vector2 offset = Vector2Subtract(Player::get().position, position);
   if (!isAttracted) {
     position = Vector2Add(position, Vector2Scale(velCart, delta));
     velCart = Vector2Scale(velCart, delta * friction);
@@ -50,7 +48,7 @@ void HealthPack::process(float delta) {
     }
   } else {
     const float cutoffDistance = 50;
-    Player::player->getHealthManager().applyHealing(health);
+    Player::get().getHealthManager().applyHealing(health);
     velPol += delta * 100;
     const Vector2 velToAdd = Vector2Scale(offset, velPol * delta);
     position = Vector2Add(position, velToAdd);

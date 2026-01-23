@@ -90,7 +90,7 @@ public:
 
   static float hitboxRadius;
 
-  static Player* player;
+  static Player& get();
 };
 
 #endif

@@ -48,7 +48,7 @@ void PostProcessing::postRender() {
   BeginShaderMode(paletteShader);
 #endif
 
-  Camera2D* cam = &Player::player->getCamera().camera;
+  Camera2D* cam = &Player::get().getCamera().camera;
   BeginMode2D(
     (Camera2D){
       .offset = cam->offset, 

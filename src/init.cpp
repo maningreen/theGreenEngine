@@ -12,6 +12,7 @@
 #include "cursor.hpp"
 #include "time.h"
 
+#include "button.hpp"
 #include "store.hpp"
 
 CameraEntity* cameraEnt = nullptr;
@@ -26,16 +27,23 @@ void managePostRendering(Entity* en) {
 void Init(Entity* root) {
   srand(time(0));
 
-  root->addChild(new Store());
+  root->addChild(
+    new Button(
+      Vector2Zero(),
+      "Begin Game",
+      [root](Button& x){
+        root->addChild(new Store());
+      }
+    )
+  );
+  root->addChild(&Player::get());
+
   root->addChild(new Cursor());
   data = new PostProcessing();
   root->addChild(data);
-
-  Player* plr = new Player("Player", (Vector2){0, 0});
-  root->addChild(plr);
   root->addChild(new Border());
-  root->addChild(new Enemy({200, 200}));
-  root->addChild(new Enemy({1200, 200}));
+  // root->addChild(new Enemy({200, 200}));
+  // root->addChild(new Enemy({1200, 200}));
   // root->addChild(new Dasher({200, 200}));
   // root->addChild(new Spiraler({200, 200}));
   // root->addChild(new Sniper({200, 200}));
@@ -48,7 +56,7 @@ void PreRendering(Entity* root) {
 void PostRendering(Entity* root) {
   data->postRender();
 
-  BeginMode2D(Player::player->getCamera().camera);
+  BeginMode2D(Player::get().getCamera().camera);
 
   managePostRendering(root);
 

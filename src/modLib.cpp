@@ -112,7 +112,7 @@ void ModManager::initLua() {
   sol::table global = lua["Global"].get_or_create<sol::table>();
   global.set_function("getFriction", [](){ return Entity2D::friction; });
   global.set_function("setFriction", [](float f){ Entity2D::friction = f; });
-  global.set_function("getPlayer", [](){ return Player::player; });
+  // global.set_function("getPlayer", [](){ return Player::get(); });
 
   en["position"] = &Enemy::position;
   en["velocity"] = &Enemy::velocity;

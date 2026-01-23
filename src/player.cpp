@@ -36,8 +36,6 @@ Key Player::dashKey = KEY_SPACE;
 Key Player::shootKey = KEY_ENTER;
 Key Player::shootKeyMouse = MOUSE_BUTTON_LEFT;
 
-Player* Player::player = nullptr;
-
 float Player::maxHealth = 10;
 
 const float Player::defaultSpeed = 4000;
@@ -199,8 +197,6 @@ Player::Player(const std::string& name, Vector2 position)
     Entity2D(name, position) 
 {
 
-  Player::player = this;
-
   healthManager = new HealthManager(maxHealth,
     BarManager(&this->position,
       distance,
@@ -276,7 +272,6 @@ Player::~Player() {
     inputManager = nullptr;
     delete cam;
   }
-  Player::player = nullptr;
 }
 
 void Player::init() { 
@@ -288,3 +283,8 @@ DashManager& Player::getDashManager() { return dashManager; }
 InputManager* Player::getInputManager() { return inputManager; }
 CameraEntity& Player::getCamera() { return *cam; }
 ModManager& Player::getModManager() { return *modManager; }
+
+Player& Player::get() {
+  static Player p("Player", (Vector2){0, 0});
+  return p;
+}

@@ -68,8 +68,7 @@ void Enemy::process(float delta) {
   position = position + velocity * delta;
   velocity = velocity * friction;
   stateTime += delta;
-  if(Player::player != nullptr)
-    manageStates(delta);
+  manageStates(delta);
   Border::wrapEntity(this);
 }
 
@@ -81,9 +80,7 @@ void Enemy::render() {
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
-  if(Player::player == nullptr)
-    return Vector2Zero();
-  return Border::getShortestPathToPoint(position, Player::player->position);
+  return Border::getShortestPathToPoint(position, Player::get().position);
 }
 
 void Enemy::manageHealthBar(float r) {
@@ -102,8 +99,6 @@ void Enemy::addDeathHook(std::function<void (Enemy *)> x) {
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // normalize the offset
-  if(Player::player == nullptr)
-    return Vector2Zero();
   Vector2 shortestPathToPlayer = getShortestVectorToPlayer();
   // lets get a model
   //--------->
@@ -115,7 +110,7 @@ Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {
   // so that's what we wanna do
   Vector2 vectorFromPlayer =
       Vector2Scale(Vector2Normalize(shortestPathToPlayer), -dist);
-  Vector2 globalPos = Vector2Add(vectorFromPlayer, Player::player->position);
+  Vector2 globalPos = Vector2Add(vectorFromPlayer, Player::get().position);
   Vector2 vectorToGlobal = Border::wrapPos(globalPos);
   // then we do some shmath
   return vectorToGlobal;

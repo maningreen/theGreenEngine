@@ -19,13 +19,13 @@ float StoreItem::padding = 100;
 Color StoreItem::defaultColour = SEPERATORCOLOUR;
 Color StoreItem::hoveredColour = WHITE;
 
-std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
+std::vector<std::function<bool(StoreItem&)>> StoreItem::purchaseHooks;
 
 #define BORDER_WIDTH 10
 
 StoreItem::StoreItem(Mod& m, Vector2 p) :
   Entity2D(m.name, p), mod(m) {
-  setState(Neutral);
+  setState(Opening);
   sigmaDelta = 0;
   sigmaDeltaPrime = 0;
   hovered = 0;
@@ -42,7 +42,7 @@ void StoreItem::process(float delta) {
         l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
     }
 
-    Vector2 mousePos = Border::wrapPos(Player::player->getCamera().getMousePosition());
+    Vector2 mousePos = Border::wrapPos(Player::get().getCamera().getMousePosition());
     Vector2 relativeMousePos = mousePos - position - (Vector2){length / 2, length / 2};
     float theta = 30 * sin(sigmaDeltaPrime + sigmaDelta) * hovered * DEG2RAD;
     Vector2 angleVec = (Vector2){
@@ -78,6 +78,10 @@ void StoreItem::process(float delta) {
       if(isHovered)
         setState(Hovered);
     break;
+    case Opening:
+      if(sigmaDelta > 1)
+        setState(Neutral);
+    break;
   }
   if(isHovered)
     hovered = std::min(hovered + delta, 1.0f);
@@ -92,6 +96,8 @@ void StoreItem::render() {
     l = .5f * length * e;
     if(state == Passing)
       l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
+    else if(state == Opening)
+      l += std::min(-(length + l) * ease(1 - sigmaDelta), 1.0f);
   }
   DrawRectanglePro(
     (Rectangle){
@@ -158,9 +164,12 @@ float StoreItem::ease(float x) {
 }
 
 void StoreItem::purchase() {
-  Player::player->getModManager().addMod(mod, Player::player);
-  for(std::function<void (StoreItem &)> f : purchaseHooks)
-    f(*this);
+  Player::get().getModManager().addMod(mod, &Player::get());
+  for(
+    std::function<bool(StoreItem&)>* f = purchaseHooks.data();
+    f <purchaseHooks.size() + purchaseHooks.data();
+  ) if((*(f++))(*this))
+      purchaseHooks.erase(purchaseHooks.begin() + (--f - purchaseHooks.data()));
   setState(Passing);
 }
 

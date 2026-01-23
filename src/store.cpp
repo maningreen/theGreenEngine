@@ -29,9 +29,10 @@ Store::Store() : Entity("StoreManager") {
 
   StoreItem::purchaseHooks.push_back(
     [this](StoreItem& x){
-      closing = true;
+      this->close();
       for(StoreItem& item : items)
         item.setState(StoreItem::Passing);
+      return true;
     }
   );
 }
@@ -42,15 +43,15 @@ void Store::process(float delta) {
     if(!items[i].getValid())
       items.erase(items.begin() + i--);
   }
+  sigmaDelta += delta;
   if(closing) {
-    closingTime += delta;
-    if(closingTime >= 1)
+    if(sigmaDelta >= 1)
       killDefered();
   }
 }
 
 void Store::render() {
-  float l = (StoreItem::length * 3.0f + 30) * ease(1 - closingTime);
+  float l = (StoreItem::length * 3.0f + 30) * std::min(ease(closing ? 1 - sigmaDelta : sigmaDelta), 1.0f);
   float h = (StoreItem::length * .75f + 30);
   DrawRectangle(-l + 15, -h + 15, l * 2, h * 2, YELLOW);
   l -= 30;
@@ -69,4 +70,9 @@ void Store::postProcessingRender() {
 float Store::ease(float x) {
   // thanks easings.net for this
   return x < 0.5 ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
+}
+
+void Store::close() {
+  sigmaDelta = 0;
+  closing = true;
 }
