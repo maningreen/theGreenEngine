@@ -27,7 +27,7 @@ Button::Button(Vector2 p, std::string t, std::function<void(Button&)> c) :
   text(t)
 {
   textDems = MeasureTextEx(GetFontDefault(), t.c_str(), 300, 10);
-  setState(Neutral);
+  setState(Opening);
   sigmaDelta = 0;
   sigmaDeltaPrime = 0;
   hovered = 0;
@@ -55,6 +55,8 @@ void Button::process(float delta) {
       l = .5f * length * ease(hovered);
       if(state == Passing)
         l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
+      else if(state == Opening)
+        l += std::min(-(length + l) * ease(1 - sigmaDelta), 0.0f);
     }
 
     Vector2 mousePos = Border::wrapPos(Player::get().getCamera().getMousePosition());
@@ -78,6 +80,10 @@ void Button::process(float delta) {
   } else isHovered = false;
 
   switch (state) {
+    case Opening:
+      if(sigmaDelta >= 1)
+        setState(Neutral);
+    break;
     case Passing:
       if(sigmaDelta >= 1) {
         if(postDip)
@@ -112,6 +118,8 @@ void Button::render() {
     l = .5f * length * e;
     if(state == Passing)
       l += std::min(-(length + l) * ease(sigmaDelta), 0.0f);
+    else if(state == Opening)
+      l += std::min(-(length + l) * ease(1 - sigmaDelta), 0.0f);
   }
   DrawRectanglePro(
     (Rectangle){

@@ -16,7 +16,8 @@ public:
   enum State {
     Hovered,
     Neutral,
-    Passing
+    Passing,
+    Opening
   };
 
   float sigmaDelta;

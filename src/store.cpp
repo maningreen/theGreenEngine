@@ -19,8 +19,8 @@ Store::Store() : Entity("StoreManager") {
     StoreItem x = StoreItem(
       mod.value(),
       (Vector2){
-        2 * StoreItem::length * (float)i - StoreItem::length * 2.5f,
-        -StoreItem::length / 2.5f
+        2 * Button::length * (float)i - Button::length * 2.5f,
+        -Button::length / 2.5f
       }
     );
     items.push_back(x);
