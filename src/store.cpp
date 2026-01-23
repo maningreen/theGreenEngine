@@ -30,7 +30,7 @@ Store::Store() : Entity("StoreManager") {
   StoreItem::purchaseHooks.push_back(
     [this](StoreItem& x){
       this->close();
-      for(StoreItem& item : items)
+      for(Button& item : items)
         item.setState(StoreItem::Passing);
       return true;
     }

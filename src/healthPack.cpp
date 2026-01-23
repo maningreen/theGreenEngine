@@ -48,7 +48,7 @@ void HealthPack::process(float delta) {
     }
   } else {
     const float cutoffDistance = 50;
-    Player::get().getHealthManager().applyHealing(health);
+    Player::getPtr()->getHealthManager()->applyHealing(health);
     velPol += delta * 100;
     const Vector2 velToAdd = Vector2Scale(offset, velPol * delta);
     position = Vector2Add(position, velToAdd);

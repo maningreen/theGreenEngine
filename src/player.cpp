@@ -278,13 +278,17 @@ void Player::init() {
   modManager->loadMods(this);
 }
 
-HealthManager& Player::getHealthManager() { return *healthManager; }
-DashManager& Player::getDashManager() { return dashManager; }
+HealthManager* Player::getHealthManager() { return healthManager; }
+DashManager* Player::getDashManager() { return &dashManager; }
 InputManager* Player::getInputManager() { return inputManager; }
 CameraEntity& Player::getCamera() { return *cam; }
-ModManager& Player::getModManager() { return *modManager; }
+ModManager* Player::getModManager() { return modManager; }
+
+Player* Player::getPtr() {
+  static Player p("Player", (Vector2){0, 0});
+  return &p;
+}
 
 Player& Player::get() {
-  static Player p("Player", (Vector2){0, 0});
-  return p;
+  return *getPtr();
 }

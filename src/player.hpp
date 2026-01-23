@@ -55,10 +55,10 @@ public:
 
   Vector2 getInput();
 
-  HealthManager& getHealthManager();
-  DashManager& getDashManager();
+  HealthManager* getHealthManager();
+  DashManager* getDashManager();
   CameraEntity& getCamera();
-  ModManager& getModManager();
+  ModManager* getModManager();
   static InputManager* getInputManager();
 
   static bool addEnemy(Enemy*);
@@ -91,6 +91,7 @@ public:
   static float hitboxRadius;
 
   static Player& get();
+  static Player* getPtr();
 };
 
 #endif

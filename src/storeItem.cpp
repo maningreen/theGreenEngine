@@ -4,18 +4,16 @@
 #include "stdio.h"
 #include "include.h"
 
-std::vector<std::function<bool(StoreItem&)>> StoreItem::purchaseHooks;
+std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
 
-StoreItem::StoreItem(Mod& m, Vector2 p) :
-  Button(p, m.name + "\n-----\n" + m.description, [this](Button&){ purchase(); }), mod(m) {
+StoreItem::StoreItem(Mod m, Vector2 p) :
+  Button(p, m.name + "\n-----\n" + m.description, [](Button& a){ ((StoreItem&)a).purchase(); }), mod(m) {
 }
 
 void StoreItem::purchase() {
-  Player::get().getModManager().addMod(mod, &Player::get());
-  for(
-    std::function<bool(StoreItem&)>* f = purchaseHooks.data();
-    f <purchaseHooks.size() + purchaseHooks.data();
-  ) if((*(f++))(*this))
-      purchaseHooks.erase(purchaseHooks.begin() + (--f - purchaseHooks.data()));
+  Player::getPtr()->getModManager()->addMod(mod, &Player::get());
+  for(std::function<void(StoreItem&)>& t : purchaseHooks)
+    t(*this);
+  purchaseHooks.erase(purchaseHooks.begin(), purchaseHooks.end());
   setState(Passing);
 }
