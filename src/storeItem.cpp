@@ -7,7 +7,7 @@
 std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
 
 StoreItem::StoreItem(Mod m, Vector2 p) :
-  Button(p, m.name + "\n-----\n" + m.description, [](Button& a){ ((StoreItem&)a).purchase(); }), mod(m) {
+  Button(p, m.name + "\n-----\n" + m.description, [this](){ this->purchase(); }), mod(m) {
 }
 
 void StoreItem::purchase() {

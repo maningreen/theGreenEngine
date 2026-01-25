@@ -13,6 +13,7 @@
 #include "time.h"
 
 #include "button.hpp"
+#include "settings.hpp"
 #include "store.hpp"
 
 CameraEntity* cameraEnt = nullptr;
@@ -31,11 +32,14 @@ void Init(Entity* root) {
     new Button(
       Vector2Zero(),
       "Begin Game",
-      [root](Button& x){
+      [root](){
         root->addChild(new Store());
       }
     )
   );
+
+  root->addChild(Settings::createSettingsButton({500, 500}));
+
   root->addChild(&Player::get());
 
   root->addChild(new Cursor());

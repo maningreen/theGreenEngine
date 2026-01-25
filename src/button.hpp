@@ -5,7 +5,7 @@
 #include <functional>
 
 class Button : public Entity2D {
-  std::function<void(Button&)> callback;
+  std::function<void()> callback;
 
   Vector2 textDems;
   std::string text;
@@ -23,8 +23,8 @@ public:
   float sigmaDelta;
   float sigmaDeltaPrime;
 
-  Button(Vector2, std::string, std::function<void(Button&)>);
-  Button(Vector2, std::string, bool, std::function<void(Button&)>);
+  Button(Vector2, std::string, std::function<void()>);
+  Button(Vector2, std::string, bool, std::function<void()>);
 
   void setState(enum State);
 
