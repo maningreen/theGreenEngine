@@ -13,7 +13,6 @@
 #include "time.h"
 
 #include "button.hpp"
-#include "settings.hpp"
 #include "store.hpp"
 
 CameraEntity* cameraEnt = nullptr;
@@ -26,8 +25,6 @@ void managePostRendering(Entity* en) {
 }
 
 void Init(Entity* root) {
-  srand(time(0));
-
   root->addChild(
     new Button(
       Vector2Zero(),
@@ -37,8 +34,6 @@ void Init(Entity* root) {
       }
     )
   );
-
-  root->addChild(Settings::createSettingsButton({500, 500}));
 
   root->addChild(&Player::get());
 

@@ -38,6 +38,7 @@ void PreRendering(Entity* root);
 void PostRendering(Entity* root);
 
 int main() {
+  srand(time(0));
   hs_init(0, 0);
   SetTraceLogLevel(LOG_NONE);
   Entity Root = Entity("Root", nullptr);
