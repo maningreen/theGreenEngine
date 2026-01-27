@@ -31,6 +31,7 @@ Button::Button(Vector2 p, std::string t, std::function<void(Button*)> c) :
   sigmaDelta = 0;
   sigmaDeltaPrime = 0;
   hovered = 0;
+  postDip = false;
 }
 
 Button::Button(Vector2 p, std::string t, bool pD, std::function<void(Button*)> c) :
@@ -40,7 +41,7 @@ Button::Button(Vector2 p, std::string t, bool pD, std::function<void(Button*)> c
 {
   textDems = MeasureTextEx(GetFontDefault(), t.c_str(), 300, 10);
   postDip = pD;
-  setState(Neutral);
+  setState(Opening);
   sigmaDelta = 0;
   sigmaDeltaPrime = 0;
   hovered = 0;
