@@ -21,7 +21,7 @@ Color Button::hoveredColour = WHITE;
 
 #define BORDER_WIDTH 10
 
-Button::Button(Vector2 p, std::string t, std::function<void()> c) :
+Button::Button(Vector2 p, std::string t, std::function<void(Button*)> c) :
   Entity2D("Button", p),
   callback(c),
   text(t)
@@ -33,7 +33,7 @@ Button::Button(Vector2 p, std::string t, std::function<void()> c) :
   hovered = 0;
 }
 
-Button::Button(Vector2 p, std::string t, bool pD, std::function<void()> c) :
+Button::Button(Vector2 p, std::string t, bool pD, std::function<void(Button*)> c) :
   Entity2D("Button", p),
   callback(c),
   text(t)
@@ -87,7 +87,7 @@ void Button::process(float delta) {
     case Passing:
       if(sigmaDelta >= 1) {
         if(postDip)
-          callback();
+          callback((Button*)this);
         killDefered();
       }
     break;
@@ -96,7 +96,7 @@ void Button::process(float delta) {
         setState(Neutral);
       else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         if(!postDip)
-          callback();
+          callback(this);
         setState(Passing);
       }
     break;

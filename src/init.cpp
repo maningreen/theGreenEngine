@@ -29,7 +29,7 @@ void Init(Entity* root) {
     new Button(
       Vector2Zero(),
       "Begin Game",
-      [root](){
+      [root](Button* self){
         root->addChild(new Store());
       }
     )
