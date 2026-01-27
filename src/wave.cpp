@@ -1,5 +1,6 @@
 #include "wave.hpp"
 #include "store.hpp"
+#include "customEnemy.hpp"
 
 std::vector<std::function<void(void)>> WaveManager::waveBeginCallbacks = {};
 std::vector<std::function<void(void)>> WaveManager::waveEndCallbacks = {};
@@ -15,7 +16,14 @@ void WaveManager::process(float delta) {
 }
 
 void WaveManager::startWave() {
-  std::cout << "SDFL:KJSDF\n";
+  waveI++;
+  for(int i = 0; i < waveI; i++) {
+    unsigned r = rand() % CustomEnemy::customEnemies.size();
+    std::cout << CustomEnemy::customEnemies.size() << '\n';
+    std::unordered_map<std::string, CustomEnemy>::iterator t = CustomEnemy::customEnemies.begin();
+    std::advance(t, r);
+    getRoot()->addChild(new CustomEnemy(t->second));
+  }
 }
 
 void WaveManager::startStore() {
