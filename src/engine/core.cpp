@@ -60,7 +60,7 @@ void Engine::addEntity(std::vector<Entity*>* entities, Entity* entity) {
 }
 
 bool Engine::entityHasTag(Entity* entity, std::string tag) {
-  for(std::string item : entity->tags)
+  for(std::string& item : entity->tags)
     if(item == tag)
       return true;
   return false;
