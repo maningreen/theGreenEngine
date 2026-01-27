@@ -18,7 +18,10 @@ public:
   Store();
   void process(float delta) override;
   void render() override;
+  void death() override;
   void postProcessingRender() override;
+
+  std::vector<std::function<void(void)>> storeCloseCallbacks;
 };
 
 #endif

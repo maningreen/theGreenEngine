@@ -4,7 +4,7 @@
 
 std::string Store::tag = "StoreItem";
 
-Store::Store() : Entity("StoreManager") {
+Store::Store() : Entity("StoreManager"), storeCloseCallbacks() {
   closing = false;
   // load mods from the pool
   std::list<std::string> x = ModManager::listPoolMods();
@@ -75,4 +75,9 @@ float Store::ease(float x) {
 void Store::close() {
   sigmaDelta = 0;
   closing = true;
+  for(std::function<void()> f : storeCloseCallbacks)
+    f();
+}
+
+void Store::death() {
 }

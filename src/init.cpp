@@ -13,7 +13,7 @@
 #include "time.h"
 
 #include "button.hpp"
-#include "store.hpp"
+#include "wave.hpp"
 
 CameraEntity* cameraEnt = nullptr;
 PostProcessing* data = nullptr;
@@ -29,8 +29,9 @@ void Init(Entity* root) {
     new Button(
       Vector2Zero(),
       "Begin Game",
+      true,
       [root](Button* self){
-        root->addChild(new Store());
+        root->addChild(new WaveManager);
       }
     )
   );

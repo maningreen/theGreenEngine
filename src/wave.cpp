@@ -15,10 +15,14 @@ void WaveManager::process(float delta) {
 }
 
 void WaveManager::startWave() {
-
+  std::cout << "SDFL:KJSDF\n";
 }
 
 void WaveManager::startStore() {
-  getRoot()->addChild(new Store);
+  Store* x = new Store;
+  x->storeCloseCallbacks = {[this](){
+    this->startWave();
+  }};
+  getRoot()->addChild(x);
   inWave = false;
 }
