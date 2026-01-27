@@ -26,6 +26,8 @@
 
 InputManager* Player::inputManager = new InputManager(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey, keybinds());
 
+Player* Player::plr = new Player("Player", (Vector2){0, 0});
+
 Key Player::upKey = KEY_W;
 Key Player::downKey = KEY_S;
 Key Player::leftKey = KEY_A;
@@ -285,8 +287,7 @@ CameraEntity& Player::getCamera() { return *cam; }
 ModManager* Player::getModManager() { return modManager; }
 
 Player* Player::getPtr() {
-  static Player p("Player", (Vector2){0, 0});
-  return &p;
+  return plr;
 }
 
 Player& Player::get() {

@@ -37,6 +37,8 @@ class Player : public Entity2D {
 
     void beginDash(Vector2 input);
 
+    static Player* plr;
+
 public:
   Player(const std::string& name, Vector2 position);
   ~Player();
