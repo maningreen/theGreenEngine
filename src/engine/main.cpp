@@ -31,6 +31,12 @@ void manageChildrenRendering(std::vector<Entity*>* children) {
   }
 }
 
+void clean(Entity* e) {
+  for(Entity* c : e->children)
+    clean(c);
+  delete e;
+}
+
 void Init(Entity* root);
 
 void PreRendering(Entity* root);
@@ -66,6 +72,9 @@ int main() {
 
     EndDrawing();
   }
+
+  for(Entity* e : Root.children)
+    clean(e);
 
   CloseWindow();
 
