@@ -1,37 +1,38 @@
 #ifndef inputManager_h
 #define inputManager_h
 
-#include "engine/entity.hpp"
 #include <functional>
 #include <variant>
 #include <vector>
 
+#include "engine/entity.hpp"
+
 // A type representing a keybind
 struct keybind {
-  // the key on which to call callback
-  Key key;
-  // the function to be called on key press
-  std::function<void(void)> callback;
-  // wether or not it's a mouse button
-  bool mouseButton;
+    // the key on which to call callback
+    Key key;
+    // the function to be called on key press
+    std::function<void(void)> callback;
+    // wether or not it's a mouse button
+    bool mouseButton;
 
-  // a simple constructor (default not a mouse button)
-  keybind(int key, std::function<void(void)> callback);
-  keybind(int key, bool isMouseButton, std::function<void(void)> callback);
+    // a simple constructor (default not a mouse button)
+    keybind(int key, std::function<void(void)> callback);
+    keybind(int key, bool isMouseButton, std::function<void(void)> callback);
 };
 
-// called with the input vector 
+// called with the input vector
 struct keybindAlt {
-  // the key on which to call callback
-  Key key;
-  // the function to be called on key press
-  std::function<void(Vector2)> callback;
-  // wether or not it's a mouse button
-  bool mouseButton;
+    // the key on which to call callback
+    Key key;
+    // the function to be called on key press
+    std::function<void(Vector2)> callback;
+    // wether or not it's a mouse button
+    bool mouseButton;
 
-  // a simple constructor (default not a mouse button)
-  keybindAlt(int key, std::function<void(Vector2)> callback);
-  keybindAlt(int key, bool isMouseButton, std::function<void(Vector2)> callback);
+    // a simple constructor (default not a mouse button)
+    keybindAlt(int key, std::function<void(Vector2)> callback);
+    keybindAlt(int key, bool isMouseButton, std::function<void(Vector2)> callback);
 };
 
 typedef std::vector<std::variant<keybind, keybindAlt>> keybinds;

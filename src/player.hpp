@@ -3,13 +3,13 @@
 
 #include "bars.hpp"
 #include "camera.hpp"
+#include "dashManager.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "healthManager.hpp"
 #include "include.h"
 #include "inputManager.hpp"
 #include "mod.hpp"
-#include "dashManager.hpp"
 
 class Player : public Entity2D {
   private:
@@ -39,61 +39,61 @@ class Player : public Entity2D {
 
     static Player* plr;
 
-public:
-  Player(const std::string& name, Vector2 position);
-  ~Player();
+  public:
+    Player(const std::string& name, Vector2 position);
+    ~Player();
 
-  Vector2 velocity;
+    Vector2 velocity;
 
-  float speed;
+    float speed;
 
-  float rotation;
+    float rotation;
 
-  void fireBullet();
+    void fireBullet();
 
-  void process(float delta) override;
-  void render() override;
-  void init() override;
+    void process(float delta) override;
+    void render() override;
+    void init() override;
 
-  Vector2 getInput();
+    Vector2 getInput();
 
-  HealthManager* getHealthManager();
-  DashManager* getDashManager();
-  CameraEntity& getCamera();
-  ModManager* getModManager();
-  static InputManager* getInputManager();
+    HealthManager* getHealthManager();
+    DashManager* getDashManager();
+    CameraEntity& getCamera();
+    ModManager* getModManager();
+    static InputManager* getInputManager();
 
-  static bool addEnemy(Enemy*);
-  static bool removeEnemy(Enemy*);
+    static bool addEnemy(Enemy*);
+    static bool removeEnemy(Enemy*);
 
-  static float maxHealth;
+    static float maxHealth;
 
-  static Key upKey;
-  static Key downKey;
-  static Key leftKey;
-  static Key rightKey;
-  static Key shootKey;
-  static Key shootKeyMouse;
-  static Key dashKey;
+    static Key upKey;
+    static Key downKey;
+    static Key leftKey;
+    static Key rightKey;
+    static Key shootKey;
+    static Key shootKeyMouse;
+    static Key dashKey;
 
-  static const float defaultSpeed;
+    static const float defaultSpeed;
 
-  static const float defaultShakeMag;
-  static float shakeMag;
+    static const float defaultShakeMag;
+    static float shakeMag;
 
-  static const float defaultDashSpeed;
-  static const float defaultDashTime;
-  static const float defaultDashControl;
-  static const float defaultDashRegenDelay;
-  static const unsigned defaultMaxDashCount;
-  static const float defaultDashCooldown;
+    static const float defaultDashSpeed;
+    static const float defaultDashTime;
+    static const float defaultDashControl;
+    static const float defaultDashRegenDelay;
+    static const unsigned defaultMaxDashCount;
+    static const float defaultDashCooldown;
 
-  static float particleSpawnTime;
+    static float particleSpawnTime;
 
-  static float hitboxRadius;
+    static float hitboxRadius;
 
-  static Player& get();
-  static Player* getPtr();
+    static Player& get();
+    static Player* getPtr();
 };
 
 #endif

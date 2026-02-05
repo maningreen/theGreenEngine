@@ -5,8 +5,8 @@
 #include "include.h"
 
 class Particle : public Entity2D {
-  float lifetime;
-  float maxLifetime;
+    float lifetime;
+    float maxLifetime;
 
   public:
     float rotation;
@@ -20,7 +20,7 @@ class Particle : public Entity2D {
 
     float GetLifetime();
 
-    //sets the rotation randomly and the rotational velocity randomly :)
+    // sets the rotation randomly and the rotational velocity randomly :)
     Particle(Vector2 position, Vector2 velocity);
     ~Particle();
 

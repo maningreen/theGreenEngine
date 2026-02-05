@@ -1,43 +1,44 @@
 #ifndef CUSTOM_EN_H
 #define CUSTOM_EN_H
 
-#include "enemy.hpp"
-#include "raylib.h"
+#include <map>
 #include <optional>
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
-#include <map>
+
+#include "enemy.hpp"
+#include "raylib.h"
 
 struct CustomEnemy : public Enemy {
-public:
-  sol::object data;
-  sol::function manageStateCustom;
-  sol::function dropHealthCustom;
-  sol::function onDeathCustom;
-  sol::function onSpawnCustom;
+  public:
+    sol::object data;
+    sol::function manageStateCustom;
+    sol::function dropHealthCustom;
+    sol::function onDeathCustom;
+    sol::function onSpawnCustom;
 
-  static std::unordered_map<std::string, CustomEnemy> customEnemies;
+    static std::unordered_map<std::string, CustomEnemy> customEnemies;
 
-public:
-  void manageStates(float delta) override;
-  void dropHealth() override;
-  void onDeath() override;
-  void onSpawn() override;
+  public:
+    void manageStates(float delta) override;
+    void dropHealth() override;
+    void onDeath() override;
+    void onSpawn() override;
 
-  static void addCustomEnemy(sol::table);
-  static std::optional<CustomEnemy> fromTable(sol::table);
-  static std::optional<CustomEnemy*> spawnEnemy(std::string name, Vector2 p);
+    static void addCustomEnemy(sol::table);
+    static std::optional<CustomEnemy> fromTable(sol::table);
+    static std::optional<CustomEnemy*> spawnEnemy(std::string name, Vector2 p);
 
-  CustomEnemy(
-    Color color,
-    float radius,
-    int initialState,
-    std::string name,
-    sol::function spawn,
-    sol::function drop,
-    sol::function manageState,
-    sol::function death
-  );
+    CustomEnemy(
+      Color color,
+      float radius,
+      int initialState,
+      std::string name,
+      sol::function spawn,
+      sol::function drop,
+      sol::function manageState,
+      sol::function death
+    );
 };
 
 #endif

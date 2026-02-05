@@ -1,41 +1,42 @@
 #ifndef mod_H
 #define mod_H
 
-#include "nodeBullet.hpp"
-#include "enemy.hpp"
-#include "engine/entity.hpp"
 #include <functional>
-#include <optional>
 #include <list>
+#include <optional>
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
 
+#include "enemy.hpp"
+#include "engine/entity.hpp"
+#include "nodeBullet.hpp"
+
 namespace mod {
-  const std::string poolPath = "resources/mods/pool";
-  const std::string initPath = "resources/mods/init";
-};
+const std::string poolPath = "resources/mods/pool";
+const std::string initPath = "resources/mods/init";
+};  // namespace mod
 
 struct Mod {
-  std::string name;
-  std::string description;
+    std::string name;
+    std::string description;
 
-  std::optional<sol::function> onInit;
-  std::optional<sol::function> onDash;
-  std::optional<sol::function> onFire;
-  std::optional<sol::function> onEnemyKill;
-  std::optional<sol::function> onEnemySpawn;
+    std::optional<sol::function> onInit;
+    std::optional<sol::function> onDash;
+    std::optional<sol::function> onFire;
+    std::optional<sol::function> onEnemyKill;
+    std::optional<sol::function> onEnemySpawn;
 
-  Mod(std::string name, sol::function onInit);
-  Mod(std::string name);
-  static std::optional<Mod> fromPath(fs::path path);
+    Mod(std::string name, sol::function onInit);
+    Mod(std::string name);
+    static std::optional<Mod> fromPath(fs::path path);
 
-  // searches for a mod names so in `pool`
-  static std::optional<Mod> fromName(std::string name);
+    // searches for a mod names so in `pool`
+    static std::optional<Mod> fromName(std::string name);
 
-  // will return std::nullopt when there is no onInit
-  static Mod fromTable(std::string name, sol::table);
+    // will return std::nullopt when there is no onInit
+    static Mod fromTable(std::string name, sol::table);
 
-  ~Mod();
+    ~Mod();
 };
 
 class ModManager {
@@ -46,6 +47,7 @@ class ModManager {
     void initLua();
     ModManager();
     ~ModManager();
+
   public:
     static ModManager* get();
     std::vector<Mod> mods;

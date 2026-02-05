@@ -23,6 +23,7 @@ class DashManager {
     // returns a new vector for the velocity based off of the input
     // **input should be a normalized vector**
     Vector2 applyInput(float delta, Vector2 input);
+
   public:
     // the speed at which you dash
     float speed;
@@ -54,7 +55,7 @@ class DashManager {
     bool isDashing();
 
     float getDashProgress();
-    
+
     void addDashProgress();
 
     // removes the equivilent of one dash
@@ -81,7 +82,8 @@ class DashManager {
     // useful only when the parent hasn't a velocity
     Vector2 getPositionIncrement(float delta);
 
-    DashManager(unsigned dashCount,
+    DashManager(
+      unsigned dashCount,
       float dashLength,
       float dashRegenDelay,
       float dashControl,

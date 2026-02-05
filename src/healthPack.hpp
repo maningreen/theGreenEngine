@@ -5,27 +5,28 @@
 #include "player.hpp"
 
 class HealthPack : public Entity2D {
-private:
-  bool isAttracted;
-public:
-  float health;
-  Vector2 velCart;
-  float velPol;
+  private:
+    bool isAttracted;
 
-  void process(float delta) override;
-  void render() override;
+  public:
+    float health;
+    Vector2 velCart;
+    float velPol;
 
-  float getRadiusForHealth();
+    void process(float delta) override;
+    void render() override;
 
-  HealthPack(Vector2 position, float h);
-  HealthPack(Vector2 position, Vector2 inVel, float h);
-  ~HealthPack();
+    float getRadiusForHealth();
 
-  bool getIsAttracted();
+    HealthPack(Vector2 position, float h);
+    HealthPack(Vector2 position, Vector2 inVel, float h);
+    ~HealthPack();
 
-  static const Color col;
-  static const float decayRate;
-  static const float playerPickupRadius;
+    bool getIsAttracted();
+
+    static const Color col;
+    static const float decayRate;
+    static const float playerPickupRadius;
 };
 
 #endif

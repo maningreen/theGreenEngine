@@ -4,24 +4,25 @@
 #include "engine/entity.hpp"
 
 class PostProcessing : public Entity {
-private:
-  Shader paletteShader;
-public:
-  void process(float delta) override;
+  private:
+    Shader paletteShader;
 
-  void preRender();
-  void postRender();
-  void postPostRender();
+  public:
+    void process(float delta) override;
 
-  float pixelLength;
-  RenderTexture texture;
+    void preRender();
+    void postRender();
+    void postPostRender();
 
-  PostProcessing();
-  ~PostProcessing();
+    float pixelLength;
+    RenderTexture texture;
 
-  Shader& getShader();
+    PostProcessing();
+    ~PostProcessing();
 
-  static const std::string palletPath;
+    Shader& getShader();
+
+    static const std::string palletPath;
 };
 
 #endif

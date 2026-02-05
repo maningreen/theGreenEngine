@@ -1,36 +1,40 @@
 #include "bars.hpp"
+
+#include <iostream>
+
 #include "engine/entity.hpp"
 #include "include.h"
-#include <iostream>
 
 float Bar::SmoothingSpeed = 15;
 
 void Bar::render() {
-  if(!ShouldRender)
-    return;
-  //STEP UNO calculate the portion that's gonna be drawn OH WAIT THATS OUR PROGRESS
-  //step dos we split the Dimensions field up to be in portions (1 - t) and t
-  Vector2 dimensionsFull = (Vector2){Dimensions.x * (ShrinkY ? 1 : Progress), Dimensions.y * (ShrinkY ? Progress : 1)};
-  Vector2 dimensionsNotFull = (Vector2){Dimensions.x - (!ShrinkY ? dimensionsFull.x : 0), Dimensions.y - (ShrinkY ? dimensionsFull.y : 0)};
-  //then we calculate our not full offset
-  Vector2 emptyOffset = (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
-  DrawRectangleV(position, dimensionsFull, Colour);
-  DrawRectangleV(emptyOffset + position, dimensionsNotFull, EmptyCol);
+    if(!ShouldRender) return;
+    // STEP UNO calculate the portion that's gonna be drawn OH WAIT THATS OUR PROGRESS
+    // step dos we split the Dimensions field up to be in portions (1 - t) and t
+    Vector2 dimensionsFull =
+      (Vector2){Dimensions.x * (ShrinkY ? 1 : Progress), Dimensions.y * (ShrinkY ? Progress : 1)};
+    Vector2 dimensionsNotFull = (Vector2){Dimensions.x - (!ShrinkY ? dimensionsFull.x : 0),
+                                          Dimensions.y - (ShrinkY ? dimensionsFull.y : 0)};
+    // then we calculate our not full offset
+    Vector2 emptyOffset =
+      (Vector2){!ShrinkY ? dimensionsFull.x : 0, ShrinkY ? dimensionsFull.y : 0};
+    DrawRectangleV(position, dimensionsFull, Colour);
+    DrawRectangleV(emptyOffset + position, dimensionsNotFull, EmptyCol);
 }
 
 void Bar::process(float delta) {
-  if(Smooth)
-    Progress += (TargetProgress - Progress) * SmoothingSpeed * delta;
-  else
-    Progress = TargetProgress;
+    if(Smooth)
+        Progress += (TargetProgress - Progress) * SmoothingSpeed * delta;
+    else
+        Progress = TargetProgress;
 }
 
-Bar::Bar(Vector2 pos, Vector2 dimens, Color colour, Color backCol, bool growVert) : Entity2D("Bar", pos),
-  Colour(colour), EmptyCol(backCol), Dimensions(dimens), ShrinkY(growVert) {
-  Progress = 1;
-  TargetProgress = 1;
-  Smooth = true;
-  ShouldRender = true;
+Bar::Bar(Vector2 pos, Vector2 dimens, Color colour, Color backCol, bool growVert)
+  : Entity2D("Bar", pos), Colour(colour), EmptyCol(backCol), Dimensions(dimens), ShrinkY(growVert) {
+    Progress = 1;
+    TargetProgress = 1;
+    Smooth = true;
+    ShouldRender = true;
 }
 
 Bar::~Bar() {}

@@ -1,73 +1,73 @@
 #include "healthManager.hpp"
-#include "barManager.hpp"
+
 #include <iostream>
 
-HealthManager::HealthManager(float maxHealth, BarManager b) : BarManager(b), maxHealth(maxHealth), health(maxHealth) {
-  initBar();
+#include "barManager.hpp"
+
+HealthManager::HealthManager(float maxHealth, BarManager b)
+  : BarManager(b), maxHealth(maxHealth), health(maxHealth) {
+    initBar();
 }
 
-HealthManager::HealthManager(float maxHealth, float health, BarManager b) : BarManager(b), maxHealth(maxHealth), health(health) {
-  initBar();
+HealthManager::HealthManager(float maxHealth, float health, BarManager b)
+  : BarManager(b), maxHealth(maxHealth), health(health) {
+    initBar();
 }
 
 void HealthManager::initBar() {
-  Bar* bar = getBar(); //i HATE calling functions that much
-  bar->Colour = RED;
-  bar->EmptyCol = GRAY;
+    Bar* bar = getBar();  // i HATE calling functions that much
+    bar->Colour = RED;
+    bar->EmptyCol = GRAY;
 }
 
 float HealthManager::getHealth() {
-  return health;
+    return health;
 }
 
 void HealthManager::setHealth(float h) {
-  if(h < 0)
-    health = 0;
-  else if(h > maxHealth)
-    health = maxHealth;
-  else
-    health = h;
+    if(h < 0)
+        health = 0;
+    else if(h > maxHealth)
+        health = maxHealth;
+    else
+        health = h;
 }
 
 void HealthManager::applyDamage(float d) {
-  setHealth(health - d);
+    setHealth(health - d);
 }
 
 void HealthManager::applyHealing(float h) {
-  setHealth(health + h);
+    setHealth(health + h);
 }
 
 bool HealthManager::isDead() {
-  return health <= 0;
+    return health <= 0;
 }
 
 float HealthManager::getMaxHealth() {
-  return maxHealth;
+    return maxHealth;
 }
 
 void HealthManager::setMaxHealth(float m) {
-  if(m >= 0)
-    maxHealth = m;
-  else
-    maxHealth = 0;
-  setHealth(health);
+    if(m >= 0)
+        maxHealth = m;
+    else
+        maxHealth = 0;
+    setHealth(health);
 }
 
 HealthManager::~HealthManager() {}
 
 void HealthManager::process(float delta) {
-  setBarPercentage(health / maxHealth);
-  getBar()->process(delta);
-  if(!getPositionPointer()) //should be 0 if not real
-    return;
-  // now we know we gots to set our position
-  getBar()->position = 
-    *getPositionPointer() +
-      (!getBar()->ShrinkY 
-        ? (Vector2){0, targetDistance} 
-        : (Vector2){targetDistance, 0}) - 
-    (!getBar()->ShrinkY 
-      ? (Vector2){ getBar()->Dimensions.x / 2.0f, 0}
-      : (Vector2){0, getBar()->Dimensions.y / 2.0f}
-    ); 
+    setBarPercentage(health / maxHealth);
+    getBar()->process(delta);
+    if(!getPositionPointer())  // should be 0 if not real
+        return;
+    // now we know we gots to set our position
+    getBar()->position =
+      *getPositionPointer() +
+      (!getBar()->ShrinkY ? (Vector2){0, targetDistance} : (Vector2){targetDistance, 0}) -
+      (!getBar()->ShrinkY ? (Vector2){getBar()->Dimensions.x / 2.0f, 0}
+                          : (Vector2){0, getBar()->Dimensions.y / 2.0f});
 }

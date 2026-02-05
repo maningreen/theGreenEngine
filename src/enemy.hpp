@@ -1,75 +1,77 @@
 #ifndef enemy_h
 #define enemy_h
 
-#include "engine/entity.hpp"
-#include "healthManager.hpp"
-#include "enemyBullet.hpp"
 #include <functional>
 #include <string>
 
+#include "enemyBullet.hpp"
+#include "engine/entity.hpp"
+#include "healthManager.hpp"
+
 class Enemy : public Entity2D {
-private:
-  int state;
+  private:
+    int state;
 
-  float stateTime;
+    float stateTime;
 
-  void manageHealthBar(float radius);
+    void manageHealthBar(float radius);
 
-  static std::vector<std::function<void(Enemy*)>> onSpawnHooks;
-  static std::vector<std::function<void(Enemy*)>> onDeathHooks;
-protected:
-  HealthManager* healthManager;
+    static std::vector<std::function<void(Enemy*)>> onSpawnHooks;
+    static std::vector<std::function<void(Enemy*)>> onDeathHooks;
 
-public:
-  Vector2 velocity;
-  Vector2 targetPos;
+  protected:
+    HealthManager* healthManager;
 
-  float radius;
+  public:
+    Vector2 velocity;
+    Vector2 targetPos;
 
-  Vector2 getShortestVectorToPlayer() const;
-  float getAngleToPlayer() const;
+    float radius;
 
-  HealthManager* getHealthManager();
+    Vector2 getShortestVectorToPlayer() const;
+    float getAngleToPlayer() const;
 
-  void setState(unsigned char s);
-  int getState() const;
+    HealthManager* getHealthManager();
 
-  float getStateTime() const;
-  void resetStateTime();
+    void setState(unsigned char s);
+    int getState() const;
 
-  Vector2 getClosestPointToPlayerWithDistance(float distance) const;
+    float getStateTime() const;
+    void resetStateTime();
 
-  EnemyBullet* fireBullet(float angle, float lifetime, Color col) const;
-  EnemyBullet* fireBullet(float angle, float lifetime, float speed, Color col) const;
-  EnemyBullet* fireBullet(float angle, float lifetime, float speed, float dmg, Color col) const;
+    Vector2 getClosestPointToPlayerWithDistance(float distance) const;
 
-  void process(float delta) override;
-  void render() override;
-  void death() override;
-  void init() override;
+    EnemyBullet* fireBullet(float angle, float lifetime, Color col) const;
+    EnemyBullet* fireBullet(float angle, float lifetime, float speed, Color col) const;
+    EnemyBullet* fireBullet(float angle, float lifetime, float speed, float dmg, Color col) const;
 
-  virtual void onDeath() {};
-  virtual void onSpawn() {};
+    void process(float delta) override;
+    void render() override;
+    void death() override;
+    void init() override;
 
-  virtual void manageStates(float delta) {};
-  virtual void dropHealth() {};
+    virtual void onDeath() {};
+    virtual void onSpawn() {};
 
-  void dropHealthPack();
-  void dropHealthPack(float hp);
+    virtual void manageStates(float delta) {};
+    virtual void dropHealth() {};
 
-  Enemy(Vector2 position);
-  ~Enemy();
+    void dropHealthPack();
+    void dropHealthPack(float hp);
 
-  static float DefaultRadius;
-  static float Speed;
+    Enemy(Vector2 position);
+    ~Enemy();
 
-  static void addSpawnHook(std::function<void(Enemy*)>);
-  static void addDeathHook(std::function<void(Enemy*)>);
+    static float DefaultRadius;
+    static float Speed;
 
-  static const std::string tag;
+    static void addSpawnHook(std::function<void(Enemy*)>);
+    static void addDeathHook(std::function<void(Enemy*)>);
 
-  static float droppedHealthHP;
-  Color colour;
+    static const std::string tag;
+
+    static float droppedHealthHP;
+    Color colour;
 };
 
 #endif

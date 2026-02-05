@@ -1,19 +1,20 @@
 #ifndef STOREITEM_H
 #define STOREITEM_H
 
+#include "button.hpp"
 #include "engine/entity.hpp"
 #include "mod.hpp"
-#include "button.hpp"
 
 class StoreItem : public Button {
-public:
-  Mod mod;
+  public:
+    Mod mod;
 
-  StoreItem(Mod m, Vector2 p);
+    StoreItem(Mod m, Vector2 p);
 
-  static std::vector<std::function<void(StoreItem&)>> purchaseHooks;
-private:
-  void purchase();
+    static std::vector<std::function<void(StoreItem&)>> purchaseHooks;
+
+  private:
+    void purchase();
 };
 
 #endif

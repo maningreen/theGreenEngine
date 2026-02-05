@@ -6,31 +6,31 @@
 #include "include.h"
 
 struct Bullet : public Entity2D {
-  Vector2 velocity;
-  float Angle;
-  float lifetime;
-  Color col;
-  bool shouldWrap;
+    Vector2 velocity;
+    float Angle;
+    float lifetime;
+    Color col;
+    bool shouldWrap;
 
-  void process(float delta) override;
-  void render() override;
-  void init() override;
+    void process(float delta) override;
+    void render() override;
+    void init() override;
 
-  virtual bool ManageCollision();
+    virtual bool ManageCollision();
 
-  Bullet(Vector2 position, float angle);
-  Bullet(Vector2 position, float angle, bool shouldWrap);
-  Bullet(Vector2 position, float angle, float maxLifetime);
-  Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime);
-  Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime, float speed);
-  ~Bullet();
+    Bullet(Vector2 position, float angle);
+    Bullet(Vector2 position, float angle, bool shouldWrap);
+    Bullet(Vector2 position, float angle, float maxLifetime);
+    Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime);
+    Bullet(Vector2 position, float angle, bool shouldWrap, float maxLifetime, float speed);
+    ~Bullet();
 
-  static float DefaultSpeed;
-  static float DefaultMaxLifetime;
-  static Vector2 bulletDimensions;
-  static Color DefaultColour;
+    static float DefaultSpeed;
+    static float DefaultMaxLifetime;
+    static Vector2 bulletDimensions;
+    static Color DefaultColour;
 
-  static float Damage;
+    static float Damage;
 };
 
 #endif

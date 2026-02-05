@@ -1,68 +1,59 @@
-#include "camera.hpp"
-#include "enemy.hpp"
-#include "engine/entity.hpp"
-#include "engine/core.h"
-#include "include.h"
-#include "postProcessing.hpp"
-#include "player.hpp"
 #include "border.hpp"
-#include "raylib.h"
-#include "inputManager.hpp"
-#include "sniper.hpp"
-#include "cursor.hpp"
-#include "time.h"
-
 #include "button.hpp"
+#include "camera.hpp"
+#include "cursor.hpp"
+#include "enemy.hpp"
+#include "engine/core.h"
+#include "engine/entity.hpp"
+#include "include.h"
+#include "inputManager.hpp"
+#include "player.hpp"
+#include "postProcessing.hpp"
+#include "raylib.h"
+#include "sniper.hpp"
+#include "time.h"
 #include "wave.hpp"
 
 CameraEntity* cameraEnt = nullptr;
 PostProcessing* data = nullptr;
 
 void managePostRendering(Entity* en) {
-  for(Entity* kid : en->children)
-    managePostRendering(kid);
-  en->postProcessingRender();
+    for(Entity* kid : en->children) managePostRendering(kid);
+    en->postProcessingRender();
 }
 
 void Init(Entity* root) {
-  root->addChild(
-    new Button(
-      Vector2Zero(),
-      "Begin Game",
-      true,
-      [root](Button* self){
+    root->addChild(new Button(Vector2Zero(), "Begin Game", true, [root](Button* self) {
         root->addChild(new WaveManager);
-      }
-    )
-  );
+    }));
 
-  root->addChild(&Player::get());
+    root->addChild(&Player::get());
 
-  root->addChild(new Cursor());
-  data = new PostProcessing();
-  root->addChild(data);
-  root->addChild(new Border());
-  // root->addChild(new Enemy({200, 200}));
-  // root->addChild(new Enemy({1200, 200}));
-  // root->addChild(new Dasher({200, 200}));
-  // root->addChild(new Spiraler({200, 200}));
-  // root->addChild(new Sniper({200, 200}));
+    root->addChild(new Cursor());
+    data = new PostProcessing();
+    root->addChild(data);
+    root->addChild(new Border());
+    // root->addChild(new Enemy({200, 200}));
+    // root->addChild(new Enemy({1200, 200}));
+    // root->addChild(new Dasher({200, 200}));
+    // root->addChild(new Spiraler({200, 200}));
+    // root->addChild(new Sniper({200, 200}));
 }
 
-void PreRendering(Entity* root) { 
-  data->preRender();
+void PreRendering(Entity* root) {
+    data->preRender();
 }
 
 void PostRendering(Entity* root) {
-  data->postRender();
+    data->postRender();
 
-  BeginMode2D(Player::get().getCamera().camera);
+    BeginMode2D(Player::get().getCamera().camera);
 
-  managePostRendering(root);
+    managePostRendering(root);
 
-  EndMode2D();
+    EndMode2D();
 
-  DrawFPS(0, 0);
+    DrawFPS(0, 0);
 
-  data->postPostRender();
+    data->postPostRender();
 }
