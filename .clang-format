@@ -1,0 +1,42 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+
+# Indentation
+IndentWidth: 4
+TabWidth: 2
+UseTab: Never
+AccessModifierOffset: -2
+ContinuationIndentWidth: 2
+ConstructorInitializerIndentWidth: 2
+
+# Alignment & Spacing
+PointerAlignment: Left
+SpaceBeforeParens: Never
+SpaceBeforeAssignmentOperators: true
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+
+# Braces & Wrapping
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: None
+
+# The specific "Vertical" look for arguments
+AlignAfterOpenBracket: BlockIndent
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# Constructor Initializers
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+# Line Length
+ColumnLimit: 100
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+...
