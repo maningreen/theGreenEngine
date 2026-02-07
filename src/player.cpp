@@ -13,8 +13,8 @@
 #include "border.hpp"
 #include "dashManager.hpp"
 #include "enemy.hpp"
-#include "engine/core.h"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "healthManager.hpp"
 #include "include.h"
 #include "inputManager.hpp"
@@ -69,7 +69,7 @@ void Player::manageInput(float delta, Vector2 input) {
         deltaParticle += delta;
         while(deltaParticle >= particleSpawnTime) {
             deltaParticle -= particleSpawnTime;
-            addChild(new Particle(
+            World::addEntity(new Particle(
               position,
               Vector2Scale(velocity + Vector2Scale(input, speed * delta), -1)
             ));
@@ -129,7 +129,7 @@ void Player::process(float delta) {
     Border::wrapEntity(this);
 
     if(dashManager.isDashing() && fmodf(dashManager.getDeltaDash(), .1) < 1.0f / 120.0f)
-        getRoot()->addChild(new Afterimage(position, rotation));
+        World::addEntity(new Afterimage(position, rotation));
 
     if(healthManager->isDead()) killDefered();
 
@@ -167,12 +167,12 @@ void Player::manageDash(float delta) {
 }
 
 void Player::fireBullet() {
-    int nodeBulletCount = Engine::getAllChildrenWithTag(this, NodeBullet::tag).size();
+    int nodeBulletCount = World::getAllEntitiesWithTag(NodeBullet::tag).size();
     int attackNodeCount = AttackNode::getNodes().size();
     if(dashManager.getAvailableDashes() > 0 && attackNodeCount + nodeBulletCount < 3) {
         cam->applyShake(shakeMag);
         dashManager.removeDashProgress();
-        addChild(new NodeBullet(position, cam->getMousePosition(), rotation));
+        World::addEntity(new NodeBullet(position, cam->getMousePosition(), rotation));
     }
 }
 
@@ -193,7 +193,7 @@ Player::Player(const std::string& name, Vector2 position)
         Bar(position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)
       )
     );
-    addChild(healthManager);
+    World::addEntity(healthManager);
 
     if(!inputManager)
         inputManager = new InputManager(
@@ -224,16 +224,16 @@ Player::Player(const std::string& name, Vector2 position)
         this->modManager->onEnemyKill(this, x);
     });
 
-    addChild(inputManager);
+    World::addEntity(inputManager);
 
     velocity = (Vector2){0, 0};
     speed = defaultSpeed;
 
     dashCooldownBar = new Bar(position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
-    addChild(dashCooldownBar);
+    World::addEntity(dashCooldownBar);
 
     cam = new CameraEntity("Camera", this);
-    addChild(cam);
+    World::addEntity(cam);
 
     modManager = ModManager::get();
 }

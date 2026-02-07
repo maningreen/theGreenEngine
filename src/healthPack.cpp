@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "engine/core.h"
 #include "engine/entity.hpp"
 #include "player.hpp"
 

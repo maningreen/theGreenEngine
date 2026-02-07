@@ -77,13 +77,12 @@ void CustomEnemy::addCustomEnemy(sol::table x) {
         DEBUG;
 }
 
-std::optional<CustomEnemy*> CustomEnemy::spawnEnemy(std::string name, Vector2 p) {
+std::optional<CustomEnemy*> CustomEnemy::createEnemy(std::string name, Vector2 p) {
     auto x = customEnemies.find(name);
     for(auto item : customEnemies) {
         if(item.first == name) {
             CustomEnemy* y = new CustomEnemy(item.second);
             y->position = p;
-            getRoot()->addChild(y);
             return y;
         }
     }

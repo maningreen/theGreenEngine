@@ -135,16 +135,6 @@ void ModManager::initLua() {
     sol::table enemy = lua["Enemy"].get_or_create<sol::table>();
     enemy["addDeathHook"] = &Enemy::addDeathHook;
     enemy["addSpawnHook"] = &Enemy::addSpawnHook;
-    enemy["spawnEnemy"] = [](Vector2 x) {
-        Enemy* y = new Enemy(x);
-        Entity::getRoot()->addChild(y);
-        return y;
-    };
-    enemy["spawnSniper"] = [](Vector2 x) {
-        Sniper* y = new Sniper(x);
-        Entity::getRoot()->addChild(y);
-        return y;
-    };
 
     sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
     nb["theta"] = &NodeBullet::theta;
@@ -175,7 +165,7 @@ void ModManager::initLua() {
 
     sol::table customEnTable = lua["CustomEnemy"].get_or_create<sol::table>();
     customEnTable["addEnemy"] = &CustomEnemy::addCustomEnemy;
-    customEnTable["spawnEnemy"] = &CustomEnemy::spawnEnemy;
+    customEnTable["spawnEnemy"] = &CustomEnemy::createEnemy;
 
     sol::table plrTbl = lua["Player"].get_or_create<sol::table>();
     plrTbl["hitBoxRadius"] = Player::hitboxRadius;

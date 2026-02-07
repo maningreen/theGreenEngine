@@ -3,6 +3,7 @@
 #include "attackNode.hpp"
 #include "border.hpp"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -10,7 +11,7 @@ float NodeBullet::speed = 5000;
 float NodeBullet::radius = 10;
 Color NodeBullet::color = WHITE;
 
-const std::string NodeBullet::tag = "nodeBullet";
+const enum Tags NodeBullet::tag = nodeBullet;
 
 NodeBullet::NodeBullet(Vector2 alpha, Vector2 beta, float r)
   : Entity2D("NodeBullet", alpha), theta(r) {
@@ -49,5 +50,5 @@ void NodeBullet::process(float delta) {
 }
 
 void NodeBullet::death() {
-    getParent()->addChild(new AttackNode(position));
+    World::addEntity(new AttackNode(position));
 }

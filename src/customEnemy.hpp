@@ -27,7 +27,7 @@ struct CustomEnemy : public Enemy {
 
     static void addCustomEnemy(sol::table);
     static std::optional<CustomEnemy> fromTable(sol::table);
-    static std::optional<CustomEnemy*> spawnEnemy(std::string name, Vector2 p);
+    static std::optional<CustomEnemy*> createEnemy(std::string name, Vector2 p);
 
     CustomEnemy(
       Color color,

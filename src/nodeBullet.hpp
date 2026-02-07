@@ -25,7 +25,7 @@ struct NodeBullet : public Entity2D {
     static float radius;
     static Color color;
 
-    static const std::string tag;
+    static const enum Tags tag;
 };
 
 #endif

@@ -5,8 +5,8 @@
 #include "bars.hpp"
 #include "border.hpp"
 #include "enemyBullet.hpp"
-#include "engine/core.h"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "healthManager.hpp"
 #include "healthPack.hpp"
 #include "include.h"
@@ -16,7 +16,7 @@ float Enemy::Speed = 4000;
 
 float Enemy::droppedHealthHP = 1;
 
-const std::string Enemy::tag = "Enemy";
+const enum Tags Enemy::tag = enemy;
 
 std::vector<std::function<void(Enemy*)>> Enemy::onSpawnHooks;
 std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
@@ -34,7 +34,7 @@ Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
     healthManager->getBar()->ShouldRender = true;
     colour = PINK;
     stateTime = 0;
-    addChild(healthManager);
+    World::addEntity(healthManager);
     addTag(tag);
 }
 
@@ -135,19 +135,19 @@ void Enemy::resetStateTime() {
 
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, Color col) const {
     EnemyBullet* bul = new EnemyBullet(position, angle, col, true, lifetime);
-    getRoot()->addChild(bul);
+    World::addEntity(bul);
     return bul;
 }
 
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, Color col) const {
     EnemyBullet* bul = new EnemyBullet(position, angle, col, true, lifetime, s);
-    getRoot()->addChild(bul);
+    World::addEntity(bul);
     return bul;
 }
 
 EnemyBullet* Enemy::fireBullet(float angle, float lifetime, float s, float dmg, Color col) const {
     EnemyBullet* bul = new EnemyBullet(position, angle, col, true, lifetime, s, dmg);
-    getRoot()->addChild(bul);
+    World::addEntity(bul);
     return bul;
 }
 
@@ -164,13 +164,12 @@ Vector2 getHealthPackVel(Vector2 enVel) {
 // otherwise, same as the more verbose overload
 void Enemy::dropHealthPack() {
     Vector2 v = getHealthPackVel(velocity);
-    Entity* root = getRoot();
     HealthPack* h = new HealthPack(position, velocity, droppedHealthHP);
-    getParent()->addChild(h);
+    World::addEntity(h);
 }
 
 void Enemy::dropHealthPack(float hp) {
     Vector2 v = getHealthPackVel(velocity);
     HealthPack* h = new HealthPack(position, velocity, hp);
-    getParent()->addChild(h);
+    World::addEntity(h);
 }

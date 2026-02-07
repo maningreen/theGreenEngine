@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "border.hpp"
-#include "engine/core.h"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "include.h"
 #include "laser.hpp"
 #include "player.hpp"
@@ -28,7 +28,7 @@ float AttackNode::damage = 600;
 AttackNode::AttackNode(Vector2 p) : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
     las = new Laser(position, 0, 500, WHITE);
     las->shouldRender = false;
-    addChild(las);
+    World::addEntity(las);
     index = nodes.size();
     nodes.push_back(this);
 }
@@ -37,7 +37,7 @@ AttackNode::AttackNode(Vector2 p, bool x)
   : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
     las = new Laser(position, 0, 500, WHITE);
     las->shouldRender = false;
-    addChild(las);
+    World::addEntity(las);
 }
 
 AttackNode::~AttackNode() {
@@ -178,10 +178,10 @@ void AttackNode::manageAttack() {
 
     bool validTriangle = getTriangleIsRegular();
 
-    std::vector<Entity*> enemies = Engine::getAllChildrenWithTagRecursive(getRoot(), Enemy::tag);
+    std::vector<unsigned> enemies = World::getAllEntitiesWithTag(Enemy::tag);
 
     for(int i = 0; i < enemies.size(); i++) {
-        Enemy* en = (Enemy*)enemies[i];
+        Enemy* en = (Enemy*)World::getEntity(enemies[i]);
         // we figure out the function for the actual slope thingy
         if(validTriangle) {
             // so in this the triangle is regular, so we want to treat it like one;

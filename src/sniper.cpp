@@ -9,6 +9,7 @@
 #include "enemy.hpp"
 #include "engine/entity.hpp"
 #include "healthPack.hpp"
+#include "engine/world.hpp"
 
 float Sniper::minDist = Border::length / 1.6f;
 float Sniper::maxDist = Border::length * 1.4;
@@ -27,7 +28,7 @@ Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 
 Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(position, 0, 0, laserColour)) {
     setState(positioning);
-    addChild(las);
+    World::addEntity(las);
     getHealthManager()->setMaxHealth(defaultHealth);
     getHealthManager()->setHealth(defaultHealth);
     las->length = 1000;

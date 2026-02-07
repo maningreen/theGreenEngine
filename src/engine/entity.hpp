@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../include.h"
+#include "tags.hpp"
 
 class Entity {
   private:
@@ -12,40 +13,32 @@ class Entity {
 
     static Entity* root;
 
+    static unsigned currentId;
+
   protected:
     bool valid;
 
   public:
     std::string name;
-    std::vector<Entity*> children;
-    std::vector<std::string> tags;
+    Tags tags;
 
     Entity(const std::string& name, Entity* parent);
     Entity(const std::string& name);
     virtual ~Entity();
 
-    unsigned id;
+    const unsigned id;
 
-    void addChild(Entity* child);
+    void addTag(Tags tag);
+    void removeTag(Tags tag);
+    bool hasTag(Tags tag) const;
 
-    void addTag(std::string tag);
-    bool removeTag(std::string tag);
-    bool hasTag(std::string tag);
+    Entity* getRoot();
 
-    void printAllChildren();
-
-    void kill();
     void killDefered();
-    // deallocates the child and removes it from the parent's entity list
-    void killAsChild();
 
-    Entity* getParent();
+    Entity* getParent() const;
 
-    bool getValid();
-
-    static Entity* getRoot();
-    // returns false if failed, true if succeeded
-    static bool setRoot(Entity* root);
+    bool getValid() const;
 
     virtual void process(float delta) {};
     virtual void render() {};

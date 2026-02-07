@@ -68,7 +68,7 @@ class Enemy : public Entity2D {
     static void addSpawnHook(std::function<void(Enemy*)>);
     static void addDeathHook(std::function<void(Enemy*)>);
 
-    static const std::string tag;
+    static const enum Tags tag;
 
     static float droppedHealthHP;
     Color colour;

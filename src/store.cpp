@@ -1,6 +1,5 @@
 #include "store.hpp"
 
-#include "engine/core.h"
 #include "storeItem.hpp"
 
 std::string Store::tag = "StoreItem";
@@ -34,8 +33,8 @@ Store::Store() : Entity("StoreManager"), storeCloseCallbacks() {
 
 void Store::process(float delta) {
     for(int i = 0; i < items.size(); i++) {
-        items[i].process(delta);
-        if(!items[i].getValid()) items.erase(items.begin() + i--);
+        // items[i].process(delta);
+        // if(!items[i].getValid()) items.erase(items.begin() + i--);
     }
     sigmaDelta += delta;
     if(closing) {

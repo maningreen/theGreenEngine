@@ -18,7 +18,7 @@ class AttackNode : public Entity2D {
     float ease(float x);
     static std::vector<AttackNode*> nodes;
 
-    static void manageAttack();
+    void manageAttack();
 
     static float getPerimeter();
 
