@@ -4,28 +4,29 @@
 #include "cursor.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "include.h"
 #include "inputManager.hpp"
 #include "player.hpp"
 #include "postProcessing.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
+#include "store.hpp"
 #include "time.h"
 #include "wave.hpp"
-#include "engine/world.hpp"
 
 CameraEntity* cameraEnt = nullptr;
 PostProcessing* data = nullptr;
 
 void managePostRendering() {
-    // for(Entity* kid : en->children) managePostRendering(kid);
-    // en->postProcessingRender();
+    for(Entity* en : World::get().entities) en->postProcessingRender();
 }
 
 void Init() {
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
         World::addEntity(new WaveManager);
     }));
+    World::addEntity(new Enemy(Vector2Zero()));
 
     World::addEntity(&Player::get());
 
@@ -40,11 +41,11 @@ void Init() {
     // World::addEntity(new Sniper({200, 200}));
 }
 
-void PreRendering() {
+void preRender() {
     data->preRender();
 }
 
-void PostRendering() {
+void postRender() {
     data->postRender();
 
     BeginMode2D(Player::get().getCamera().camera);

@@ -2,6 +2,7 @@
 
 #include "customEnemy.hpp"
 #include "engine/world.hpp"
+#include "border.hpp"
 #include "store.hpp"
 
 std::vector<std::function<void(void)>> WaveManager::waveBeginCallbacks = {};
@@ -18,6 +19,7 @@ WaveManager::~WaveManager() {}
 
 void WaveManager::process(float delta) {
     std::vector<unsigned> t = World::getAllEntitiesWithTag(tag);
+    std::cout << t.size() << '\n';
     for(unsigned id : t) std::cout << World::getEntity(id)->name << '\n';
     if(inWave && t.size() == 0) startStore();
 }
@@ -25,23 +27,24 @@ void WaveManager::process(float delta) {
 void WaveManager::startWave() {
     waveI++;
     inWave = true;
-    if(CustomEnemy::customEnemies.size() == 0) return;
-    for(int i = 0; i < waveI; i++) {
-        unsigned r = rand() % CustomEnemy::customEnemies.size();
-        std::unordered_map<std::string, CustomEnemy>::iterator t =
-          CustomEnemy::customEnemies.begin();
-        std::advance(t, r);
-        Enemy* en = new CustomEnemy(t->second);
-        en->addTag(tag);
-        World::addEntity(en);
-    }
+    // if(CustomEnemy::customEnemies.size() == 0) return;
+    // for(int i = 0; i < waveI; i++) {
+    // unsigned r = rand() % CustomEnemy::customEnemies.size();
+    // std::unordered_map<std::string, CustomEnemy>::iterator t =
+    // CustomEnemy::customEnemies.begin();
+    // std::advance(t, r);
+    Enemy* en = new Enemy(Border::getRandomPosInBorder());
+    en->addTag(tag);
+    World::addEntity(en);
+    // }
+    DEBUG;
 }
 
 void WaveManager::startStore() {
-    Store* x = new Store;
-    x->storeCloseCallbacks = {[this]() {
+    Store* x = new Store({[this]() {
         this->startWave();
-    }};
+        DEBUG;
+    }});
     World::addEntity(x);
     inWave = false;
 }
