@@ -1,3 +1,5 @@
+require("resources.mods.init.Spiral")
+
 return {
   description = "Spiraler fires another bullet,\nbut less health",
   onInit = function()
