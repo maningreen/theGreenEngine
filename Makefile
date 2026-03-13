@@ -8,13 +8,14 @@ HCFLAGS = -lstdc++ -no-hs-main -hidir $(builddir) -outputdir $(builddir) -lrayli
 CXX = g++
 CXXFLAGS = -Iexternal -Lexternal -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -llua
 TARGET = $(builddir)/out
+PREFIX = /usr/bin/
 
 OBJ := $(src:$(srcdir)/%.cpp=$(builddir)/%.o)
 
 build: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(HC) $^ -o $@ $(HCFLAGS) -lstdc++ -no-hs-main -hidir $(builddir) -outputdir $(builddir) 
+	$(HC) $^ -o $@ $(HCFLAGS) -no-hs-main -hidir $(builddir) -outputdir $(builddir) 
 
 build/%.o: src/%.cpp
 	mkdir -p $(dir $@)
@@ -22,6 +23,9 @@ build/%.o: src/%.cpp
 
 clean:
 	rm -rf $(builddir)
+
+install:
+	cp $(TARGET) $(PREFIX)
 
 run: $(TARGET)
 	$(TARGET)

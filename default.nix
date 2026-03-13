@@ -32,6 +32,6 @@ pkgs.stdenv.mkDerivation {
 
   installPhase = ''
     mkdir -p $out/bin
-    make install PREFIX=$out/bin
+    make install PREFIX=$out/bin -j $(nproc)
   '';
 }
