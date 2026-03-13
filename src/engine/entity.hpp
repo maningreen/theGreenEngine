@@ -9,11 +9,8 @@
 
 class Entity {
   private:
-    Entity* Parent;
-
-    static Entity* root;
-
     static unsigned currentId;
+    unsigned id;
 
   protected:
     bool valid;
@@ -26,7 +23,7 @@ class Entity {
     Entity(const std::string& name);
     virtual ~Entity();
 
-    const unsigned id;
+    unsigned getId() const;
 
     void addTag(Tags tag);
     void removeTag(Tags tag);
@@ -36,7 +33,6 @@ class Entity {
 
     void killDefered();
 
-    Entity* getParent() const;
 
     bool getValid() const;
 
@@ -51,7 +47,6 @@ class Entity2D : public Entity {
   public:
     Vector2 position;
 
-    Entity2D(const std::string& name, Entity* Parent, Vector2 position);
     Entity2D(const std::string& name, Vector2 position);
 
     static float friction;

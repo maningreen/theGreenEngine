@@ -1,8 +1,8 @@
 #include <csignal>
 #include <vector>
 
-#include "world.hpp"
 #include "entity.hpp"
+#include "world.hpp"
 
 extern "C" {
 extern void hs_init(int argc, char** argv);
@@ -17,14 +17,14 @@ extern void hs_exit();
 
 void Init();
 
-void PreRendering();
+void postRender();
 
-void PostRendering();
+void preRender();
 
 int main() {
     srand(time(0));
     hs_init(0, 0);
-    SetTraceLogLevel(LOG_NONE);
+    // SetTraceLogLevel(LOG_NONE);
 
     SetTargetFPS(60);
 
@@ -40,11 +40,11 @@ int main() {
 
         BeginDrawing();
 
-        PreRendering();
+        preRender();
 
         World::render();
 
-        PostRendering();
+        postRender();
 
         EndDrawing();
     }

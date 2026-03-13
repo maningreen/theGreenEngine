@@ -3,6 +3,7 @@
 #include <optional>
 #include <sol/sol.hpp>
 #include <unordered_map>
+#include <iostream>
 
 #include "enemy.hpp"
 #include "raylib.h"

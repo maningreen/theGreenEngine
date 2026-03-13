@@ -5,7 +5,7 @@
 #include "player.hpp"
 #include "stdio.h"
 
-std::vector<std::function<void(StoreItem&)>> StoreItem::purchaseHooks;
+std::vector<std::function<bool(StoreItem&)>> StoreItem::purchaseHooks;
 
 StoreItem::StoreItem(Mod m, Vector2 p)
   : Button(
@@ -18,8 +18,15 @@ StoreItem::StoreItem(Mod m, Vector2 p)
     mod(m) {}
 
 void StoreItem::purchase() {
-    Player::getPtr()->getModManager()->addMod(mod, &Player::get());
-    for(std::function<void(StoreItem&)>& t : purchaseHooks) t(*this);
-    purchaseHooks.erase(purchaseHooks.begin(), purchaseHooks.end());
+    Player::getPtr()->getModManager()->addMod(mod, Player::getPtr());
+    for(std::function<bool(StoreItem&)>& t : purchaseHooks) t(*this);
+    for(int i = 0; i < purchaseHooks.size(); i++) {
+        bool x = purchaseHooks[i](*this);
+        if(x) {
+            purchaseHooks[i] = purchaseHooks.back();
+            purchaseHooks.pop_back();
+            i -= 1;
+        }
+    }
     setState(Passing);
 }

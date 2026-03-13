@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 enum Tags : uint64_t {
+    empty = 0,
     storeItem = 1ULL << 1,
     enemy = 1ULL << 2,
     wave = 1ULL << 3,

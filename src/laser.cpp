@@ -110,7 +110,7 @@ void Laser::render() {
     if(preWrap.x == endPos.x && preWrap.y == endPos.y)
         DrawLineEx(position, endPos, width, colour);
     else
-        while(abs(preWrap.x - endPos.x) > 10 && abs(preWrap.y - endPos.y) > 10) {
+        while(abs(preWrap.x - endPos.x) > 1 && abs(preWrap.y - endPos.y) > 1) {
             // get intersection
             bool left = localOffset.x >= 0;
             bool top = localOffset.y >= 0;

@@ -20,7 +20,7 @@ class Enemy : public Entity2D {
     static std::vector<std::function<void(Enemy*)>> onDeathHooks;
 
   protected:
-    HealthManager* healthManager;
+    HealthManager healthManager;
 
   public:
     Vector2 velocity;
@@ -31,7 +31,7 @@ class Enemy : public Entity2D {
     Vector2 getShortestVectorToPlayer() const;
     float getAngleToPlayer() const;
 
-    HealthManager* getHealthManager();
+    HealthManager& getHealthManager();
 
     void setState(unsigned char s);
     int getState() const;

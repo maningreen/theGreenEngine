@@ -9,34 +9,22 @@
 float Entity2D::friction = .97;
 unsigned Entity::currentId = 0;
 
-Entity2D::Entity2D(const std::string& name, Entity* par, Vector2 position)
-  : Entity(name, par), position(position) {}
-
-Entity2D::Entity2D(const std::string& name, Vector2 position) : Entity(name), position(position) {}
+Entity2D::Entity2D(const std::string& name, Vector2 position) : Entity(name), position(position) {
+    tags = Tags::empty;
+}
 
 Entity::~Entity() {}
 
-Entity::Entity(const std::string& name, Entity* parent)
-  : Parent(parent), name(name), valid(true), id(currentId++) {
-    std::cout << id << '\n';
-}
-
-Entity::Entity(const std::string& name)
-  : Parent(nullptr), name(name), valid(true), id(currentId++) {
-    std::cout << id << '\n';
+Entity::Entity(const std::string& name) : name(name), valid(true), id(currentId++) {
+    tags = Tags::empty;
 }
 
 void Entity::addTag(Tags tag) {
     tags = tag;
 }
 
-Entity* Entity::getParent() const {
-    return Parent;
-}
-
 void Entity::removeTag(Tags tag) {
-    if(tags & tag)
-        tags = (Tags)(tags ^ tag);
+    if(tags & tag) tags = (Tags)(tags ^ tag);
 }
 
 bool Entity::hasTag(Tags tag) const {
@@ -51,9 +39,6 @@ void Entity::killDefered() {
     valid = false;  // :p
 }
 
-Entity* Entity::getRoot() {
-    if(Parent)
-        return Parent->getRoot();
-    else
-        return this;
+unsigned Entity::getId() const {
+    return id;
 }

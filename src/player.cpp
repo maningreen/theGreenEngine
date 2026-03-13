@@ -90,6 +90,8 @@ void Player::beginDash(Vector2 input) {
 void Player::render() {
     // get the mouse position (in cartesian)
     // draw our triangle
+    healthManager->render();
+
     DrawTriangle(
       position,
       position + (Vector2){cosf(rotation) * distance, sinf(rotation) * distance},
@@ -125,6 +127,8 @@ void Player::render() {
 void Player::process(float delta) {
     position = position + velocity * delta;
     velocity = velocity * Entity2D::friction;
+
+    healthManager->process(delta);
 
     Border::wrapEntity(this);
 
@@ -168,8 +172,7 @@ void Player::manageDash(float delta) {
 
 void Player::fireBullet() {
     int nodeBulletCount = World::getAllEntitiesWithTag(NodeBullet::tag).size();
-    int attackNodeCount = AttackNode::getNodes().size();
-    if(dashManager.getAvailableDashes() > 0 && attackNodeCount + nodeBulletCount < 3) {
+    if(dashManager.getAvailableDashes() > 0 && nodeBulletCount < 3) {
         cam->applyShake(shakeMag);
         dashManager.removeDashProgress();
         World::addEntity(new NodeBullet(position, cam->getMousePosition(), rotation));
@@ -193,7 +196,6 @@ Player::Player(const std::string& name, Vector2 position)
         Bar(position, (Vector2){barDimensions.y, barDimensions.x}, RED, DARKGRAY, false)
       )
     );
-    World::addEntity(healthManager);
 
     if(!inputManager)
         inputManager = new InputManager(
@@ -239,13 +241,11 @@ Player::Player(const std::string& name, Vector2 position)
 }
 
 Player::~Player() {
-    if(getParent() == nullptr) {
-        delete healthManager;
-        delete dashCooldownBar;
-        delete inputManager;
-        inputManager = nullptr;
-        delete cam;
-    }
+    delete healthManager;
+    delete dashCooldownBar;
+    delete inputManager;
+    inputManager = nullptr;
+    delete cam;
 }
 
 void Player::init() {
@@ -273,5 +273,5 @@ Player* Player::getPtr() {
 }
 
 Player& Player::get() {
-    return *getPtr();
+    return *plr;
 }

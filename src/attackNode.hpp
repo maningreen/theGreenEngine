@@ -13,7 +13,7 @@ class AttackNode : public Entity2D {
 
     int index;
 
-    Laser* las;
+    Laser las;
 
     float ease(float x);
     static std::vector<AttackNode*> nodes;

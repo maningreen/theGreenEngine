@@ -11,7 +11,7 @@ class StoreItem : public Button {
 
     StoreItem(Mod m, Vector2 p);
 
-    static std::vector<std::function<void(StoreItem&)>> purchaseHooks;
+    static std::vector<std::function<bool(StoreItem&)>> purchaseHooks;
 
   private:
     void purchase();

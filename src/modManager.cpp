@@ -69,10 +69,7 @@ void ModManager::loadMods(Entity2D* plr) {
 
 int ModManager::loadMod(std::string name, Entity2D* plr) {
     // check if file is valid, if so we return 1
-    std::string path = mod::poolPath;
-    path.append(1, '/').append(name).append(
-      ".lua"
-    );  // we assume it fits in the format, with a .lua extention
+    std::string path = mod::poolPath + "/" + name + ".lua";
     if(!fs::exists(path)) return 1;
 
     std::optional<Mod> mod = Mod::fromPath(path);

@@ -25,19 +25,18 @@ std::vector<AttackNode*> AttackNode::nodes;
 
 float AttackNode::damage = 600;
 
-AttackNode::AttackNode(Vector2 p) : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
-    las = new Laser(position, 0, 500, WHITE);
-    las->shouldRender = false;
-    World::addEntity(las);
+AttackNode::AttackNode(Vector2 p)
+  : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius), las(position, 0, 500, WHITE) {
+    las.shouldRender = false;
     index = nodes.size();
     nodes.push_back(this);
+    addTag(Tags::nodeBullet);
 }
 
 AttackNode::AttackNode(Vector2 p, bool x)
-  : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius) {
-    las = new Laser(position, 0, 500, WHITE);
-    las->shouldRender = false;
-    World::addEntity(las);
+  : Entity2D("DashNode", p), lifetime(0), radius(defaultRadius), las(position, 0, 500, WHITE) {
+    las.shouldRender = false;
+    addTag(Tags::nodeBullet);
 }
 
 AttackNode::~AttackNode() {
@@ -72,11 +71,11 @@ AttackNode* AttackNode::getNext() {
 }
 
 float AttackNode::getLasAngle() {
-    return las->rotation;
+    return las.rotation;
 }
 
 bool AttackNode::getBreakInLas() {
-    return las->getBreaks();
+    return las.getBreaks();
 }
 
 float AttackNode::getInternalAngle() {
@@ -101,28 +100,13 @@ int AttackNode::getBreakInPolygon() {
     // THERE IS A SINGULAR EDGE CASE
     // that's if the first index is the one that's breaking it
     if(nodes[0]->getPrev()->getBreakInLas()) return 0;
-    for(int i = 0; i < nodes.size(); i++) {
-        if(nodes[i]->getBreakInLas()) {
-            if(nodes[i]->getNext()->getBreakInLas()) return i + 1;
-        }
-    }
+    for(int i = 0; i < nodes.size(); i++)
+        if(nodes[i]->getBreakInLas() && nodes[i]->getNext()->getBreakInLas()) return i + 1;
     return -1;
 }
 
 AttackNode AttackNode::unwrapRelative() {
-    AttackNode x = *this;
-    if(abs(x.position.x - getPrev()->position.x) > Border::length) {
-        if(x.position.x > 0)
-            x.position.x -= Border::length * 2;
-        else
-            x.position.x += Border::length * 2;
-    } else if(abs(x.position.y - getPrev()->position.y) > Border::length) {
-        if(x.position.y > 0)
-            x.position.y -= Border::length * 2;
-        else
-            x.position.y += Border::length * 2;
-    }
-    return x;
+    return Border::unwrapPositionRelative(this->position, getNext()->position);
 }
 
 float AttackNode::getPerimeter() {
@@ -144,6 +128,7 @@ bool AttackNode::getTriangleIsRegular(float angleSum) {
 }
 
 void AttackNode::render() {
+    las.render();
     DrawCircleV(position, radius, WHITE);
     if(index == 0) manageAttack();
 }
@@ -151,20 +136,22 @@ void AttackNode::render() {
 void AttackNode::process(float delta) {
     lifetime += delta;
 
+    las.process(delta);
+
     if(nodes.size() >= 3) {
         AttackNode* next = getNext();
         Vector2 vectorToNext = Border::getShortestPathToPoint(this, next->position);
-        if(!las->shouldRender) {
-            las->shouldRender = true;
+        if(!las.shouldRender) {
+            las.shouldRender = true;
             lifetime = Player::get().getDashManager()->regenRate + -lifetimeAfterAttack;
-            las->lookAt(next->position);
+            las.lookAt(next->position);
             radius = defaultRadius;
         }
-        las->length = Vector2Length(vectorToNext) - (next->radius + radius);
-        las->width = sqrt(radius);
+        las.length = Vector2Length(vectorToNext) - (next->radius + radius);
+        las.width = sqrt(radius);
         // then we wanna ummm crap, offset the umm mfrickennnaaahahhmmmm the
         // las->position yeah
-        las->position = position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
+        las.position = position + Vector2Scale(Vector2Normalize(vectorToNext), radius);
     } else if(lifetime <= 1)
         radius = ease(1 - lifetime) * defaultRadius;
     if(lifetime >= getMaxLifetime()) radius = ease(lifetime - getMaxLifetime()) * defaultRadius;
@@ -224,7 +211,7 @@ void AttackNode::manageAttack() {
             float min = dist < r ? dist : r;
             Vector2 p = en->position + Vector2Scale(vecToAvg, min / dist);
             if(CheckCollisionPointTriangle(p, effectivePos[0], effectivePos[1], effectivePos[2]))
-                en->getHealthManager()->applyDamage(damage / getPerimeter());
+                en->getHealthManager().applyDamage(damage / getPerimeter());
         } else {
             float minimumDistance = INFINITY;
             for(int i = 0; i < 3; i++) {
@@ -242,7 +229,7 @@ void AttackNode::manageAttack() {
                 minimumDistance = min(distance, minimumDistance);
             }
             if(minimumDistance <= en->radius)
-                en->getHealthManager()->applyDamage(damage / getPerimeter());
+                en->getHealthManager().applyDamage(damage / getPerimeter());
         }
     }
 }

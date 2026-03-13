@@ -63,11 +63,11 @@ Vector2 Border::getShortestPathToPoint(const Vector2 a, const Vector2 b) {
     Vector2 vectorTo = Vector2Subtract(b, a);
     if(vectorTo.x < -length)
         vectorTo.x += length * 2;
-    else if(vectorTo.x > length)
+    if(vectorTo.x > length)
         vectorTo.x -= length * 2;
     if(vectorTo.y < -length)
         vectorTo.y += length * 2;
-    else if(vectorTo.y > length)
+    if(vectorTo.y > length)
         vectorTo.y -= length * 2;
     return vectorTo;
 }

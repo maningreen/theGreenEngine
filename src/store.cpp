@@ -4,7 +4,10 @@
 
 std::string Store::tag = "StoreItem";
 
-Store::Store() : Entity("StoreManager"), storeCloseCallbacks() {
+Store::Store() : Store((std::vector<std::function<void(void)>>){}) {}
+
+Store::Store(std::vector<std::function<void(void)>> callbacks)
+  : Entity("StoreManager"), storeCloseCallbacks(callbacks) {
     closing = false;
     // load mods from the pool
     std::list<std::string> x = ModManager::listPoolMods();
@@ -16,30 +19,28 @@ Store::Store() : Entity("StoreManager"), storeCloseCallbacks() {
             arr.erase(arr.begin() + n);
             return;
         }
-        StoreItem x = StoreItem(
+        items.push_back(StoreItem(
           mod.value(),
           (Vector2){2 * Button::length * (float)i - Button::length * 2.5f, -Button::length / 2.5f}
-        );
-        items.push_back(x);
+        ));
         arr.erase(arr.begin() + n);
     }
 
     StoreItem::purchaseHooks.push_back([this](StoreItem& x) {
-        this->close();
         for(Button& item : items) item.setState(StoreItem::Passing);
+        close();
         return true;
     });
 }
 
 void Store::process(float delta) {
     for(int i = 0; i < items.size(); i++) {
-        // items[i].process(delta);
-        // if(!items[i].getValid()) items.erase(items.begin() + i--);
+        items[i].process(delta);
+        if(!items[i].getValid()) items.erase(items.begin() + i--);
     }
     sigmaDelta += delta;
-    if(closing) {
+    if(closing)
         if(sigmaDelta >= 1) killDefered();
-    }
 }
 
 void Store::render() {
@@ -60,13 +61,14 @@ void Store::postProcessingRender() {
 
 float Store::ease(float x) {
     // thanks easings.net for this
-    return x < 0.5 ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
+    return x < 0.5 ? 16 * x * x * x * x * x : 1 - pow(-2 * x + 2, 5) / 2;
 }
 
 void Store::close() {
     sigmaDelta = 0;
     closing = true;
-    for(std::function<void()> f : storeCloseCallbacks) f();
+    for(std::function<void()>& f : storeCloseCallbacks) f();
+    DEBUG;
 }
 
 void Store::death() {}

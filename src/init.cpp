@@ -26,7 +26,6 @@ void Init() {
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
         World::addEntity(new WaveManager);
     }));
-    World::addEntity(new Enemy(Vector2Zero()));
 
     World::addEntity(&Player::get());
 

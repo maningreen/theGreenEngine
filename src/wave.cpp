@@ -1,8 +1,8 @@
 #include "wave.hpp"
 
+#include "border.hpp"
 #include "customEnemy.hpp"
 #include "engine/world.hpp"
-#include "border.hpp"
 #include "store.hpp"
 
 std::vector<std::function<void(void)>> WaveManager::waveBeginCallbacks = {};
@@ -19,8 +19,6 @@ WaveManager::~WaveManager() {}
 
 void WaveManager::process(float delta) {
     std::vector<unsigned> t = World::getAllEntitiesWithTag(tag);
-    std::cout << t.size() << '\n';
-    for(unsigned id : t) std::cout << World::getEntity(id)->name << '\n';
     if(inWave && t.size() == 0) startStore();
 }
 
@@ -37,13 +35,11 @@ void WaveManager::startWave() {
     en->addTag(tag);
     World::addEntity(en);
     // }
-    DEBUG;
 }
 
 void WaveManager::startStore() {
     Store* x = new Store({[this]() {
         this->startWave();
-        DEBUG;
     }});
     World::addEntity(x);
     inWave = false;

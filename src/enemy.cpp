@@ -21,20 +21,24 @@ const enum Tags Enemy::tag = enemy;
 std::vector<std::function<void(Enemy*)>> Enemy::onSpawnHooks;
 std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
 
-#define barDimensions (Vector2){radius * 2, 10}
+#define barDimensions (Vector2){DefaultRadius * 2, 10}
 
-Enemy::Enemy(Vector2 pos) : Entity2D("Enemy", pos) {
+Enemy::Enemy(Vector2 pos)
+  : Entity2D("Enemy", pos),
+    healthManager(
+      10,
+      BarManager(
+        &position,
+        DefaultRadius * 1.5f,
+        Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false)
+      )
+    ) {
     velocity = {0, 0};
     targetPos = {0, 0};
     radius = DefaultRadius;
-    healthManager = new HealthManager(
-      10,
-      BarManager(&position, radius * 1.5f, Bar(Vector2Zero(), barDimensions, RED, DARKGRAY, false))
-    );
-    healthManager->getBar()->ShouldRender = true;
+    healthManager.getBar()->ShouldRender = true;
     colour = PINK;
     stateTime = 0;
-    World::addEntity(healthManager);
     addTag(tag);
 }
 
@@ -43,7 +47,7 @@ Enemy::~Enemy() {}
 void Enemy::death() {
     for(std::function<void(Enemy*)> f : onDeathHooks) f(this);
     onDeath();
-    if(healthManager->isDead())
+    if(healthManager.isDead())
         dropHealth();
     else
         valid = true;
@@ -61,6 +65,7 @@ void Enemy::process(float delta) {
     stateTime += delta;
     manageStates(delta);
     Border::wrapEntity(this);
+    healthManager.process(delta);
 }
 
 void Enemy::render() {
@@ -68,6 +73,7 @@ void Enemy::render() {
     // hear me out:
     // circle :3
     DrawCircleV(position, radius, colour);  // WHOOOOOO
+    healthManager.render();
 }
 
 Vector2 Enemy::getShortestVectorToPlayer() const {
@@ -75,8 +81,8 @@ Vector2 Enemy::getShortestVectorToPlayer() const {
 }
 
 void Enemy::manageHealthBar(float r) {
-    healthManager->targetDistance = r * 1.5f;
-    if(healthManager->isDead()) killDefered();
+    healthManager.targetDistance = r * 1.5f;
+    if(healthManager.isDead()) killDefered();
 }
 
 void Enemy::addSpawnHook(std::function<void(Enemy*)> x) {
@@ -125,7 +131,7 @@ float Enemy::getStateTime() const {
     return stateTime;
 }
 
-HealthManager* Enemy::getHealthManager() {
+HealthManager& Enemy::getHealthManager() {
     return healthManager;
 }
 
@@ -171,5 +177,4 @@ void Enemy::dropHealthPack() {
 void Enemy::dropHealthPack(float hp) {
     Vector2 v = getHealthPackVel(velocity);
     HealthPack* h = new HealthPack(position, velocity, hp);
-    World::addEntity(h);
 }

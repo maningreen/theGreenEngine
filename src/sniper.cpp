@@ -29,8 +29,8 @@ Color Sniper::laserColour = {PURPLE.r, PURPLE.g, PURPLE.b, 30};
 Sniper::Sniper(Vector2 pos) : Enemy(pos), rotation(0), las(new Laser(position, 0, 0, laserColour)) {
     setState(positioning);
     World::addEntity(las);
-    getHealthManager()->setMaxHealth(defaultHealth);
-    getHealthManager()->setHealth(defaultHealth);
+    getHealthManager().setMaxHealth(defaultHealth);
+    getHealthManager().setHealth(defaultHealth);
     las->length = 1000;
     radius = getRadius();
     colour = PURPLE;

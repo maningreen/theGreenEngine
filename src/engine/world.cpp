@@ -19,7 +19,10 @@ void World::process(float delta) {
         en->process(delta);
         if(!en->getValid()) {
             en->death();
-            if(!en->getValid()) world.entities.erase(world.entities.begin() + i--);
+            if(!en->getValid()) {
+                delete en;
+                world.entities.erase(world.entities.begin() + i--);
+            }
         }
     }
 }
@@ -28,9 +31,9 @@ void World::render() {
     for(Entity* en : world.entities) en->render();
 }
 
-Entity* World::getEntity(typeof(Entity::id) id) {
+Entity* World::getEntity(unsigned id) {
     for(int i = 0; i < world.entities.size(); i++)
-        if(world.entities[i]->id == id) return world.entities[i];
+        if(world.entities[i]->getId() == id) return world.entities[i];
     return nullptr;
 }
 
@@ -41,6 +44,6 @@ void World::addEntity(Entity* en) {
 std::vector<unsigned> World::getAllEntitiesWithTag(Tags x) {
     std::vector<unsigned> ret;
     for(Entity* en : world.entities)
-        if(en->hasTag(x)) ret.push_back(en->id);
+        if(en->hasTag(x)) ret.push_back(en->getId());
     return ret;
 }
