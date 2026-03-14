@@ -27,8 +27,8 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // const raylib_dep = b.dependency("raylib_zig", .{
-        // .target = target,
-        // .optimize = optimize,
+    // .target = target,
+    // .optimize = optimize,
     // });
 
     // const raylib = raylib_dep.module("raylib"); // main raylib module
@@ -70,20 +70,19 @@ pub fn build(b: *std.Build) void {
     }
 
     // Build and Link zig -> c code -------------------------------------------
-    // const zig_lib = b.addLibrary(.{
-    // .name = "engine",
-    // .root_module = b.createModule(.{
-    // .root_source_file = b.path("src/root.zig"),
-    // .target = target,
-    // .optimize = optimize,
-    // }),
-    // .linkage = .static,
-    // });
-    // zig_lib.linkLibCpp();
-    // zig_lib.addIncludePath(b.path("src/"));
-    //
-    // exe.root_module.linkLibrary(zig_lib);
-    // exe.root_module.linkLibrary(raylibC);
+    const zig_lib = b.addLibrary(.{
+        .name = "engine",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/root.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+        .linkage = .static,
+    });
+    zig_lib.linkLibCpp();
+    zig_lib.addIncludePath(b.path("src/"));
+
+    exe.root_module.linkLibrary(zig_lib);
 
     for (libraries) |lib| {
         if (lib.path) |p| {

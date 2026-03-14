@@ -22,7 +22,12 @@ void managePostRendering() {
     for(Entity* en : World::get().entities) en->postProcessingRender();
 }
 
+extern "C" {
+    void testFunction();
+}
+
 void Init() {
+    testFunction();
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
         World::addEntity(new WaveManager);
     }));

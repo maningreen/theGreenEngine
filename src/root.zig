@@ -1,3 +1,7 @@
 const std = @import("std");
 
-const main = @extern(*const fn () void, .{ .name = "main" });
+export fn testFunction() void {
+    var stdout = std.fs.File.stdout();
+    _ = stdout.write("WOOOOOOOOO\n") catch @panic("FUCK");
+    stdout.close();
+}
