@@ -17,14 +17,8 @@ const debug_flags = runtime_check_flags ++ warning_flags;
 const library = struct { name: []const u8, path: ?[]const u8 = null };
 
 const libraries: []const library = &.{
-    .{ .name = "raylib", .path = "external/" },
-    .{ .name = "GL" },
-    .{ .name = "dl" },
-    .{ .name = "rt" },
-    .{ .name = "X11" },
+    .{ .name = "raylib" },
     .{ .name = "lua" },
-    .{ .name = "m" },
-    .{ .name = "pthread" },
 };
 
 pub fn build(b: *std.Build) void {
