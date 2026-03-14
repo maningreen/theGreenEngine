@@ -1,13 +1,9 @@
-#include <csignal>
+#include <raylib.h>
+
 #include <vector>
 
 #include "entity.hpp"
 #include "world.hpp"
-
-extern "C" {
-extern void hs_init(int argc, char** argv);
-extern void hs_exit();
-};
 
 #define baseScreenScalar 1000
 #define initialScreenDimensions                                \
@@ -23,14 +19,16 @@ void preRender();
 
 int main() {
     srand(time(0));
-    hs_init(0, 0);
-    // SetTraceLogLevel(LOG_NONE);
+    SetTraceLogLevel(LOG_ALL);
 
     SetTargetFPS(60);
 
     srand(time(0));
 
     InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
+
+    while(!IsWindowReady()) {
+    }
 
     Init();
 
@@ -50,6 +48,4 @@ int main() {
     }
 
     CloseWindow();
-
-    hs_exit();
 }

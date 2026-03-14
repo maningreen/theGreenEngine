@@ -14,11 +14,6 @@
 
 #define min(a, b) (a < b ? a : b)
 
-extern "C" {
-float getDistanceFromLineAndPoint(float aX, float aY, float bX, float bY, float cX, float cY);
-void getClosestPointFromLineAndPoint(Vector2* a, Vector2* b, Vector2* c, Vector2* out);
-};
-
 float AttackNode::defaultRadius = 30;
 float AttackNode::lifetimeAfterAttack = 2.5;
 std::vector<AttackNode*> AttackNode::nodes;
@@ -215,18 +210,6 @@ void AttackNode::manageAttack() {
         } else {
             float minimumDistance = INFINITY;
             for(int i = 0; i < 3; i++) {
-                Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().position;
-                Vector2 closestPoint;
-
-                // this is an external function written in haskell
-                getClosestPointFromLineAndPoint(
-                  &nodes[i]->position,
-                  &unwrappedNext,
-                  &en->position,
-                  &closestPoint
-                );
-                float distance = Vector2Distance(closestPoint, en->position);
-                minimumDistance = min(distance, minimumDistance);
             }
             if(minimumDistance <= en->radius)
                 en->getHealthManager().applyDamage(damage / getPerimeter());

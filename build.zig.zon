@@ -1,0 +1,17 @@
+.{
+    .name = .engine,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.15.2",
+    .paths = .{ "external/", "resources/", "src/", "LUA.md", "README.md", "build.zig", "build.zig.zon", "default.nix", "flake.lock", "flake.nix", "keys.md", "shell.nic" },
+    .fingerprint = 0xe8a81a8d9aca4ebd,
+    .dependencies = .{
+        .compile_commands = .{
+            .url = "https://github.com/the-argus/zig-compile-commands/archive/70fb439897e12cae896c071717d7c9c382918689.tar.gz",
+            .hash = "zig_compile_commands-0.0.1-OZg5-ULBAABTh3NXO3WXoSUX1474ez0EouuoT2yDANhz",
+        },
+        .raylib_zig = .{
+            .url = "git+https://github.com/raylib-zig/raylib-zig#cd71c85d571027ac8033357f83b124ee051825b3",
+            .hash = "raylib_zig-5.6.0-dev-KE8REENOBQC-m5nK7M2b5aKSIubJPbPLUYcRhT7aT3RN",
+        },
+    },
+}
