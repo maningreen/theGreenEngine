@@ -192,8 +192,8 @@ fn getClangPath(alloc: std.mem.Allocator, target: std.Target) ![]const u8 {
 }
 
 const runtime_check_flags: []const []const u8 = &.{
-    // "-fsanitize=array-bounds,null,alignment,unreachable,address,leak", // asan and leak are linux/macos only in 0.14.1
-    "-fstack-protector-strong",
+    "-fsanitize=address,leak", 
+    "-g",
     "-fno-omit-frame-pointer",
 };
 
