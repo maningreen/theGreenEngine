@@ -8,5 +8,6 @@ pkgs.mkShell {
     sol2 # lib for lua
     lua # lua itself
     raylib
+    zig
   ];
 }

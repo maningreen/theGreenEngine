@@ -7,31 +7,21 @@ pkgs.stdenv.mkDerivation {
   version = "0.0.0";
   src = ./.;
   buildInputs = with pkgs; [
-    gnumake # build backend
-    gcc # c++ compiler package
-    ghc # haskell compiler
-    sol2 # lib for lua
-
-    libGL
-
-    # X11 dependencies
-    xorg.libX11
-    xorg.libX11.dev
-    xorg.libXcursor
-    xorg.libXi
-    xorg.libXinerama
-    xorg.libXrandr
+    clang
+    sol2
+    lua
+    raylib
   ];
   nativeBuildInputs = with pkgs; [
     lua
   ];
 
   buildPhase = ''
-    make
+    zig build
   '';
 
   installPhase = ''
     mkdir -p $out/bin
-    make install PREFIX=$out/bin -j $(nproc)
+    zig build install -p $out/bin
   '';
 }
