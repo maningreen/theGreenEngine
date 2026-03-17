@@ -1,9 +1,14 @@
 {
-  pkgs ? import <nixpkgs> { },
+  mkShell,
+  clang,
+  sol2,
+  lua,
+  raylib,
+  zig,
   ...
 }:
-pkgs.mkShell {
-  packages = with pkgs; [
+mkShell {
+  packages = [
     clang
     sol2 # lib for lua
     lua # lua itself

@@ -11,7 +11,6 @@
 sol::state ModManager::lua;
 
 ModManager::ModManager() : mods({}) {
-    initLua();
 }
 
 ModManager::~ModManager() {}

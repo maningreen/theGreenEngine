@@ -11,7 +11,7 @@
         baseScreenScalar * 16 / 9, baseScreenScalar / (16 / 9) \
     }
 
-void Init();
+void init();
 
 void postRender();
 
@@ -23,14 +23,11 @@ int main() {
 
     SetTargetFPS(60);
 
-    srand(time(0));
-
     InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-    while(!IsWindowReady()) {
-    }
+    while(!IsWindowReady()) { }
 
-    Init();
+    init();
 
     float delta = 1.0f / 60.0f;
     while(!WindowShouldClose()) {
@@ -48,4 +45,6 @@ int main() {
     }
 
     CloseWindow();
+
+    return 0;
 }

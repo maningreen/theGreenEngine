@@ -33,7 +33,6 @@ class Entity {
 
     void killDefered();
 
-
     bool getValid() const;
 
     virtual void process(float delta) {};

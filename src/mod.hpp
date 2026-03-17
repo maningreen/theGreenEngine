@@ -44,11 +44,11 @@ class ModManager {
     static sol::state lua;
 
     // this function doesn't call onInit, only sets up the lua
-    void initLua();
     ModManager();
     ~ModManager();
 
   public:
+    void initLua();
     static ModManager* get();
     std::vector<Mod> mods;
 

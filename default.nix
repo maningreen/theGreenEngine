@@ -11,6 +11,7 @@ pkgs.stdenv.mkDerivation {
     sol2
     lua
     raylib
+    zig
   ];
   nativeBuildInputs = with pkgs; [
     lua
@@ -23,5 +24,9 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     zig build install -p $out/bin
+  '';
+
+  postPatch = ''
+    ln -s ${pkgs.callPackage ./deps.nix { }} $ZIG_GLOBAL_CACHE_DIR/p
   '';
 }
