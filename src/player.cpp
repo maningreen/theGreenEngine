@@ -241,11 +241,10 @@ Player::Player(const std::string& name, Vector2 position)
 }
 
 Player::~Player() {
-    delete healthManager;
-    delete dashCooldownBar;
-    delete inputManager;
-    inputManager = nullptr;
-    delete cam;
+    healthManager->killDefered();
+    dashCooldownBar->killDefered();
+    inputManager->killDefered();
+    cam->killDefered();
 }
 
 void Player::init() {
