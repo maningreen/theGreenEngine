@@ -59,17 +59,17 @@ pub fn getDistanceFromPoint(self: Line, x: rl.Vector2) f32 {
 pub const SolveErrors = error{ InfiniteCollision, NoCollision };
 
 /// solves a system of equations
-pub fn solve(a: Line, b: Line) SolveErrors!rl.Vector2 {
-    if (a.m == b.m) {
-        return if (a.b == b.b)
+pub fn solve(alpha: Line, beta: Line) SolveErrors!Vector2 {
+    if (alpha.m == beta.m) {
+        return if (alpha.b == beta.b)
             SolveErrors.InfiniteCollision
         else
             SolveErrors.NoCollision;
     }
-    if (a.m) |am| {
-        if (b.m) |bm| {
-            const y = (b.b - a.b) / (bm - am);
-            return rl.Vector2{ .x = a.inverseF(y) catch unreachable, .y = y };
-        } else return rl.Vector2{ .x = b.b, .y = a.f(b.b) catch unreachable };
-    } else return rl.Vector2{ .x = a.b, .y = b.f(a.b) catch unreachable };
+    if (alpha.m) |am| {
+        if (beta.m) |bm| {
+            const x = (alpha.b - beta.b) / (bm - am);
+            return Vector2{ .x = x, .y = alpha.f(x) catch unreachable };
+        } else return Vector2{ .x = beta.b, .y = alpha.f(beta.b) catch unreachable };
+    } else return Vector2{ .x = alpha.b, .y = beta.f(alpha.b) catch unreachable };
 }
