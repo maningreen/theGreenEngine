@@ -27,7 +27,7 @@
 InputManager* Player::inputManager =
   new InputManager(Player::upKey, Player::downKey, Player::leftKey, Player::rightKey, keybinds());
 
-Player* Player::plr = new Player("Player", (Vector2){0, 0});
+Player* Player::plr = nullptr;
 
 Key Player::upKey = KEY_W;
 Key Player::downKey = KEY_S;
@@ -60,6 +60,10 @@ const float Player::defaultShakeMag = 10;
 float Player::shakeMag = Player::defaultShakeMag;
 
 #define barDimensions (Vector2){10, 100}
+
+void Player::initPlr() {
+    plr = new Player("Player", (Vector2){0, 0});
+}
 
 void Player::manageInput(float delta, Vector2 input) {
     velocity += input * delta * speed;

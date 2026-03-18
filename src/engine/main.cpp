@@ -18,14 +18,18 @@ void postRender();
 void preRender();
 
 int main() {
+    new int(3);
+    World::init();
+
     srand(time(0));
-    SetTraceLogLevel(LOG_ALL);
+    SetTraceLogLevel(LOG_ERROR);
 
     SetTargetFPS(60);
 
     InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-    while(!IsWindowReady()) { }
+    while(!IsWindowReady()) {
+    }
 
     init();
 
@@ -45,6 +49,8 @@ int main() {
     }
 
     CloseWindow();
+
+    World::deinit();
 
     return 0;
 }

@@ -92,6 +92,9 @@ class Player : public Entity2D {
 
     static float hitboxRadius;
 
+    static void initPlr();
+    static void deInitPlr();
+
     static Player& get();
     static Player* getPtr();
 };

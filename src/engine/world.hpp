@@ -31,10 +31,14 @@ class World {
     World();
     ~World();
 
-    static World world;
+    static World* world;
 
   public:
     std::vector<Entity*> entities;
+
+    static void init();
+    static void deinit();
+    
     static World& get();
 
     static void process(float delta);

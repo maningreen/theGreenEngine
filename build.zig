@@ -20,7 +20,7 @@ const libraries: []const library = &.{
 };
 
 pub fn build(b: *std.Build) void {
-    var threaded = std.Io.Threaded.init(b.allocator, .{});
+    var threaded = std.Io.Threaded.init_single_threaded;
     defer threaded.deinit();
 
     const io = threaded.io();

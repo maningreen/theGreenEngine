@@ -23,6 +23,7 @@ void managePostRendering() {
 }
 
 void init() {
+    Player::initPlr();
     ModManager::get()->initLua();
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
         World::addEntity(new WaveManager);
