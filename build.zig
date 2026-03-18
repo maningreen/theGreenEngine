@@ -76,10 +76,13 @@ pub fn build(b: *std.Build) void {
 
     for (libraries) |lib| {
         if (lib.path) |p| {
+            zig_lib.root_module.addLibraryPath(b.path(p));
+            zig_lib.root_module.addIncludePath(b.path(p));
             exe.root_module.addLibraryPath(b.path(p));
             exe.root_module.addIncludePath(b.path(p));
         }
         exe.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
+        zig_lib.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
     }
 
     b.installArtifact(exe);
