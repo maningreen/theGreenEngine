@@ -4,6 +4,39 @@
 
 #include <vector>
 
+template <typename T>
+Listener<T>::Listener(unsigned id, std::function<void(Entity*, T)> callback)
+  : callback(callback), id(id) {}
+
+template <typename T>
+Listener<T>::~Listener() {}
+
+template <typename T>
+bool Listener<T>::call(std::tuple<T> args) {
+    if(auto entity = World::getEntity(id)) {
+        std::apply(callback, std::tuple_cat(std::tuple<Entity*>(entity), args));
+        return true;
+    } else
+        return false;
+}
+
+template <typename T>
+Event<T>::Event() {}
+
+template <typename T>
+Event<T>::~Event() {}
+
+template <typename T>
+void Event<T>::call(std::tuple<T> args) {
+    for(int i = 0; i < listeners.size(); i++) {
+        const bool result = listeners[i].call(args);
+        if(!result) {
+            listeners[i] = listeners[listeners.size() - 1];
+            listeners.pop_back();
+        }
+    }
+}
+
 World* World::world = nullptr;
 
 World::World() {}
@@ -59,4 +92,13 @@ std::vector<unsigned> World::getAllEntitiesWithTag(Tags x) {
     for(Entity* en : world->entities)
         if(en->hasTag(x)) ret.push_back(en->getId());
     return ret;
+}
+
+template <typename T>
+void World::callEvent(std::string name, std::tuple<T> args) {
+    const int count = world->events.count(name);
+    if(count == 0)
+        return;
+    else
+        world->events[name].call(args);
 }
