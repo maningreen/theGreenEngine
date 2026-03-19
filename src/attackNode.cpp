@@ -14,6 +14,10 @@
 
 #define min(a, b) (a < b ? a : b)
 
+extern "C" {
+float getLineFromPointsAndDistanceTo(Vector2 a, Vector2 b, Vector2 c);
+}
+
 float AttackNode::defaultRadius = 30;
 float AttackNode::lifetimeAfterAttack = 2.5;
 std::vector<AttackNode*> AttackNode::nodes;
@@ -75,28 +79,21 @@ bool AttackNode::getBreakInLas() {
 
 float AttackNode::getInternalAngle() {
     if(nodes.size() < 3) return 0;
-    float thetaA = getLasAngle();
-    float thetaB = fmodf(getPrev()->getLasAngle() + PI, PI * 2);
-    float deltaTheta = fmodf(thetaB - thetaA, PI * 2);
-    if(deltaTheta < PI)
-        return deltaTheta;
-    else
-        return 2 * PI - deltaTheta;
+    Vector2 alphaP = Vector2Subtract(getNext()->position, position);
+    Vector2 betaP = Vector2Subtract(getPrev()->position, position);
+    return abs(Vector2Angle(alphaP, betaP));
 }
 
 float AttackNode::getInternalAngleSum() {
     if(nodes.size() < 3) return -1;
     float theta = 0;
     for(int i = 0; i < nodes.size(); i++) theta += nodes[i]->getInternalAngle();
-    return theta;
+    return fmodf(theta, 2 * M_PI);
 }
 
 int AttackNode::getBreakInPolygon() {
-    // THERE IS A SINGULAR EDGE CASE
-    // that's if the first index is the one that's breaking it
-    if(nodes[0]->getPrev()->getBreakInLas()) return 0;
     for(int i = 0; i < nodes.size(); i++)
-        if(nodes[i]->getBreakInLas() && nodes[i]->getNext()->getBreakInLas()) return i + 1;
+        if(nodes[i]->getBreakInLas()) return i;
     return -1;
 }
 
@@ -115,7 +112,7 @@ float AttackNode::getPerimeter() {
 
 bool AttackNode::getTriangleIsRegular() {
     float angleSum = getInternalAngleSum();
-    return getTriangleIsValid(angleSum);
+    return abs(angleSum - M_PI) < 0.01;
 }
 
 bool AttackNode::getTriangleIsRegular(float angleSum) {
@@ -126,6 +123,8 @@ void AttackNode::render() {
     las.render();
     DrawCircleV(position, radius, WHITE);
     if(index == 0) manageAttack();
+    // auto t = Border::getShortestPathToPoint(this, getNext()->position);
+    // DrawLineV(position, Vector2Add(position, t), BLUE);
 }
 
 void AttackNode::process(float delta) {
@@ -210,6 +209,12 @@ void AttackNode::manageAttack() {
         } else {
             float minimumDistance = INFINITY;
             for(int i = 0; i < 3; i++) {
+                Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().position;
+
+                // this is an external function written in zig
+                float distance =
+                  getLineFromPointsAndDistanceTo(nodes[i]->position, unwrappedNext, en->position);
+                minimumDistance = min(distance, minimumDistance);
             }
             if(minimumDistance <= en->radius)
                 en->getHealthManager().applyDamage(damage / getPerimeter());

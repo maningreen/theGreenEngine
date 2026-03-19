@@ -1,9 +1,16 @@
+//! A struct representing a linear equation
+//! There's one edge case:
+//!     `m == null`
+//! plotted on a cartesian coordinate system, this would be a vertical line
+//! if this is the case, the member `b` is expected to be as follows
+//! `x = b`
+
 const std = @import("std");
 const Line = @This();
 const rl = @cImport({
     @cInclude("raylib.h");
-    @cInclude("raymath.h");
 });
+pub const Vector2 = @import("root").Vector2;
 
 /// if m == null, line is vertical
 m: ?f32,
@@ -16,7 +23,7 @@ const EvaluateErrors = error{ VerticalLine, HorizontalLine };
 /// Will not return EvaluateErrors.HorizontalLine
 pub fn f(self: Line, x: f32) EvaluateErrors!f32 {
     if (self.m) |m|
-        return m * x + self.b
+        return (m * x) + self.b
     else
         return error.VerticalLine;
 }
@@ -31,29 +38,32 @@ pub fn inverseF(self: Line, y: f32) EvaluateErrors!f32 {
 }
 
 /// calculates the position of a point on the line given the X
-pub fn point(self: Line, x: f32) rl.Vector2 {
-    return .{ .x = x, .y = self.f(x) };
+pub fn point(self: Line, x: f32) EvaluateErrors!Vector2 {
+    return .{ .x = x, .y = try self.f(x) };
+}
+
+/// calculates the position of a point on the line given the Y
+pub fn inversePoint(self: Line, y: f32) EvaluateErrors!Vector2 {
+    return .{ .x = try self.inverseF(y), .y = y };
 }
 
 /// returns the closest point on the line to the provided point
-pub fn getClosestPointToPoint(self: Line, x: rl.Vector2) rl.Vector2 {
+pub fn getClosestPointToPoint(self: Line, x: Vector2) Vector2 {
     if (self.m) |m| {
-        if (m == 0) {
+        if (m == 0)
             return .{ .x = x.x, .y = self.b };
-        }
         const fPrime: Line = .{ .m = -1 / m, .b = x.y + x.x / m };
-        return self.solve(fPrime) catch |err| switch (err) {
-            SolveErrors.InfiniteCollision => x,
-            SolveErrors.NoCollision => unreachable,
-        };
+        // the slopes are defined to be different, causing both exceptions to be impossible
+        return self.solve(fPrime) catch unreachable;
     } else return .{ .x = self.b, .y = x.y };
 }
 
 /// given a point, calculates the closest point on the line to the point,
 /// and the distance
-pub fn getDistanceFromPoint(self: Line, x: rl.Vector2) f32 {
+pub fn getDistanceFromPoint(self: Line, x: Vector2) f32 {
     const closestPoint = self.getClosestPointToPoint(x);
-    return x.Vector2Distance(closestPoint);
+    const delta: Vector2 = .{ .x = closestPoint.x - x.x, .y = closestPoint.y - x.y };
+    return @sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
 pub const SolveErrors = error{ InfiniteCollision, NoCollision };

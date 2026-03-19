@@ -46,29 +46,18 @@ Vector2 Border::wrapPosY(Vector2 v) {
     return v;
 }
 
-Vector2 Border::getShortestPathToPoint(const Entity2D* en, const Vector2 point) {
+Vector2 Border::getShortestPathToPoint(const Entity2D* const en, const Vector2 point) {
     Vector2 vectorTo = Vector2Subtract(point, en->position);
-    if(vectorTo.x < -length)
-        vectorTo.x += length * 2;
-    else if(vectorTo.x > length)
-        vectorTo.x -= length * 2;
-    if(vectorTo.y < -length)
-        vectorTo.y += length * 2;
-    else if(vectorTo.y > length)
-        vectorTo.y -= length * 2;
-    return vectorTo;
+    return (Vector2){.x = std::remainder(vectorTo.x, length * 2),
+                     .y = std::remainder(vectorTo.y, length * 2)};
 }
 
 Vector2 Border::getShortestPathToPoint(const Vector2 a, const Vector2 b) {
     Vector2 vectorTo = Vector2Subtract(b, a);
-    if(vectorTo.x < -length)
-        vectorTo.x += length * 2;
-    if(vectorTo.x > length)
-        vectorTo.x -= length * 2;
-    if(vectorTo.y < -length)
-        vectorTo.y += length * 2;
-    if(vectorTo.y > length)
-        vectorTo.y -= length * 2;
+    while(vectorTo.x < -length) vectorTo.x += length * 2;
+    while(vectorTo.x > length) vectorTo.x -= length * 2;
+    while(vectorTo.y < -length) vectorTo.y += length * 2;
+    while(vectorTo.y > length) vectorTo.y -= length * 2;
     return vectorTo;
 }
 

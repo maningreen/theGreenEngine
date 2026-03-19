@@ -1,6 +1,9 @@
 #ifndef in_h
 #define in_h
 
+#define SHADER
+#define PIXEL
+
 #include <raylib.h>
 #include <raymath.h>
 #include <filesystem>

@@ -2,14 +2,20 @@
 
 #include "border.hpp"
 #include "player.hpp"
+#include "include.h"
 
 const std::string PostProcessing::palletPath = "resources/shaders/palette.glsl";
 
-#define SHADER
-
 PostProcessing::PostProcessing() : Entity("PostProcessing") {
     pixelLength = 10;
-    texture = LoadRenderTexture(2 * Border::length / pixelLength, 2 * Border::length / pixelLength);
+    int size =
+#ifdef PIXEL
+      2 * Border::length / pixelLength
+#else
+      Border::length * 2
+#endif
+      ;
+    texture = LoadRenderTexture(size, size);
     paletteShader = LoadShader(NULL, palletPath.c_str());
 }
 
@@ -19,21 +25,29 @@ PostProcessing::~PostProcessing() {
 }
 
 void PostProcessing::process(float delta) {
-    if(2 * Border::length / pixelLength != texture.texture.height) {
+    int size =
+#ifdef PIXEL
+      2 * Border::length / pixelLength
+#else
+      Border::length * 2
+#endif
+      ;
+    if(size != texture.texture.height) {
         UnloadRenderTexture(texture);
-        texture =
-          LoadRenderTexture(2 * Border::length / pixelLength, 2 * Border::length / pixelLength);
+        texture = LoadRenderTexture(size, size);
     }
 }
 
 void PostProcessing::preRender() {
     BeginTextureMode(texture);
+#ifdef PIXEL
     BeginMode2D((Camera2D){
       .offset = {0, 0},
       .target = {-Border::length, -Border::length},
       .rotation = 0,
       .zoom = 1 / pixelLength,
     });
+#endif
 }
 
 void PostProcessing::postRender() {
