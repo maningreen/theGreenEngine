@@ -20,7 +20,7 @@ Entity::Entity(const std::string& name) : name(name), valid(true), id(currentId+
 }
 
 void Entity::addTag(Tags tag) {
-    tags = tag;
+    tags = (Tags)((uint64_t)tags | (uint64_t)tag);
 }
 
 void Entity::removeTag(Tags tag) {
