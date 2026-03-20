@@ -3,7 +3,6 @@
 #include "border.hpp"
 #include "include.h"
 #include "player.hpp"
-#include "stdio.h"
 
 #define vec4(a, b, c, d)                                                                    \
     (Color) {                                                                               \
@@ -118,9 +117,8 @@ void Button::render() {
             l += std::min(-(length + l) * ease(1 - sigmaDelta), 0.0f);
     }
     DrawRectanglePro(
-      (
-        Rectangle
-      ){position.x + (length) / 2.0f, position.y + (length) / 2.0f, length + l, length + l},
+      (Rectangle){position.x + (length) / 2.0f, position.y + (length) / 2.0f, length + l, length + l
+      },
       (Vector2){(length + l) / 2.0f, (length + l) / 2.0f},
       30 * sin(sigmaDeltaPrime + sigmaDelta) * e,
       ColorLerp(defaultColour, hoveredColour, e)
@@ -154,8 +152,9 @@ void Button::postProcessingRender() {
     text[i] = scratch;
 }
 
+/// quintic easing
+/// thanks [easings.net] for this
 float Button::ease(float x) {
-    // thanks easings.net for this
     return x < 0.5 ? 16 * x * x * x * x * x : 1 - std::pow(-2 * x + 2, 5) / 2;
 }
 
