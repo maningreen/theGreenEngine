@@ -8,6 +8,10 @@ Listener::Listener(unsigned id, void (*callback)(Entity*, void*)) : callback(cal
 
 Listener::~Listener() {}
 
+Listener Listener::operator=(Listener& a) {
+    return a;
+}
+
 bool Listener::call(void* args) {
     if(auto entity = World::getEntity(id)) {
         callback(entity, args);
@@ -21,8 +25,11 @@ Event::Event() {}
 Event::~Event() {}
 
 void Event::call(void* args) {
-    for(Listener& listener: listeners) {
-        listener.call(args);
+    for(int i = 0; i < listeners.size(); i++) {
+        if(!listeners[i].call(args)) {
+            listeners[i--] = listeners.back();
+            listeners.pop_back();
+        }
     }
 }
 

@@ -50,7 +50,6 @@ void ModManager::addMod(Mod x, Entity2D* y) {
            (int)z != 1)  // didn't return anything, carry on || didn't return anything we care about
             mods.push_back(x);
     }
-    mods.push_back(x);
 }
 
 void ModManager::removeMod(int i) {}

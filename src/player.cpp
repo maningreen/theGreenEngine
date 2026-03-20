@@ -248,6 +248,10 @@ Player::Player(const std::string& name, Vector2 position)
     World::addEntity(cam);
 
     modManager = ModManager::get();
+
+    modManager->initLua();
+
+    modManager->loadMods(this);
 }
 
 Player::~Player() {
@@ -258,7 +262,6 @@ Player::~Player() {
 }
 
 void Player::init() {
-    modManager->loadMods(this);
 }
 
 HealthManager* Player::getHealthManager() {

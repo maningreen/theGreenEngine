@@ -10,8 +10,7 @@
 #include "entity.hpp"
 #include "tags.hpp"
 
-class Listener {
-  public:
+struct Listener {
     void (*callback)(Entity*, void*);
     const unsigned id;
 
@@ -24,8 +23,7 @@ class Listener {
     bool call(void*);
 };
 
-class Event {
-  public:
+struct Event {
     std::vector<Listener> listeners;
 
     Event();
@@ -62,7 +60,8 @@ class World {
 
     static void createEvent(std::string name, Event event);
 
-    static void listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id);
+    static void
+    listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id);
 };
 
 #endif
