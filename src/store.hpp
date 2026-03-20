@@ -14,15 +14,15 @@ class Store : public Entity {
 
     static float ease(float x);
     void close();
-    std::vector<std::function<void(void)>> storeCloseCallbacks;
 
   public:
     Store();
-    Store(std::vector<std::function<void(void)>> callbacks);
     void process(float delta) override;
     void render() override;
     void death() override;
     void postProcessingRender() override;
+
+    static const std::string storeCloseEvent;
 };
 
 #endif

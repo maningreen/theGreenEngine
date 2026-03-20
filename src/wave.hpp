@@ -1,7 +1,6 @@
 #ifndef WAVE_H
 #define WAVE_H
 
-#include <functional>
 #include <vector>
 
 #include "engine/entity.hpp"
@@ -15,9 +14,11 @@ class WaveManager : public Entity {
     void startWave();
     void startStore();
 
+    static void storeCloseCallback(Entity*, void*);
+
   public:
-    static std::vector<std::function<void(void)>> waveBeginCallbacks;
-    static std::vector<std::function<void(void)>> waveEndCallbacks;
+    static const std::string waveBeginEvent;
+    static const std::string waveEndEvent;
 
     void process(float delta) override;
 

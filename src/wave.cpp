@@ -5,14 +5,20 @@
 #include "engine/world.hpp"
 #include "store.hpp"
 
-std::vector<std::function<void(void)>> WaveManager::waveBeginCallbacks = {};
-std::vector<std::function<void(void)>> WaveManager::waveEndCallbacks = {};
+const std::string WaveManager::waveBeginEvent = "waveBegin";
+const std::string WaveManager::waveEndEvent = "waveEnd";
 
 const enum Tags tag = wave;
+
+void WaveManager::storeCloseCallback(Entity* t, void* _) {
+    WaveManager* self = (WaveManager*)t;
+    self->startWave();
+}
 
 WaveManager::WaveManager() : Entity("wave manager") {
     waveI = 0;
     startStore();
+    World::listenEvent(Store::storeCloseEvent, &storeCloseCallback, getId());
 }
 
 WaveManager::~WaveManager() {}
@@ -25,6 +31,7 @@ void WaveManager::process(float delta) {
 void WaveManager::startWave() {
     waveI++;
     inWave = true;
+    World::callEvent(waveBeginEvent, nullptr);
     // if(CustomEnemy::customEnemies.size() == 0) return;
     // for(int i = 0; i < waveI; i++) {
     // unsigned r = rand() % CustomEnemy::customEnemies.size();
@@ -38,9 +45,7 @@ void WaveManager::startWave() {
 }
 
 void WaveManager::startStore() {
-    Store* x = new Store({[this]() {
-        this->startWave();
-    }});
-    World::addEntity(x);
+    World::callEvent(waveEndEvent, nullptr);
+    World::addEntity(new Store());
     inWave = false;
 }

@@ -1,13 +1,11 @@
 #include "store.hpp"
 
+#include "engine/world.hpp"
 #include "storeItem.hpp"
 
-std::string Store::tag = "StoreItem";
+const std::string Store::storeCloseEvent = "storeClose";
 
-Store::Store() : Store((std::vector<std::function<void(void)>>){}) {}
-
-Store::Store(std::vector<std::function<void(void)>> callbacks)
-  : Entity("StoreManager"), storeCloseCallbacks(callbacks) {
+Store::Store() : Entity("StoreManager") {
     closing = false;
     // load mods from the pool
     std::list<std::string> x = ModManager::listPoolMods();
@@ -47,10 +45,10 @@ void Store::render() {
     float e = std::min(ease(closing ? 1 - sigmaDelta : sigmaDelta), 1.0f);
     float l = (StoreItem::length * 3.0f + 30) * e;
     float h = (StoreItem::length * .75f + 30);
-    DrawRectangle((int)-l + 15, -h + 15, l * 2, h * 2, YELLOW);
+    DrawRectangle(-(int)l + 15, -h + 15, l * 2, h * 2, YELLOW);
     l -= 30;
     h -= 30;
-    DrawRectangle((int)-l + 15, -h + 15, l * 2, h * 2, BLACK);
+    DrawRectangle(-(int)l + 15, -h + 15, l * 2, h * 2, BLACK);
 
     for(StoreItem& x : items) x.render();
 }
@@ -67,8 +65,7 @@ float Store::ease(float x) {
 void Store::close() {
     sigmaDelta = 0;
     closing = true;
-    for(std::function<void()>& f : storeCloseCallbacks) f();
-    DEBUG;
+    World::callEvent(storeCloseEvent, nullptr);
 }
 
 void Store::death() {}
