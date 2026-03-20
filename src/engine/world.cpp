@@ -4,13 +4,13 @@
 
 #include <vector>
 
-Listener::Listener(unsigned id, void (*callback)(Entity*)) : callback(callback), id(id) {}
+Listener::Listener(unsigned id, void (*callback)(Entity*, void*)) : callback(callback), id(id) {}
 
 Listener::~Listener() {}
 
-bool Listener::call() {
+bool Listener::call(void* args) {
     if(auto entity = World::getEntity(id)) {
-        callback(entity);
+        callback(entity, args);
         return true;
     } else
         return false;
@@ -20,9 +20,9 @@ Event::Event() {}
 
 Event::~Event() {}
 
-void Event::call() {
+void Event::call(void* args) {
     for(Listener& listener: listeners) {
-        listener.call();
+        listener.call(args);
     }
 }
 
@@ -87,13 +87,12 @@ void World::createEvent(std::string name, Event event) {
     world->events.emplace(std::pair<std::string, Event>(name, Event()));
 }
 
-void World::listenEvent(std::string eventName, void (*callback)(Entity*), const unsigned id) {
-    DEBUG;
+void World::listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id) {
     auto it = world->events.find(eventName);
     it->second.listeners.push_back(Listener(id, callback));
 }
 
-void World::callEvent(std::string name) {
+void World::callEvent(std::string name, void* args) {
     const int count = world->events.count(name);
-    world->events[name].call();
+    world->events[name].call(args);
 }

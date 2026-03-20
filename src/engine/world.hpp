@@ -12,16 +12,16 @@
 
 class Listener {
   public:
-    void (*callback)(Entity*);
+    void (*callback)(Entity*, void*);
     const unsigned id;
 
-    Listener(unsigned id, void (*callback)(Entity*));
+    Listener(unsigned id, void (*callback)(Entity*, void*));
     ~Listener();
 
     Listener operator=(Listener& a);
 
     /// if fails to call returns false
-    bool call();
+    bool call(void*);
 };
 
 class Event {
@@ -31,7 +31,7 @@ class Event {
     Event();
     ~Event();
 
-    void call();
+    void call(void*);
 };
 
 class World {
@@ -58,11 +58,11 @@ class World {
     static void addEntity(Entity*);
     static std::vector<unsigned> getAllEntitiesWithTag(Tags x);
 
-    static void callEvent(std::string name);
+    static void callEvent(std::string name, void* args);
 
     static void createEvent(std::string name, Event event);
 
-    static void listenEvent(std::string eventName, void (*callback)(Entity*), const unsigned id);
+    static void listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id);
 };
 
 #endif
