@@ -18,8 +18,10 @@ float Enemy::droppedHealthHP = 1;
 
 const enum Tags Enemy::tag = enemy;
 
-std::vector<std::function<void(Enemy*)>> Enemy::onSpawnHooks;
-std::vector<std::function<void(Enemy*)>> Enemy::onDeathHooks;
+/// Arguments: args == *Enemy
+const std::string Enemy::spawnEvent = "enemySpawn";
+/// Arguments: args == *Enemy
+const std::string Enemy::deathEvent = "enemyDeath";
 
 #define barDimensions (Vector2){DefaultRadius * 2, 10}
 
@@ -45,7 +47,7 @@ Enemy::Enemy(Vector2 pos)
 Enemy::~Enemy() {}
 
 void Enemy::death() {
-    for(std::function<void(Enemy*)> f : onDeathHooks) f(this);
+    World::callEvent(deathEvent, this);
     onDeath();
     if(healthManager.isDead())
         dropHealth();
@@ -54,7 +56,7 @@ void Enemy::death() {
 }
 
 void Enemy::init() {
-    for(std::function<void(Enemy*)> f : onSpawnHooks) f(this);
+    World::callEvent(spawnEvent, this);
     onSpawn();
 }
 
@@ -83,14 +85,6 @@ Vector2 Enemy::getShortestVectorToPlayer() const {
 void Enemy::manageHealthBar(float r) {
     healthManager.targetDistance = r * 1.5f;
     if(healthManager.isDead()) killDefered();
-}
-
-void Enemy::addSpawnHook(std::function<void(Enemy*)> x) {
-    onSpawnHooks.push_back(x);
-}
-
-void Enemy::addDeathHook(std::function<void(Enemy*)> x) {
-    onDeathHooks.push_back(x);
 }
 
 Vector2 Enemy::getClosestPointToPlayerWithDistance(float dist) const {

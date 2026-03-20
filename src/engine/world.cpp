@@ -88,8 +88,7 @@ void World::createEvent(std::string name, Event event) {
 }
 
 void World::listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id) {
-    auto it = world->events.find(eventName);
-    it->second.listeners.push_back(Listener(id, callback));
+    world->events[eventName].listeners.push_back(Listener(id, callback));
 }
 
 void World::callEvent(std::string name, void* args) {

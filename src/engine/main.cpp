@@ -18,7 +18,6 @@ void postRender();
 void preRender();
 
 int main() {
-    new int(3);
     World::init();
 
     srand(time(0));

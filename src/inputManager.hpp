@@ -35,7 +35,7 @@ struct keybindAlt {
     keybindAlt(int key, bool isMouseButton, std::function<void(Vector2)> callback);
 };
 
-typedef std::vector<std::variant<keybind, keybindAlt>> keybinds;
+using keybinds = std::vector<std::variant<keybind, keybindAlt>>;
 
 class InputManager : public Entity {
   public:

@@ -183,6 +183,16 @@ void Player::fireBullet() {
     }
 }
 
+void spawnHook(Entity* p, void* enemy) {
+    Player* plr = (Player*)p;
+    plr->getModManager()->onEnemySpawn(plr, (Enemy*)enemy);
+}
+
+void deathHook(Entity* p, void* enemy) {
+    Player* plr = (Player*)p;
+    plr->getModManager()->onEnemyKill(plr, (Enemy*)enemy);
+}
+
 Player::Player(const std::string& name, Vector2 position)
   : dashManager(
       defaultMaxDashCount,
@@ -222,13 +232,9 @@ Player::Player(const std::string& name, Vector2 position)
         this->manageInput(delta, i);
     });
 
-    Enemy::addSpawnHook([this](Enemy* x) {
-        this->modManager->onEnemySpawn(this, x);
-    });
+    World::listenEvent(Enemy::spawnEvent, &spawnHook, getId());
 
-    Enemy::addDeathHook([this](Enemy* x) {
-        this->modManager->onEnemyKill(this, x);
-    });
+    World::listenEvent(Enemy::deathEvent, &deathHook, getId());
 
     World::addEntity(inputManager);
 

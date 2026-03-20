@@ -16,9 +16,6 @@ class Enemy : public Entity2D {
 
     void manageHealthBar(float radius);
 
-    static std::vector<std::function<void(Enemy*)>> onSpawnHooks;
-    static std::vector<std::function<void(Enemy*)>> onDeathHooks;
-
   protected:
     HealthManager healthManager;
 
@@ -65,10 +62,10 @@ class Enemy : public Entity2D {
     static float DefaultRadius;
     static float Speed;
 
-    static void addSpawnHook(std::function<void(Enemy*)>);
-    static void addDeathHook(std::function<void(Enemy*)>);
-
     static const enum Tags tag;
+
+    static const std::string spawnEvent;
+    static const std::string deathEvent;
 
     static float droppedHealthHP;
     Color colour;
