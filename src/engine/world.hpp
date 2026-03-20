@@ -10,25 +10,28 @@
 #include "entity.hpp"
 #include "tags.hpp"
 
-template <typename T>
 class Listener {
   public:
-    std::function<void(Entity*, T)> callback;
+    void (*callback)(Entity*);
     const unsigned id;
-    Listener(unsigned id, std::function<void(Entity*, T)> callback);
+
+    Listener(unsigned id, void (*callback)(Entity*));
     ~Listener();
 
+    Listener operator=(Listener& a);
+
     /// if fails to call returns false
-    bool call(std::tuple<T> args);
+    bool call();
 };
 
-template <typename T>
 class Event {
   public:
-    std::vector<Listener<T>> listeners;
-    void call(std::tuple<T> args);
+    std::vector<Listener> listeners;
+
     Event();
     ~Event();
+
+    void call();
 };
 
 class World {
@@ -40,7 +43,7 @@ class World {
 
   public:
     std::vector<Entity*> entities;
-    std::unordered_map<std::string, Event<void>> events;
+    std::unordered_map<std::string, Event> events;
 
     static void init();
     static void deinit();
@@ -55,15 +58,11 @@ class World {
     static void addEntity(Entity*);
     static std::vector<unsigned> getAllEntitiesWithTag(Tags x);
 
-    template <typename T>
-    static void callEvent(std::string name, std::tuple<T> args);
+    static void callEvent(std::string name);
 
-    template <typename T>
-    static void createEvent(std::string name, Event<T> event);
+    static void createEvent(std::string name, Event event);
 
-    template <typename T>
-    static void
-    listenEvent(std::string eventName, std::function<void(T)> callback, const unsigned id);
+    static void listenEvent(std::string eventName, void (*callback)(Entity*), const unsigned id);
 };
 
 #endif
