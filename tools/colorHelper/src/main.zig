@@ -21,7 +21,6 @@ pub fn main(init: std.process.Init) !void {
             else => return err,
         };
         const toParse = std.mem.trim(u8, line, "#\n \t\n\t");
-        std.log.debug("{s}\n", .{toParse});
         const parsed = try std.fmt.parseInt(u24, toParse, 16);
         const r: f128 = @as(f128, @floatFromInt((parsed & 0x0000FF) >> 0)) / 255.0;
         const g: f128 = @as(f128, @floatFromInt((parsed & 0x00FF00) >> 8)) / 255.0;

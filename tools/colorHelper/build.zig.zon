@@ -2,6 +2,6 @@
     .name = .colorHelper,
     .version = "0.0.1",
     .minimum_zig_version = "0.16.0-dev.2915+065c6e794",
-    .paths = .{""},
+    .paths = .{"src/", "build.zig", "build.zig.zon", "README.md"},
     .fingerprint = 0x7b6fc0a838995e7f,
 }
