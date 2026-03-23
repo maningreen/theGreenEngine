@@ -1,6 +1,6 @@
 #include <filesystem>
-#include <sol/forward.hpp>
 #define SOL_ALL_SAFETIES_ON 1
+#include <sol/forward.hpp>
 
 #include <cstdio>
 #include <sol/sol.hpp>
@@ -28,11 +28,6 @@ Mod::Mod(std::string n) {
     onEnemySpawn = std::nullopt;
 }
 
-std::optional<Mod> Mod::fromPath(fs::path x) {
-    sol::function_result result = ModManager::getLua().script_file(x);
-    return fromTable(x.filename().replace_extension("").string(), result);
-}
-
 #define MODTHING(var, table, functionName, key) \
     {                                           \
         sol::function function = table[key];    \
@@ -52,13 +47,6 @@ Mod Mod::fromTable(std::string n, sol::table table) {
     MODTHING(x, table, onEnemySpawn, "onSpawn");
 
     x.description = (std::string)table["description"];
-    return x;
-}
-
-std::optional<Mod> Mod::fromName(std::string name) {
-    std::string n = mod::poolPath;
-    n.append(1, '/').append(name).append(".lua");
-    Mod x = fromPath(n).value();
     return x;
 }
 

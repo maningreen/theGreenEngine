@@ -12,8 +12,8 @@
 #include "nodeBullet.hpp"
 
 namespace mod {
-const std::string poolPath = "resources/mods/pool";
-const std::string initPath = "resources/mods/init";
+const fs::path poolPath = "resources/mods/pool";
+const fs::path initPath = "resources/mods/init";
 };  // namespace mod
 
 struct Mod {
@@ -41,43 +41,45 @@ struct Mod {
 
 class ModManager {
   private:
-    static sol::state lua;
+    sol::state lua;
 
-    // this function doesn't call onInit, only sets up the lua
+    void initLua();
+  public:
+
     ModManager();
     ~ModManager();
 
-  public:
-    void initLua();
-    static ModManager* get();
     std::vector<Mod> mods;
 
     // this function calls `onDash` on all the mods
-    void onDash(Entity2D*);
+    void onDash(unsigned playerId);
 
     // this function calls `onFire` on all the mods
-    void onFire(Entity2D*, NodeBullet*);
+    void onFire(unsigned playerId, unsigned bulletId);
 
     // this function calls `onEnemyKill` on all the mods
-    void onEnemyKill(Entity2D*, Enemy*);
+    void onEnemyKill(unsigned playerId, unsigned enemyId);
     // this function calls `onEnemySpawn` on all the mods
-    void onEnemySpawn(Entity2D*, Enemy*);
-
-    // adds a mod, does *not* call onInit
-    void addModPartial(Mod);
+    void onEnemySpawn(unsigned playerId, unsigned enemyId);
 
     // adds a mod, calls onInit
-    void addMod(Mod, Entity2D*);
+    void addMod(Mod, unsigned playerId);
 
-    // loads all the mods in resources/mods
+    // loads all the mods in resources/mods/pool
     // parses the lua and calls onInit
-    void loadMods(Entity2D*);
+    void loadMods(unsigned playerId);
 
     // loads a mod from `pool`
-    // if fails, returns 0, otherwise 1
+    // if fails, returns 1, otherwise 0
     // expects format: (poolPath)/(mod).lua
-    int loadMod(std::string mod, Entity2D* plr);
+    int loadMod(std::string mod, unsigned playerId);
 
+    // loads a mod from the specified path.
+    int loadModPath(fs::path, unsigned playerId);
+
+    std::optional<Mod> fromPath(fs::path);
+    std::optional<Mod> fromName(std::string);
+    
     // lists all possible mods to be loaded
     static std::list<std::string> listPoolMods();
     // picks a random pool mod to be loaded
@@ -86,7 +88,7 @@ class ModManager {
     // removes a mod.
     void removeMod(int i);
 
-    static sol::state& getLua();
+    sol::state& getLua();
 };
 
 #endif

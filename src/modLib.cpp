@@ -34,25 +34,16 @@ void ModManager::initLua() {
         return (Color){r, g, b, a};
     };
 
-    sol::usertype<Player> plr = lua.new_usertype<Player>(
-      "Player",
-      sol::constructors<Player(std::string&, Vector2)>()
-      // , "defaultMaxHealth", &Player::maxHealth
-      // , "defaultDashSpeed", &Player::defaultDashSpeed
-      // , "defaultDashTime", &Player::defaultDashTime
-      // , "defaultDashControl", &Player::defaultDashControl
-      // , "defaultDashRegenDelay", &Player::defaultDashRegenDelay
-      // , "defaultMaxDashCount", &Player::defaultMaxDashCount
-      // , "defaultDashCooldown", &Player::defaultDashCooldown
-      // , "particleSpawnTime", &Player::particleSpawnTime
-    );
-    plr["getHealth"] = &Player::getHealthManager;
-    plr["getInput"] = &Player::getInputManager;
-    plr["getDash"] = &Player::getDashManager;
-    plr["position"] = &Player::position;
-    plr["velocity"] = &Player::velocity;
+    sol::usertype<Player> plr = lua.new_usertype<Player>("player");
     plr["speed"] = &Player::speed;
+    lua["test"] = &dumpStackTrace;
+    plr["test"] = [](){
+        dumpStackTrace();
+    };
+    plr["rotation"] = &Player::rotation;
     plr["fireBullet"] = &Player::fireBullet;
+    plr["getHealth"] = &Player::getHealthManager;
+    plr["getDash"] = &Player::getDashManager;
 
     sol::usertype<HealthManager> hm = lua.new_usertype<HealthManager>("healthManager");
     hm["getHealth"] = &HealthManager::getHealth;

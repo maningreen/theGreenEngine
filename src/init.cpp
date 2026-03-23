@@ -11,9 +11,7 @@
 #include "postProcessing.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
-#include "store.hpp"
 #include "time.h"
-#include "wave.hpp"
 
 CameraEntity* cameraEnt = nullptr;
 PostProcessing* data = nullptr;
@@ -24,9 +22,7 @@ void managePostRendering() {
 
 void init() {
     Player::initPlr();
-    ModManager::get()->initLua();
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
-        World::addEntity(new WaveManager);
     }));
 
     World::addEntity(&Player::get());

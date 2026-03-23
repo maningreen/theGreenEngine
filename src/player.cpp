@@ -86,7 +86,7 @@ void Player::beginDash(Vector2 input) {
         Vector2 dashDirection = Vector2Length(input) > 0 ? input : Vector2Normalize(velocity);
         dashManager.beginDash(dashDirection);
         dashManager.removeDashProgress();
-        modManager->onDash(this);
+        modManager->onDash(getId());
         cam->applyShake(shakeMag);
     }
 }
@@ -184,13 +184,12 @@ void Player::fireBullet() {
 }
 
 void spawnHook(Entity* p, void* enemy) {
-    Player* plr = (Player*)p;
-    plr->getModManager()->onEnemySpawn(plr, (Enemy*)enemy);
+    ((Player*)p)->getModManager()->onEnemySpawn(p->getId(), ((Enemy*)enemy)->getId());
 }
 
 void deathHook(Entity* p, void* enemy) {
     Player* plr = (Player*)p;
-    plr->getModManager()->onEnemyKill(plr, (Enemy*)enemy);
+    plr->getModManager()->onEnemyKill(plr->getId(), ((Enemy*)enemy)->getId());
 }
 
 Player::Player(const std::string& name, Vector2 position)
@@ -247,11 +246,9 @@ Player::Player(const std::string& name, Vector2 position)
     cam = new CameraEntity("Camera", this);
     World::addEntity(cam);
 
-    modManager = ModManager::get();
+    modManager = new ModManager();
 
-    modManager->initLua();
-
-    modManager->loadMods(this);
+    modManager->loadMods(getId());
 }
 
 Player::~Player() {
@@ -259,6 +256,7 @@ Player::~Player() {
     dashCooldownBar->killDefered();
     inputManager->killDefered();
     cam->killDefered();
+    delete modManager;
 }
 
 void Player::init() {
