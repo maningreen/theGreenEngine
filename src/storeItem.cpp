@@ -1,11 +1,12 @@
 #include "storeItem.hpp"
 
 #include "border.hpp"
+#include "engine/world.hpp"
 #include "include.h"
 #include "player.hpp"
 #include "stdio.h"
 
-std::vector<std::function<bool(StoreItem&)>> StoreItem::purchaseHooks;
+const std::string StoreItem::purchaseEvent = "purchase";
 
 StoreItem::StoreItem(Mod m, Vector2 p)
   : Button(
@@ -18,15 +19,8 @@ StoreItem::StoreItem(Mod m, Vector2 p)
     mod(m) {}
 
 void StoreItem::purchase() {
-    Player::getPtr()->getModManager()->addMod(mod, Player::getPtr());
-    for(std::function<bool(StoreItem&)>& t : purchaseHooks) t(*this);
-    for(int i = 0; i < purchaseHooks.size(); i++) {
-        bool x = purchaseHooks[i](*this);
-        if(x) {
-            purchaseHooks[i] = purchaseHooks.back();
-            purchaseHooks.pop_back();
-            i -= 1;
-        }
-    }
+    std::cout << "TEST\n";
+    ModManager::get()->addMod(mod, Player::getPtr());
+    World::callEvent(purchaseEvent, &mod);
     setState(Passing);
 }

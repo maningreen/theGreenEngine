@@ -10,10 +10,13 @@
 
 sol::state ModManager::lua;
 
-ModManager::ModManager() : mods({}) {
-}
+ModManager::ModManager() : mods({}) {}
 
 ModManager::~ModManager() {}
+
+extern "C" {
+    void dumpStackTrace();
+}
 
 void ModManager::onDash(Entity2D* x) {
     for(Mod& x : mods)
@@ -46,9 +49,8 @@ void ModManager::addMod(Mod x, Entity2D* y) {
         mods.push_back(x);
     else {
         sol::function_result z = x.onInit.value()((Player*)y);
-        if(!z.valid() ||
-           (int)z != 1)  // didn't return anything, carry on || didn't return anything we care about
-            mods.push_back(x);
+        if(!z.valid()) mods.push_back(x);
+        else if((int)z != 1) mods.push_back(x);
     }
 }
 

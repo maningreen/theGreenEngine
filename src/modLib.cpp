@@ -133,9 +133,6 @@ void ModManager::initLua() {
     en["color"] = &Enemy::colour;
 
     sol::table enemy = lua["Enemy"].get_or_create<sol::table>();
-    enemy["spawnEvent"] = &Enemy::spawnEvent;
-    enemy["deathEvent"] = &Enemy::deathEvent;
-
     sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
     nb["theta"] = &NodeBullet::theta;
     nb["lifetime"] = &NodeBullet::lifetime;

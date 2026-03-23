@@ -5,6 +5,14 @@
 
 const std::string Store::storeCloseEvent = "storeClose";
 
+float clampf(float low, float high, float value) {
+    return value;
+}
+
+extern "C" {
+void drawStoreBody(float length, float sigmaDelta, float (*const ease)(float));
+}
+
 Store::Store() : Entity("StoreManager") {
     closing = false;
     // load mods from the pool
@@ -24,11 +32,7 @@ Store::Store() : Entity("StoreManager") {
         arr.erase(arr.begin() + n);
     }
 
-    StoreItem::purchaseHooks.push_back([this](StoreItem& x) {
-        for(Button& item : items) item.setState(StoreItem::Passing);
-        close();
-        return true;
-    });
+    World::listenEvent(StoreItem::purchaseEvent, &Store::purchaseCallback, getId());
 }
 
 void Store::process(float delta) {
@@ -42,13 +46,7 @@ void Store::process(float delta) {
 }
 
 void Store::render() {
-    float e = std::min(ease(closing ? 1 - sigmaDelta : sigmaDelta), 1.0f);
-    float l = (StoreItem::length * 3.0f + 30) * e;
-    float h = (StoreItem::length * .75f + 30);
-    DrawRectangle(-floorf(l) + 15, -h + 15, l * 2, h * 2, YELLOW);
-    l -= 30;
-    h -= 30;
-    DrawRectangle(-floorf(l) + 15, -h + 15, l * 2, h * 2, BLACK);
+    drawStoreBody(StoreItem::length, sigmaDelta, &ease);
 
     for(StoreItem& x : items) x.render();
 }
@@ -57,9 +55,11 @@ void Store::postProcessingRender() {
     for(StoreItem& x : items) x.postProcessingRender();
 }
 
+extern "C" {
 float Store::ease(float x) {
     // thanks easings.net for this
     return x < 0.5 ? 16 * x * x * x * x * x : 1 - pow(-2 * x + 2, 5) / 2;
+}
 }
 
 void Store::close() {
@@ -69,3 +69,9 @@ void Store::close() {
 }
 
 void Store::death() {}
+
+void Store::purchaseCallback(Entity* t, void*) {
+    Store* self = (Store*)t;
+    for(Button& item : self->items) item.setState(StoreItem::Passing);
+    self->close();
+}

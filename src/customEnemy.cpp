@@ -7,6 +7,7 @@
 
 #include "enemy.hpp"
 #include "raylib.h"
+#include <iostream>
 
 std::unordered_map<std::string, CustomEnemy> CustomEnemy::customEnemies;
 

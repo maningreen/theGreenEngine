@@ -10,7 +10,7 @@ pub const rl = @cImport({
 pub const Vector2 = rl.Vector2;
 
 pub fn distance(a: Vector2, b: Vector2) f32 {
-    const delta = Vector2{.x = a.x - b.x, .y = a.y - b.y};
+    const delta = Vector2{ .x = a.x - b.x, .y = a.y - b.y };
     return @sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
@@ -31,6 +31,18 @@ export fn drawLaser(length: f32, theta: f32, pos: rl.Vector2, wrapLength: f32, c
     laser.draw(.{ .r = col.r, .g = col.g, .b = col.b, .a = col.a }, wrapLength);
 }
 
+export fn dumpStackTrace() callconv(.c) void {
+    std.debug.dumpCurrentStackTrace(.{});
+}
+
 // export fn getDistanceToLaser(length: f32, theta: f32, pos: Vector2, wrapLength: f32, p: Vector2) callconv(.c) f32 {
-    // return (Laser{.length = length, .pos = pos, .theta = theta}).getDistanceToSplitLaser(wrapLength, p);
+// return (Laser{.length = length, .pos = pos, .theta = theta}).getDistanceToSplitLaser(wrapLength, p);
 // }
+
+export fn drawStoreBody(length: f32, sigmaDelta: f32, ease: *const fn(f32) callconv(.c) f32) callconv(.c) void {
+    const e: f32 = std.math.clamp(ease(sigmaDelta), 0, 1);
+    const l: i32 = @intFromFloat(length * 3.0 + 30.0 * e);
+    const h: i32 = @intFromFloat(length * 0.75 + 30.0);
+    rl.DrawRectangle(-l + 15, -h + 15, l * 2, h * 2, rl.YELLOW);
+    rl.DrawRectangle(-(l - 30) + 15, -(h - 30) + 15, (l - 30) * 2, (h - 30) * 2, rl.BLACK);
+}

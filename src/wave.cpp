@@ -4,6 +4,7 @@
 #include "customEnemy.hpp"
 #include "engine/world.hpp"
 #include "store.hpp"
+#include <iostream>
 
 const std::string WaveManager::waveBeginEvent = "waveBegin";
 const std::string WaveManager::waveEndEvent = "waveEnd";

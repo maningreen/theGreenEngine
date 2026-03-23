@@ -15,6 +15,8 @@ class Store : public Entity {
     static float ease(float x);
     void close();
 
+    static void purchaseCallback(Entity*, void*);
+
   public:
     Store();
     void process(float delta) override;

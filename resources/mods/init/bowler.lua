@@ -48,7 +48,7 @@ local en = {
     end
   end,
   onDeath = function(self)
-    plr = Global.getPlayer()
+    local plr = Global.getPlayer()
     plr.velocity = plr.velocity:add(self.velocity:normalize():scale(speed))
   end,
   maxHealth = 10,
@@ -56,8 +56,8 @@ local en = {
 
 return {
   onInit = function()
-    -- CustomEnemy.addEnemy(en)
-    -- CustomEnemy.spawnEnemy("bowling", vector2(300, 300))
+    CustomEnemy.addEnemy(en)
+    CustomEnemy.spawnEnemy("bowling", vector2(300, 300))
     return 1
   end,
   description = "adds a simple enemy"
