@@ -98,3 +98,8 @@ std::optional<Mod> ModManager::fromName(std::string name) {
     Mod x = fromPath(n).value();
     return x;
 }
+
+/// TODO:
+std::string ModManager::pickRandomPoolMod() {
+    return "Speed";
+}

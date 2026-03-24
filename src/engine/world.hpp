@@ -10,26 +10,43 @@
 #include "entity.hpp"
 #include "tags.hpp"
 
+template <typename T>
 struct Listener {
-    void (*callback)(Entity*, void*);
+    void (*callback)(Entity*, T);
     const unsigned id;
 
-    Listener(unsigned id, void (*callback)(Entity*, void*));
-    ~Listener();
+    Listener<T>(unsigned id, void (*callback)(Entity*, T)) : callback(callback), id(id) {}
+    ~Listener<T>() = default;
 
-    Listener operator=(Listener& a);
+    Listener<T>& operator=(Listener<T>& a) {
+        return a;
+    }
 
     /// if fails to call returns false
-    bool call(void*);
+    bool call(std::tuple<T>);
 };
 
-struct Event {
-    std::vector<Listener> listeners;
+/// Dummy class
+struct EventI {
+    EventI();
+    ~EventI();
+};
 
-    Event();
-    ~Event();
+template <typename T>
+struct Event : EventI {
+    std::vector<Listener<T>> listeners;
 
-    void call(void*);
+    Event<T>() {}
+    ~Event<T>() {}
+
+    void call(std::tuple<T> args) {
+        for(int i = 0; i < listeners.size(); i++) {
+            if(!listeners[i].call(args)) {
+                listeners[i--] = listeners.back();
+                listeners.pop_back();
+            }
+        }
+    }
 };
 
 class World {
@@ -41,7 +58,7 @@ class World {
 
   public:
     std::vector<Entity*> entities;
-    std::unordered_map<std::string, Event> events;
+    std::unordered_map<std::string, EventI*> events;
 
     static void init();
     static void deinit();
@@ -56,12 +73,34 @@ class World {
     static void addEntity(Entity*);
     static std::vector<unsigned> getAllEntitiesWithTag(Tags x);
 
-    static void callEvent(std::string name, void* args);
+    template <typename T>
+    static void callEvent(std::string name, std::tuple<T> args) {
+        const int count = world->events.count(name);
+        ((Event<T>*)world->events[name])->call(args);
+    }
 
-    static void createEvent(std::string name, Event event);
+    template <typename T>
+    static void createEvent(std::string name) {
+        world->events.emplace(std::pair<std::string, EventI*>(name, new Event<T>()));
+    }
 
+    template <typename T>
     static void
-    listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id);
+    listenEvent(std::string eventName, void (*callback)(Entity*, T), const unsigned id) {
+        auto t = world->events.find(eventName);
+        if(t == world->events.end())
+            createEvent<T>(eventName);
+        ((Event<T>*)world->events[eventName])->listeners.push_back(Listener(id, callback));
+    }
 };
+
+template <typename T>
+bool Listener<T>::call(std::tuple<T> args) {
+    if(auto entity = World::getEntity(id)) {
+        std::apply(callback, std::tuple_cat(std::tuple<Entity*>(entity), args));
+        return true;
+    } else
+        return false;
+}
 
 #endif

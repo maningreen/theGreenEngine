@@ -12,16 +12,22 @@ class Particle : public Entity2D {
     float rotation;
     float rotationalVelocity;
     float length;
+    bool hasGravity;
+
     Vector2 velocity;
     Color colour;
 
     void process(float delta) override;
     void render() override;
 
-    float GetLifetime();
+    float getLifetime();
+
+    static float gravity;
 
     // sets the rotation randomly and the rotational velocity randomly :)
     Particle(Vector2 position, Vector2 velocity);
+    // sets the rotation randomly and the rotational velocity randomly :), with/without gravity
+    Particle(Vector2 position, Vector2 velocity, bool gravity);
     ~Particle();
 
     static float MinLifetime;

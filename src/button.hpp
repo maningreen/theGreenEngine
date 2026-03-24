@@ -6,6 +6,7 @@
 #include "engine/entity.hpp"
 
 class Button : public Entity2D {
+  private:
     std::function<void(Button*)> callback;
 
     Vector2 textDems;

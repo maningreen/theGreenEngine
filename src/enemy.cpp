@@ -47,7 +47,7 @@ Enemy::Enemy(Vector2 pos)
 Enemy::~Enemy() {}
 
 void Enemy::death() {
-    World::callEvent(deathEvent, this);
+    World::callEvent<Enemy*>(deathEvent, std::tuple<Enemy*>(this));
     onDeath();
     if(healthManager.isDead())
         dropHealth();
@@ -56,7 +56,7 @@ void Enemy::death() {
 }
 
 void Enemy::init() {
-    World::callEvent(spawnEvent, this);
+    World::callEvent<Enemy*>(spawnEvent, std::tuple<Enemy*>(this));
     onSpawn();
 }
 

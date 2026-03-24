@@ -183,13 +183,13 @@ void Player::fireBullet() {
     }
 }
 
-void spawnHook(Entity* p, void* enemy) {
-    ((Player*)p)->getModManager()->onEnemySpawn(p->getId(), ((Enemy*)enemy)->getId());
+void spawnHook(Entity* p, Enemy* enemy) {
+    ((Player*)p)->getModManager()->onEnemySpawn(p->getId(), enemy->getId());
 }
 
-void deathHook(Entity* p, void* enemy) {
+void deathHook(Entity* p, Enemy* enemy) {
     Player* plr = (Player*)p;
-    plr->getModManager()->onEnemyKill(plr->getId(), ((Enemy*)enemy)->getId());
+    plr->getModManager()->onEnemyKill(plr->getId(), enemy->getId());
 }
 
 Player::Player(const std::string& name, Vector2 position)
@@ -259,8 +259,7 @@ Player::~Player() {
     delete modManager;
 }
 
-void Player::init() {
-}
+void Player::init() {}
 
 HealthManager* Player::getHealthManager() {
     return healthManager;
