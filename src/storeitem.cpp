@@ -18,7 +18,7 @@ Button StoreItem::init(Mod mod) {
             World::addEntity(new Particle(self->position, vel));
         }
         Player::get().getModManager()->addMod(mod, Player::get().getId());
-        dumpStackTrace();
     };
-    return Button(Vector2Zero(), "testing", false, callback);
+    std::string str = mod.name + "\n-----\n" + mod.description;
+    return Button(Vector2Zero(), str, false, callback);
 }

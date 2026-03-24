@@ -185,12 +185,11 @@ void AttackNode::manageAttack() {
 
             Vector2 effectivePos[nodes.size()];
             for(int i = 0; i < nodes.size(); i++) {
-                if(i == closestI) {
+                if(i == closestI)
                     effectivePos[i] = nodes[i]->position;
-                    continue;
-                }
-                effectivePos[i] =
-                  Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
+                else
+                    effectivePos[i] =
+                      Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
             }
 
             // then we can use a regular collision

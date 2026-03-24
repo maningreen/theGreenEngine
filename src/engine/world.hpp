@@ -26,7 +26,7 @@ struct Listener {
     bool call(std::tuple<T>);
 };
 
-/// Dummy class
+/// Dummy class for events
 struct EventI {
     EventI();
     ~EventI();
