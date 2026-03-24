@@ -46,3 +46,21 @@ export fn drawStoreBody(length: f32, sigmaDelta: f32, ease: *const fn (f32) call
     rl.DrawRectangle(-l + 15, -h + 15, l * 2, h * 2, rl.YELLOW);
     rl.DrawRectangle(-(l - 30) + 15, -(h - 30) + 15, (l - 30) * 2, (h - 30) * 2, rl.BLACK);
 }
+
+var threaded = std.Io.Threaded.init_single_threaded;
+
+/// returns the time since last called
+export fn getDelta() callconv(.c) f64 {
+    const t = struct {
+        var lastCalled: ?i64 = null;
+    };
+    const time = std.Io.Timestamp.now(threaded.io(), .awake).toMicroseconds();
+    if (t.lastCalled) |c| {
+        const x = time - c;
+        t.lastCalled = time;
+        return @as(f64, @floatFromInt(x)) / @as(f64, @floatFromInt(std.time.us_per_s));
+    } else {
+        t.lastCalled = time;
+        return @as(f64, @floatFromInt(time)) / @as(f64, @floatFromInt(std.time.us_per_s));
+    }
+}

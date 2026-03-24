@@ -32,8 +32,8 @@ int main() {
 
     init();
 
-    float delta = 1.0f / 60.0f;
     while(!WindowShouldClose()) {
+        float delta = getDelta();
         World::process(delta);
 
         BeginDrawing();
