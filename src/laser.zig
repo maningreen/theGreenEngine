@@ -141,7 +141,7 @@ pub fn getDistanceToLaser(self: Laser, p: Vector2) f32 {
     const endPos = self.calculateLocalEndPoint();
     const leftBound = minBy(Vector2, getDistanceToLaserCmp, self.pos, endPos);
     const rightBound = maxBy(Vector2, getDistanceToLaserCmp, self.pos, endPos);
-    const clampedClosest = clampBy(Vector2(), getDistanceToLaserCmp, leftBound, rightBound, closestPoint);
+    const clampedClosest = clampBy(Vector2, getDistanceToLaserCmp, leftBound, rightBound, closestPoint);
     return distance(clampedClosest, p);
 }
 

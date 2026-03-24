@@ -24,9 +24,9 @@ void managePostRendering() {
 void init() {
     Player::initPlr();
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
-        StoreItem::init(
+        World::addEntity(new Button(StoreItem::init(
           Player::get().getModManager()->fromName(ModManager::pickRandomPoolMod()).value()
-        );
+        )));
     }));
 
     World::addEntity(&Player::get());

@@ -2,6 +2,7 @@
 
 #include "engine/world.hpp"
 #include "particle.hpp"
+#include "player.hpp"
 
 Button StoreItem::init(Mod mod) {
     std::function<void(Button *)> callback = [mod](Button *self) {
@@ -16,6 +17,8 @@ Button StoreItem::init(Mod mod) {
             const Vector2 vel = (Vector2){cosf(theta) * speed, sinf(theta) * speed};
             World::addEntity(new Particle(self->position, vel));
         }
+        Player::get().getModManager()->addMod(mod, Player::get().getId());
+        dumpStackTrace();
     };
     return Button(Vector2Zero(), "testing", false, callback);
 }

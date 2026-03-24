@@ -35,11 +35,11 @@ export fn dumpStackTrace() callconv(.c) void {
     std.debug.dumpCurrentStackTrace(.{});
 }
 
-// export fn getDistanceToLaser(length: f32, theta: f32, pos: Vector2, wrapLength: f32, p: Vector2) callconv(.c) f32 {
-// return (Laser{.length = length, .pos = pos, .theta = theta}).getDistanceToSplitLaser(wrapLength, p);
-// }
+export fn getDistanceToLaser(length: f32, theta: f32, pos: Vector2, wrapLength: f32, p: Vector2) callconv(.c) f32 {
+    return (Laser{ .length = length, .pos = pos, .theta = theta }).getDistanceToSplitLaser(wrapLength, p);
+}
 
-export fn drawStoreBody(length: f32, sigmaDelta: f32, ease: *const fn(f32) callconv(.c) f32) callconv(.c) void {
+export fn drawStoreBody(length: f32, sigmaDelta: f32, ease: *const fn (f32) callconv(.c) f32) callconv(.c) void {
     const e: f32 = std.math.clamp(ease(sigmaDelta), 0, 1);
     const l: i32 = @intFromFloat(length * 3.0 + 30.0 * e);
     const h: i32 = @intFromFloat(length * 0.75 + 30.0);

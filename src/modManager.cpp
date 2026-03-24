@@ -53,6 +53,8 @@ void ModManager::addMod(Mod mod, unsigned plrId) {
         return;
     }
     auto t = mod.onInit.value()(player);
+    // this is because a return code of `1` is a special case,
+    // where you don't add the mod
     if(t.valid()) {
         if(t.get_type() == sol::type::number) {
             if((int)t == 1) {
