@@ -1,5 +1,6 @@
 #include <raylib.h>
 
+#include <iostream>
 #include <vector>
 
 #include "entity.hpp"
@@ -10,6 +11,10 @@
     (Vector2) {                                                \
         baseScreenScalar * 16 / 9, baseScreenScalar / (16 / 9) \
     }
+
+extern "C" {
+double getDelta();
+}
 
 void init();
 
