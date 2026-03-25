@@ -1,0 +1,13 @@
+.{
+    .name = .RaylibTranslator,
+    .version = "0.0.1",
+    .dependencies = .{
+        .mvzr = .{
+            .url = "https://github.com/mnemnion/mvzr/archive/refs/tags/v0.3.7.tar.gz",
+            .hash = "mvzr-0.3.7-ZSOky5FtAQB2VrFQPNbXHQCFJxWTMAYEK7ljYEaMR6jt",
+        },
+    },
+    .minimum_zig_version = "0.16.0-dev.2915+065c6e794",
+    .paths = .{ "src/", "build.zig", "build.zig.zon", "README.md" },
+    .fingerprint = 0xc1aee6d40340476c,
+}

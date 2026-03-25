@@ -1,0 +1,13 @@
+.{
+    .name = .tools,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.16.0-dev.2915+065c6e794",
+    .dependencies = .{
+        .colorHelper = .{ .path = "./colorHelper/" },
+        .headerTranslator = .{
+            .path = "./headerTranslator/"
+        }
+    },
+    .paths = .{ "./build.zig", "./build.zig.zon" },
+    .fingerprint = 0xeafade77e530445d,
+}
