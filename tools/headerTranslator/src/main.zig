@@ -38,9 +38,7 @@ pub const ParsedStruct = struct {
                     if (name) |_| {
                         closing = true;
                         break;
-                    }
-                    else
-                        return parseError.NoOpening;
+                    } else return parseError.NoOpening;
                 },
                 .function => continue,
             }
@@ -179,13 +177,13 @@ pub fn buildTokens(gpa: std.mem.Allocator, tokens: []Token) ![]u8 {
     for (tokens, 0..) |token, i| {
         switch (token) {
             .structClosing, .structMember => continue,
-            .structOpening => try structs.append(gpa, (ParsedStruct.init(gpa, tokens[i..]) catch unreachable) orelse unreachable),
+            .structOpening => try structs.append(gpa, (try ParsedStruct.init(gpa, tokens[i..])) orelse unreachable),
             .function => try functions.append(gpa, token),
         }
     }
     const structOpeningFmt =
         \\{{
-        \\    sol::usertype<{s}> {s} = sol::usertype<{s}>("{s}");
+        \\    sol::usertype<{s}> {s} = lua.new_usertype<{s}>("{s}");
         \\
     ;
     const structMemberFmt =
@@ -220,33 +218,60 @@ pub fn buildTokens(gpa: std.mem.Allocator, tokens: []Token) ![]u8 {
     return try writer.toOwnedSlice();
 }
 
-pub fn main(init: std.process.Init) !void {
-    const stdoutFile = std.Io.File.stdout();
-    var writeBuf: [1028]u8 = undefined;
-    var stdout = stdoutFile.writer(init.io, &writeBuf);
-    defer stdoutFile.close(init.io);
-
-    var stdinFile = std.Io.File.stdin();
+fn manageFile(gpa: std.mem.Allocator, io: std.Io, file: std.Io.File, out: *std.Io.Writer) !void {
     var readBuf: [1028]u8 = undefined;
-    var stdin = stdinFile.reader(init.io, &readBuf);
-    defer stdinFile.close(init.io);
+    var reader = file.reader(io, &readBuf);
 
-    var tokens = try std.ArrayList(Token).initCapacity(init.gpa, 10);
+    var tokens = try std.ArrayList(Token).initCapacity(gpa, 10);
+
     defer {
         for (tokens.items) |token|
             switch (token) {
-                inline else => |v| init.gpa.free(v),
+                inline else => |v| gpa.free(v),
             };
-        tokens.deinit(init.gpa);
+        tokens.deinit(gpa);
     }
 
-    while (try stdin.interface.takeDelimiter('\n')) |line| {
-        const token = try Parser.buildToken(init.gpa, line) orelse continue;
-        try tokens.append(init.gpa, token);
+    while (try reader.interface.takeDelimiter('\n')) |line| {
+        const token = try Parser.buildToken(gpa, line) orelse continue;
+        try tokens.append(gpa, token);
     }
 
-    const x = try buildTokens(init.gpa, tokens.items);
-    defer init.gpa.free(x);
-    _ = try stdout.interface.writeAll(x);
-    try stdout.flush();
+    const x = try buildTokens(gpa, tokens.items);
+    defer gpa.free(x);
+    _ = try out.writeAll(x);
+}
+
+pub fn main(init: std.process.Init) !void {
+    if (init.minimal.args.vector.len > 1) {} else {}
+
+    const stdout = std.Io.File.stdout();
+    var writeBuf: [1028]u8 = undefined;
+    var writer = stdout.writer(init.io, &writeBuf);
+
+    for (init.minimal.args.vector[1..]) |arg| {
+        const r = try std.zig.system.NativePaths.detect(init.arena.allocator(), init.io, &@import("builtin").target, init.environ_map);
+        std.log.info("Searching for: {s}", .{arg});
+        items: for (r.include_dirs.items) |path| {
+            const dir = try std.Io.Dir.openDirAbsolute(init.io, path, .{ .iterate = true });
+            defer dir.close(init.io);
+            var it = dir.iterate();
+            while (try it.next(init.io)) |f| {
+                if (f.kind != .file) continue;
+                if (std.mem.endsWith(u8, f.name, arg[0..std.mem.len(arg)])) {
+                    std.log.info("{s} found, parsing...", .{arg});
+                    const file = try dir.openFile(init.io, f.name, .{});
+                    defer file.close(init.io);
+                    try manageFile(init.gpa, init.io, file, &writer.interface);
+                    std.log.info("done parsing!", .{});
+                    break :items;
+                }
+            }
+        } else std.log.err("{s} not found, continuing", .{arg});
+    } else if (init.minimal.args.vector.len == 0) {
+        std.log.info("Listening on stdin", .{});
+        const file = std.Io.File.stdin();
+        defer file.close(init.io);
+        try manageFile(init.gpa, init.io, file, &writer.interface);
+    }
 }
