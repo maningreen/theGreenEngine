@@ -1,9 +1,11 @@
 # Raylib Translator
 
-This helper program generates a lua api for sol, and documentation for it
+This helper program generates a lua api for sol
 
 # Usage
 
-`cat 'raylib.h' | zig build run`
+`zig build run -- raylib.h`
+or
+`translator raylib.h`
 
-And prints out the sol api glue necessary
+And prints out the sol api glue necessary, works for any C header.
