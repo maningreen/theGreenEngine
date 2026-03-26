@@ -96,6 +96,21 @@ pub fn build(b: *std.Build) void {
 
     const run_step = b.step("run", "runs the application");
     run_step.dependOn(&exe_run.step);
+
+    const tools = b.dependency("tools", .{});
+    const translator = tools.artifact("translator");
+
+    const glueStep = b.step("glue", "generate glue for sol");
+    exe.step.dependOn(glueStep);
+
+    const runTranslator = b.addRunArtifact(translator);
+    runTranslator.addArgs(&.{
+        "--silent",
+        "raylib.h"
+    });
+    glueStep.dependOn(&runTranslator.step);
+    const stdout = runTranslator.captureStdOut(.{ .basename = "glue.h" });
+    exe_mod.addIncludePath(stdout.dirname());
 }
 
 /// Used to recursively fetch source files from a directory

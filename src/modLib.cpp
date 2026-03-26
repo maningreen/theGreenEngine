@@ -5,9 +5,13 @@
 #include "player.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
+#include <raylib.h>
 
 void ModManager::initLua() {
     lua.open_libraries();
+
+    // this line shits itself, sorry
+#include "glue.h"
 
     sol::usertype<Vector2> vec = lua.new_usertype<Vector2>("vector2");
     vec["x"] = &Vector2::x;

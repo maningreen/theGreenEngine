@@ -183,11 +183,11 @@ pub fn buildTokens(gpa: std.mem.Allocator, tokens: []Token) ![]u8 {
     }
     const structOpeningFmt =
         \\{{
-        \\    sol::usertype<{s}> {s} = lua.new_usertype<{s}>("{s}");
+        \\    sol::usertype<{s}> t = lua.new_usertype<{s}>("{s}");
         \\
     ;
     const structMemberFmt =
-        \\    {s}["{s}"] = &{s}::{s};
+        \\    t["{s}"] = &{s}::{s};
         \\
     ;
     const structCloseFmt =
@@ -209,9 +209,9 @@ pub fn buildTokens(gpa: std.mem.Allocator, tokens: []Token) ![]u8 {
         };
 
     for (structs.items) |s| {
-        try writer.writer.print(structOpeningFmt, .{ s.name, s.name, s.name, s.name });
+        try writer.writer.print(structOpeningFmt, .{ s.name, s.name, s.name });
         for (s.members) |member|
-            try writer.writer.print(structMemberFmt, .{ s.name, member, s.name, member });
+            try writer.writer.print(structMemberFmt, .{ member, s.name, member });
         try writer.writer.print(structCloseFmt, .{});
     }
 
@@ -252,27 +252,39 @@ pub fn main(init: std.process.Init) !void {
     var writer = stdout.writer(init.io, &writeBuf);
     defer stdout.close(init.io);
 
-    for (init.minimal.args.vector[1..]) |arg| {
+    var quiet = false;
+
+    for (init.minimal.args.vector[1..]) |a| {
+        const arg = a[0..std.mem.len(a)];
+        if (std.mem.eql(u8, arg, "--silent") or std.mem.eql(u8, arg, "-s")) {
+            quiet = true;
+            continue;
+        }
+
         const r = try std.zig.system.NativePaths.detect(init.arena.allocator(), init.io, &@import("builtin").target, init.environ_map);
-        std.log.info("Searching for: {s}", .{arg});
+        if (!quiet)
+            std.log.info("Searching for: {s}", .{arg});
         items: for (r.include_dirs.items) |path| {
             const dir = try std.Io.Dir.openDirAbsolute(init.io, path, .{ .iterate = true });
             defer dir.close(init.io);
             var it = dir.iterate();
             while (try it.next(init.io)) |f| {
                 if (f.kind != .file) continue;
-                if (std.mem.endsWith(u8, f.name, arg[0..std.mem.len(arg)])) {
-                    std.log.info("{s} found, parsing...", .{arg});
+                if (std.mem.endsWith(u8, f.name, arg)) {
+                    if (!quiet)
+                        std.log.info("{s} found, parsing...", .{arg});
                     const file = try dir.openFile(init.io, f.name, .{});
                     defer file.close(init.io);
                     try manageFile(init.gpa, init.io, file, &writer);
-                    std.log.info("done parsing!", .{});
+                    if (!quiet)
+                        std.log.info("done parsing!", .{});
                     break :items;
                 }
             }
-        } else std.log.err("{s} not found, continuing", .{arg});
+        } else if (!quiet) std.log.err("{s} not found, continuing", .{arg});
     } else if (init.minimal.args.vector.len == 1) {
-        std.log.info("Listening on stdin", .{});
+        if (!quiet)
+            std.log.info("Listening on stdin", .{});
         const file = std.Io.File.stdin();
         defer file.close(init.io);
         try manageFile(init.gpa, init.io, file, &writer);

@@ -1,7 +1,7 @@
 .{
     .name = .engine,
     .version = "0.0.1",
-    .dependencies = .{},
+    .dependencies = .{ .tools = .{ .path = "./tools/" } },
     .minimum_zig_version = "0.16.0-dev.2877+627f03af9",
     .fingerprint = 0xe8a81a8d13cfc4ac,
     .paths = .{ "external/", "resources/", "src/", "LUA.md", "README.md", "build.zig", "build.zig.zon", "default.nix", "flake.lock", "flake.nix", "keys.md", "shell.nic" },
