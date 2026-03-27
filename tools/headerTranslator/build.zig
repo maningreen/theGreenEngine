@@ -6,7 +6,10 @@ pub fn build(b: *std.Build) void {
 
     const main = b.addModule("root", .{ .root_source_file = b.path("src/main.zig"), .optimize = optimize, .target = target });
 
-    const exe = b.addExecutable(.{ .root_module = main, .name = "colorHelper" });
+    const exe = b.addExecutable(.{ .root_module = main, .name = "translator" });
+
+    const dep = b.dependency("mvzr", .{});
+    main.addImport("mvzr", dep.module("mvzr"));
 
     const install = b.addInstallArtifact(exe, .{});
     b.getInstallStep().dependOn(&install.step);

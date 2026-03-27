@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     zig = {
-      url = "github:mitchellh/zig-overlay";
+      url = "github:mitchellh/zig-overlay/3dcf920d3a17bc0393d9031b2431fd4609cf53b4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

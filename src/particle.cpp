@@ -9,6 +9,8 @@
 float Particle::MaxLifetime = .5;
 float Particle::MinLifetime = .1;
 
+float Particle::gravity = 10;
+
 void Particle::render() {
     // sick so here's what we wanna do here
     // draw a square!1!!!!
@@ -34,7 +36,8 @@ void Particle::process(float delta) {
     if(length <= 1 || colour.a <= 10) killDefered();
 }
 
-Particle::Particle(Vector2 pos, Vector2 vel) : Entity2D("Particle", pos), velocity(vel) {
+Particle::Particle(Vector2 pos, Vector2 vel, bool g) : Entity2D("Particle", pos), velocity(vel) {
+    hasGravity = g;
     // then we set our stuff randomly :thumbsup:
     rotation = 360.0f * (float)rand() /
                (float)RAND_MAX;  // degrees cuz the raylib function are in degrees :/
@@ -54,7 +57,9 @@ Particle::Particle(Vector2 pos, Vector2 vel) : Entity2D("Particle", pos), veloci
     maxLifetime = ((MaxLifetime - MinLifetime) * (float)rand() / (float)RAND_MAX) + MinLifetime;
 }
 
-float Particle::GetLifetime() {
+Particle::Particle(Vector2 p, Vector2 v) : Particle(p, v, false) {}
+
+float Particle::getLifetime() {
     return lifetime;
 }
 

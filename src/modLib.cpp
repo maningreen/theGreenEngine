@@ -5,9 +5,14 @@
 #include "player.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
+#include <raylib.h>
+#include <raymath.h>
 
 void ModManager::initLua() {
     lua.open_libraries();
+
+    // this line shits itself, sorry
+#include "glue.h"
 
     sol::usertype<Vector2> vec = lua.new_usertype<Vector2>("vector2");
     vec["x"] = &Vector2::x;
@@ -34,25 +39,16 @@ void ModManager::initLua() {
         return (Color){r, g, b, a};
     };
 
-    sol::usertype<Player> plr = lua.new_usertype<Player>(
-      "Player",
-      sol::constructors<Player(std::string&, Vector2)>()
-      // , "defaultMaxHealth", &Player::maxHealth
-      // , "defaultDashSpeed", &Player::defaultDashSpeed
-      // , "defaultDashTime", &Player::defaultDashTime
-      // , "defaultDashControl", &Player::defaultDashControl
-      // , "defaultDashRegenDelay", &Player::defaultDashRegenDelay
-      // , "defaultMaxDashCount", &Player::defaultMaxDashCount
-      // , "defaultDashCooldown", &Player::defaultDashCooldown
-      // , "particleSpawnTime", &Player::particleSpawnTime
-    );
-    plr["getHealth"] = &Player::getHealthManager;
-    plr["getInput"] = &Player::getInputManager;
-    plr["getDash"] = &Player::getDashManager;
-    plr["position"] = &Player::position;
-    plr["velocity"] = &Player::velocity;
+    sol::usertype<Player> plr = lua.new_usertype<Player>("player");
     plr["speed"] = &Player::speed;
+    lua["test"] = &dumpStackTrace;
+    plr["test"] = [](){
+        dumpStackTrace();
+    };
+    plr["rotation"] = &Player::rotation;
     plr["fireBullet"] = &Player::fireBullet;
+    plr["getHealth"] = &Player::getHealthManager;
+    plr["getDash"] = &Player::getDashManager;
 
     sol::usertype<HealthManager> hm = lua.new_usertype<HealthManager>("healthManager");
     hm["getHealth"] = &HealthManager::getHealth;
@@ -133,9 +129,6 @@ void ModManager::initLua() {
     en["color"] = &Enemy::colour;
 
     sol::table enemy = lua["Enemy"].get_or_create<sol::table>();
-    enemy["spawnEvent"] = &Enemy::spawnEvent;
-    enemy["deathEvent"] = &Enemy::deathEvent;
-
     sol::usertype<NodeBullet> nb = lua.new_usertype<NodeBullet>("nodeBullet");
     nb["theta"] = &NodeBullet::theta;
     nb["lifetime"] = &NodeBullet::lifetime;

@@ -2,36 +2,13 @@
 
 #include <inttypes.h>
 
+#include <iostream>
+#include <optional>
 #include <vector>
 
-Listener::Listener(unsigned id, void (*callback)(Entity*, void*)) : callback(callback), id(id) {}
+EventI::EventI() {}
 
-Listener::~Listener() {}
-
-Listener Listener::operator=(Listener& a) {
-    return a;
-}
-
-bool Listener::call(void* args) {
-    if(auto entity = World::getEntity(id)) {
-        callback(entity, args);
-        return true;
-    } else
-        return false;
-}
-
-Event::Event() {}
-
-Event::~Event() {}
-
-void Event::call(void* args) {
-    for(int i = 0; i < listeners.size(); i++) {
-        if(!listeners[i].call(args)) {
-            listeners[i--] = listeners.back();
-            listeners.pop_back();
-        }
-    }
-}
+EventI::~EventI() {}
 
 World* World::world = nullptr;
 
@@ -73,9 +50,21 @@ void World::render() {
     for(Entity* en : world->entities) en->render();
 }
 
-Entity* World::getEntity(unsigned id) {
-    for(int i = 0; i < world->entities.size(); i++)
-        if(world->entities[i]->getId() == id) return world->entities[i];
+Entity* World::getEntity(unsigned key) {
+    unsigned low = 0;
+    unsigned high = world->entities.size() - 1;
+    while(low <= high) {
+        unsigned avg = (high + low) / 2;
+        const unsigned got = world->entities[avg]->getId();
+        if(got < key) {
+            low = avg + 1;
+        } else if(got > key) {
+            high = avg - 1;
+        } else {
+            return world->entities[avg];
+            break;
+        }
+    }
     return nullptr;
 }
 
@@ -88,17 +77,4 @@ std::vector<unsigned> World::getAllEntitiesWithTag(Tags x) {
     for(Entity* en : world->entities)
         if(en->hasTag(x)) ret.push_back(en->getId());
     return ret;
-}
-
-void World::createEvent(std::string name, Event event) {
-    world->events.emplace(std::pair<std::string, Event>(name, Event()));
-}
-
-void World::listenEvent(std::string eventName, void (*callback)(Entity*, void*), const unsigned id) {
-    world->events[eventName].listeners.push_back(Listener(id, callback));
-}
-
-void World::callEvent(std::string name, void* args) {
-    const int count = world->events.count(name);
-    world->events[name].call(args);
 }

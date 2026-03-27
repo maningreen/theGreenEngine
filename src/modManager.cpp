@@ -5,92 +5,101 @@
 #include "customEnemy.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
+#include "engine/world.hpp"
 #include "mod.hpp"
 #include "player.hpp"
 
-sol::state ModManager::lua;
-
 ModManager::ModManager() : mods({}) {
+    initLua();
 }
 
 ModManager::~ModManager() {}
 
-void ModManager::onDash(Entity2D* x) {
-    for(Mod& x : mods)
-        if(x.onDash.has_value() && x.onDash.value()) x.onDash.value()(x);
+void ModManager::onDash(unsigned playerId) {
+    Player* player = (Player*)World::getEntity(playerId);
+    if(player == nullptr) return;
+    for(Mod& mod : mods)
+        if(mod.onDash.has_value()) mod.onDash.value().call<void>(player);
 }
 
-void ModManager::onFire(Entity2D* x, NodeBullet* y) {
-    for(Mod& m : mods)
-        if(m.onFire.has_value() && m.onFire.value()) m.onFire.value()((Player*)x, y);
+void ModManager::onFire(unsigned playerId, unsigned bulletId) {
+    Player* player = (Player*)World::getEntity(playerId);
+    NodeBullet* bullet = (NodeBullet*)World::getEntity(bulletId);
+    if(player == nullptr || bullet == nullptr) return;
+    for(Mod& mod : mods)
+        if(mod.onDash.has_value()) mod.onFire.value().call<void>(player, bullet);
 }
 
-void ModManager::onEnemyKill(Entity2D* x, Enemy* y) {
-    for(Mod* m = mods.data(); m < mods.data() + mods.size(); m++)
-        if(m->onEnemyKill.has_value() && m->onEnemyKill.value())
-            m->onEnemyKill.value()((Player*)x, y);
+void ModManager::onEnemyKill(unsigned playerId, unsigned enId) {
+    Player* player = (Player*)World::getEntity(playerId);
+    Enemy* en = (Enemy*)World::getEntity(enId);
+    if(player == nullptr || en == nullptr) return;
+    for(Mod& mod : mods)
+        if(mod.onDash.has_value()) mod.onEnemyKill.value().call<void>(player, en);
 }
 
-void ModManager::onEnemySpawn(Entity2D* x, Enemy* y) {
-    for(Mod& m : mods)
-        if(m.onEnemySpawn.has_value() && m.onEnemySpawn.value())
-            (m.onEnemySpawn.value())((Player*)x, y);
+void ModManager::onEnemySpawn(unsigned playerId, unsigned enId) {
+    Player* player = (Player*)World::getEntity(playerId);
+    Enemy* en = (Enemy*)World::getEntity(enId);
+    if(player == nullptr || en == nullptr) return;
+    for(Mod& mod : mods)
+        if(mod.onDash.has_value()) mod.onEnemyKill.value().call<void>(player, en);
 }
 
-void ModManager::addModPartial(Mod x) {
-    mods.push_back(x);
-}
-
-void ModManager::addMod(Mod x, Entity2D* y) {
-    if(!x.onInit.has_value())
-        mods.push_back(x);
-    else {
-        sol::function_result z = x.onInit.value()((Player*)y);
-        if(!z.valid() ||
-           (int)z != 1)  // didn't return anything, carry on || didn't return anything we care about
-            mods.push_back(x);
+void ModManager::addMod(Mod mod, unsigned plrId) {
+    Player* player = (Player*)World::getEntity(plrId);
+    if(!mod.onInit.has_value()) {
+        mods.push_back(mod);
+        return;
     }
+    auto t = mod.onInit.value()(player);
+    // this is because a return code of `1` is a special case,
+    // where you don't add the mod
+    if(t.valid()) {
+        if(t.get_type() == sol::type::number) {
+            if((int)t == 1) {
+                return;
+            } else
+                mods.push_back(mod);
+        } else
+            mods.push_back(mod);
+    } else
+        mods.push_back(mod);
 }
 
-void ModManager::removeMod(int i) {}
-
-sol::state& ModManager::getLua() {
-    return lua;
+int ModManager::loadMod(std::string mod, unsigned plrId) {
+    fs::path path = mod::poolPath.string().append("/") + mod + ".lua";
+    return loadModPath(path, plrId);
 }
 
-void ModManager::loadMods(Entity2D* plr) {
-    for(const fs::directory_entry& p : fs::directory_iterator(mod::initPath)) {
-        std::optional<Mod> mod = Mod::fromPath(p.path());
-        if(mod.has_value()) addMod(mod.value(), plr);
-    }
-}
-
-int ModManager::loadMod(std::string name, Entity2D* plr) {
-    // check if file is valid, if so we return 1
-    std::string path = mod::poolPath + "/" + name + ".lua";
+int ModManager::loadModPath(fs::path path, unsigned playerId) {
     if(!fs::exists(path)) return 1;
-
-    std::optional<Mod> mod = Mod::fromPath(path);
-    if(mod.has_value()) addMod(mod.value(), plr);  // if it's valid shablamo
-
+    std::optional<Mod> mod = fromPath(path);
+    if(!mod.has_value()) {
+        return 1;
+    } else {
+        addMod(mod.value(), playerId);
+    }
     return 0;
 }
 
-std::list<std::string> ModManager::listPoolMods() {
-    std::list<std::string> arr;
-    for(const fs::directory_entry& path : fs::directory_iterator(mod::poolPath))
-        arr.push_front(path.path().filename().replace_extension("").string());
-    return arr;
+void ModManager::loadMods(unsigned playerId) {
+    for(auto& entry : fs::directory_iterator(mod::initPath)) loadModPath(entry.path(), playerId);
 }
 
+std::optional<Mod> ModManager::fromPath(fs::path x) {
+    sol::function_result result = lua.script_file(x);
+    return Mod::fromTable(x.filename().replace_extension("").string(), result);
+}
+
+std::optional<Mod> ModManager::fromName(std::string name) {
+    std::string n = mod::poolPath;
+    n.append(1, '/').append(name).append(".lua");
+    Mod x = fromPath(n).value();
+    return x;
+}
+
+/// TODO:
 std::string ModManager::pickRandomPoolMod() {
-    std::list<std::string> arr = listPoolMods();
-    int r = rand() % arr.size();
-    for(int i = 0; i < r; i++) arr.pop_front();
-    return arr.front();
-}
-
-ModManager* ModManager::get() {
-    static ModManager x;
-    return &x;
+    return "Speed";
 }

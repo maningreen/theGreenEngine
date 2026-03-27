@@ -55,16 +55,11 @@ class Player : public Entity2D {
     void render() override;
     void init() override;
 
-    Vector2 getInput();
-
     HealthManager* getHealthManager();
     DashManager* getDashManager();
     CameraEntity& getCamera();
     ModManager* getModManager();
     static InputManager* getInputManager();
-
-    static bool addEnemy(Enemy*);
-    static bool removeEnemy(Enemy*);
 
     static float maxHealth;
 

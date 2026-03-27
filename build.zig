@@ -12,11 +12,18 @@ const CSourceLanguage = Module.CSourceLanguage;
 const additional_flags: []const []const u8 = &.{};
 const debug_flags = runtime_check_flags ++ warning_flags;
 
-const library = struct { name: []const u8, path: ?[]const u8 = null };
+const Library = struct {
+    name: []const u8,
+    searchName: ?[]const u8 = null,
+    type: enum {
+        dependency,
+        systemLib,
+    },
+};
 
-const libraries: []const library = &.{
-    .{ .name = "raylib" },
-    .{ .name = "lua" },
+const libraries: []const Library = &.{
+    .{ .name = "raylib", .type = .dependency },
+    .{ .name = "lua", .type = .dependency },
 };
 
 pub fn build(b: *std.Build) void {
@@ -75,14 +82,28 @@ pub fn build(b: *std.Build) void {
     exe.root_module.linkLibrary(zig_lib);
 
     for (libraries) |lib| {
-        if (lib.path) |p| {
-            zig_lib.root_module.addLibraryPath(b.path(p));
-            zig_lib.root_module.addIncludePath(b.path(p));
-            exe.root_module.addLibraryPath(b.path(p));
-            exe.root_module.addIncludePath(b.path(p));
+        switch (lib.type) {
+            .dependency => {
+                const dep = b.dependency(lib.name, .{});
+                const artifact = dep.artifact(lib.searchName orelse lib.name);
+
+                zig_lib.installLibraryHeaders(artifact);
+                exe.installLibraryHeaders(artifact);
+
+                zig_lib.root_module.linkLibrary(artifact);
+                exe.root_module.linkLibrary(artifact);
+            },
+            .systemLib => {
+                if (lib.searchName) |p| {
+                    zig_lib.root_module.addLibraryPath(b.path(p));
+                    zig_lib.root_module.addIncludePath(b.path(p));
+                    exe.root_module.addLibraryPath(b.path(p));
+                    exe.root_module.addIncludePath(b.path(p));
+                }
+                exe.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
+                zig_lib.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
+            },
         }
-        exe.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
-        zig_lib.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
     }
 
     b.installArtifact(exe);
@@ -96,6 +117,25 @@ pub fn build(b: *std.Build) void {
 
     const run_step = b.step("run", "runs the application");
     run_step.dependOn(&exe_run.step);
+
+    const tools = b.dependency("tools", .{});
+    const translator = tools.artifact("translator");
+
+    const glueStep = b.step("glue", "generate glue for sol");
+    exe.step.dependOn(glueStep);
+
+    glueStep.dependOn(&translator.step);
+    const runTranslator = b.addRunArtifact(translator);
+    glueStep.dependOn(&runTranslator.step);
+
+    const rl = b.dependency("raylib", .{});
+    const headers = rl.artifact("raylib").installed_headers;
+    for (headers.items) |header| {
+        if (std.mem.eql(u8, header.file.source.basename(b, &runTranslator.step), "raylib.h"))
+            runTranslator.addArgs(&.{ "--silent", "--ignore=.{\"capacity\"}", header.file.dest_rel_path });
+    }
+    const stdout = runTranslator.captureStdOut(.{ .basename = "glue.h" });
+    exe_mod.addIncludePath(stdout.dirname());
 }
 
 /// Used to recursively fetch source files from a directory

@@ -16,6 +16,7 @@
 
 extern "C" {
 float getLineFromPointsAndDistanceTo(Vector2 a, Vector2 b, Vector2 c);
+float getDistanceToLaser(float length, float theta, Vector2 pos);
 }
 
 float AttackNode::defaultRadius = 30;
@@ -184,12 +185,11 @@ void AttackNode::manageAttack() {
 
             Vector2 effectivePos[nodes.size()];
             for(int i = 0; i < nodes.size(); i++) {
-                if(i == closestI) {
+                if(i == closestI)
                     effectivePos[i] = nodes[i]->position;
-                    continue;
-                }
-                effectivePos[i] =
-                  Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
+                else
+                    effectivePos[i] =
+                      Border::unwrapPositionRelative(nodes[closestI]->position, nodes[i]->position);
             }
 
             // then we can use a regular collision
@@ -212,8 +212,7 @@ void AttackNode::manageAttack() {
                 Vector2 unwrappedNext = nodes[i]->getNext()->unwrapRelative().position;
 
                 // this is an external function written in zig
-                float distance =
-                  getLineFromPointsAndDistanceTo(nodes[i]->position, unwrappedNext, en->position);
+                float distance = getDistanceToLaser(las.length, las.rotation, en->position);
                 minimumDistance = min(distance, minimumDistance);
             }
             if(minimumDistance <= en->radius)
