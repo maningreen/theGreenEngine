@@ -28,8 +28,8 @@ struct Listener {
 
 /// Dummy class for events
 struct EventI {
-    EventI();
-    ~EventI();
+    EventI() = default;
+    ~EventI() = default;
 };
 
 template <typename T>

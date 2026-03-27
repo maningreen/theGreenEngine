@@ -6,10 +6,6 @@
 #include <optional>
 #include <vector>
 
-EventI::EventI() {}
-
-EventI::~EventI() {}
-
 World* World::world = nullptr;
 
 World::World() {}
@@ -18,6 +14,8 @@ World::~World() {
         en->death();
         delete en;
     }
+    for(auto& item: events)
+        delete item.second;
 }
 
 void World::init() {
