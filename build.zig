@@ -22,7 +22,7 @@ const Library = struct {
 };
 
 const libraries: []const Library = &.{
-    .{ .name = "raylib", .type = .systemLib },
+    .{ .name = "raylib", .type = .dependency },
     .{ .name = "lua", .type = .dependency },
 };
 
@@ -126,8 +126,14 @@ pub fn build(b: *std.Build) void {
 
     glueStep.dependOn(&translator.step);
     const runTranslator = b.addRunArtifact(translator);
-    runTranslator.addArgs(&.{ "--silent", "raylib.h" });
     glueStep.dependOn(&runTranslator.step);
+
+    const rl = b.dependency("raylib", .{});
+    const headers = rl.artifact("raylib").installed_headers;
+    for (headers.items) |header| {
+        if (std.mem.eql(u8, header.file.source.basename(b, &runTranslator.step), "raylib.h"))
+            runTranslator.addArgs(&.{ "--silent", "--ignore=.{\"capacity\"}", header.file.dest_rel_path });
+    }
     const stdout = runTranslator.captureStdOut(.{ .basename = "glue.h" });
     exe_mod.addIncludePath(stdout.dirname());
 }

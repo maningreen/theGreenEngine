@@ -218,7 +218,7 @@ pub fn buildTokens(gpa: std.mem.Allocator, tokens: []Token) ![]u8 {
     return try writer.toOwnedSlice();
 }
 
-fn manageFile(gpa: std.mem.Allocator, io: std.Io, file: std.Io.File, out: *std.Io.File.Writer) !void {
+fn manageFile(gpa: std.mem.Allocator, io: std.Io, file: std.Io.File, out: *std.Io.File.Writer, ignores: []const []const u8) !void {
     var readBuf: [1028]u8 = undefined;
     var reader = file.reader(io, &readBuf);
 
@@ -232,8 +232,17 @@ fn manageFile(gpa: std.mem.Allocator, io: std.Io, file: std.Io.File, out: *std.I
         tokens.deinit(gpa);
     }
 
-    while (try reader.interface.takeDelimiter('\n')) |line| {
+    tokenize: while (try reader.interface.takeDelimiter('\n')) |line| {
         const token = try Parser.buildToken(gpa, line) orelse continue;
+        switch (token) {
+            inline else => |value| {
+                for (ignores) |ignore|
+                    if (std.mem.eql(u8, value, ignore)) {
+                        gpa.free(value);
+                        continue :tokenize;
+                    };
+            },
+        }
         try tokens.append(gpa, token);
     }
 
@@ -254,39 +263,64 @@ pub fn main(init: std.process.Init) !void {
 
     var quiet = false;
 
+    // items to ignore
+    var ignore: ?[][]const u8 = undefined;
+
     for (init.minimal.args.vector[1..]) |a| {
         const arg = a[0..std.mem.len(a)];
+        const ignorePrefix = "--ignore=";
+
         if (std.mem.eql(u8, arg, "--silent") or std.mem.eql(u8, arg, "-s")) {
             quiet = true;
+            continue;
+        } else if (std.mem.cutPrefix(u8, arg, ignorePrefix)) |_| {
+            if (!quiet) {
+                std.log.info("Ignore detected, parsing", .{});
+            }
+            const ignorePtrArr = a[ignorePrefix.len..];
+            const ignoreStr = std.mem.span(ignorePtrArr);
+            ignore = try std.zon.parse.fromSliceAlloc([][]const u8, init.arena.allocator(), ignoreStr, null, .{});
+            if (!quiet) {
+                std.log.info("Ignored:", .{});
+                for (ignore orelse unreachable) |i|
+                    std.log.info("\t{s}", .{i});
+            }
             continue;
         }
 
         const r = try std.zig.system.NativePaths.detect(init.arena.allocator(), init.io, &@import("builtin").target, init.environ_map);
         if (!quiet)
             std.log.info("Searching for: {s}", .{arg});
-        items: for (r.include_dirs.items) |path| {
-            const dir = try std.Io.Dir.openDirAbsolute(init.io, path, .{ .iterate = true });
-            defer dir.close(init.io);
-            var it = dir.iterate();
-            while (try it.next(init.io)) |f| {
-                if (f.kind != .file) continue;
-                if (std.mem.endsWith(u8, f.name, arg)) {
-                    if (!quiet)
-                        std.log.info("{s} found, parsing...", .{arg});
-                    const file = try dir.openFile(init.io, f.name, .{});
-                    defer file.close(init.io);
-                    try manageFile(init.gpa, init.io, file, &writer);
-                    if (!quiet)
-                        std.log.info("done parsing!", .{});
-                    break :items;
+
+        const file = std.Io.Dir.cwd().openFile(init.io, arg, .{ .mode = .read_only }) catch |err| switch (err) {
+            error.FileNotFound => items: for (r.include_dirs.items) |path| {
+                const dir = try std.Io.Dir.openDirAbsolute(init.io, path, .{ .iterate = true });
+                defer dir.close(init.io);
+                var it = dir.iterate();
+                while (try it.next(init.io)) |f| {
+                    if (f.kind != .file) continue;
+                    if (std.mem.endsWith(u8, f.name, arg)) {
+                        if (!quiet)
+                            std.log.info("{s} found, parsing...", .{arg});
+                        const file = try dir.openFile(init.io, f.name, .{});
+                        if (!quiet)
+                            std.log.info("done parsing!", .{});
+                        break :items file;
+                    }
                 }
-            }
-        } else if (!quiet) std.log.err("{s} not found, continuing", .{arg});
+            } else {
+                if (!quiet) std.log.err("{s} not found, continuing", .{arg});
+                continue;
+            },
+            else => return err,
+        };
+        try manageFile(init.gpa, init.io, file, &writer, ignore orelse &.{});
+        defer file.close(init.io);
     } else if (init.minimal.args.vector.len == 1) {
         if (!quiet)
             std.log.info("Listening on stdin", .{});
         const file = std.Io.File.stdin();
         defer file.close(init.io);
-        try manageFile(init.gpa, init.io, file, &writer);
+        try manageFile(init.gpa, init.io, file, &writer, ignore orelse &.{});
     }
 }

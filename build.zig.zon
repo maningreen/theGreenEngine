@@ -7,6 +7,10 @@
             .url = "git+https://github.com/maningreen/luaZig.git#92bbd79768fc8568664c8a15e5322bc45b6390bc",
             .hash = "luaZig-0.0.1-gPcjoxkjAACVJcnUmrQ60OI9-MgtTvJu8iTPGOFGMk4U",
         },
+        .raylib = .{
+            .url = "git+https://github.com/raysan5/raylib#4b01c23ba678d4c1243fcc6ecc4672df9fe71872",
+            .hash = "raylib-5.6.0-dev-whq8uGI0DQW_JSJMJ70TwnSHTPqunpAhDqH11EnE3ozb",
+        },
     },
     .minimum_zig_version = "0.16.0-dev.2877+627f03af9",
     .fingerprint = 0xe8a81a8d13cfc4ac,

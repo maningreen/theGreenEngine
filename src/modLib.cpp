@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "sniper.hpp"
 #include <raylib.h>
+#include <raymath.h>
 
 void ModManager::initLua() {
     lua.open_libraries();
