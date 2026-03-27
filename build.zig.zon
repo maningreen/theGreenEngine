@@ -1,8 +1,22 @@
 .{
     .name = .engine,
     .version = "0.0.1",
-    .dependencies = .{ .tools = .{ .path = "./tools/" } },
+    .dependencies = .{
+        .tools = .{ .path = "./tools/" },
+        .lua = .{
+            .url = "git+https://github.com/maningreen/luaZig.git#92bbd79768fc8568664c8a15e5322bc45b6390bc",
+            .hash = "luaZig-0.0.1-gPcjoxkjAACVJcnUmrQ60OI9-MgtTvJu8iTPGOFGMk4U",
+        },
+    },
     .minimum_zig_version = "0.16.0-dev.2877+627f03af9",
     .fingerprint = 0xe8a81a8d13cfc4ac,
-    .paths = .{ "external/", "resources/", "src/", "LUA.md", "README.md", "build.zig", "build.zig.zon", "default.nix", "flake.lock", "flake.nix", "keys.md", "shell.nic" },
+    .paths = .{
+        "external/",
+        "resources/",
+        "src/",
+        "LUA.md",
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+    },
 }

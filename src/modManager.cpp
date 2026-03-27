@@ -76,10 +76,8 @@ int ModManager::loadModPath(fs::path path, unsigned playerId) {
     if(!fs::exists(path)) return 1;
     std::optional<Mod> mod = fromPath(path);
     if(!mod.has_value()) {
-        std::cout << "Invalid mod!\n";
         return 1;
     } else {
-        std::cout << "Valid mod!\n";
         addMod(mod.value(), playerId);
     }
     return 0;
