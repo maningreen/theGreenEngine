@@ -13,4 +13,9 @@ pub fn build(b: *std.Build) void {
     const headerExe = header.artifact("translator");
     const installHeader = b.addInstallArtifact(headerExe, .{});
     b.getInstallStep().dependOn(&installHeader.step);
+
+    const ccHelper = b.dependency("ccHelper", .{ .target = target, .optimize = opt});
+    const ccExe = ccHelper.artifact("ccHelper");
+    const installCC = b.addInstallArtifact(ccExe, .{});
+    b.getInstallStep().dependOn(&installCC.step);
 }
