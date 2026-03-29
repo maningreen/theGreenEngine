@@ -8,11 +8,22 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{ .root_module = main, .name = "translator" });
 
+    const lib = b.addLibrary(.{
+        .name = "helper",
+        .root_module = b.addModule("helper", .{
+            .target = target,
+            .optimize = optimize
+        }),
+    });
+
     const dep = b.dependency("mvzr", .{});
     main.addImport("mvzr", dep.module("mvzr"));
 
     const install = b.addInstallArtifact(exe, .{});
     b.getInstallStep().dependOn(&install.step);
+
+    const installLIb = b.addInstallArtifact(lib, .{});
+    b.getInstallStep().dependOn(&installLIb.step);
 
     const runStep = b.step("run", "Runs the artifact");
     const run = b.addRunArtifact(exe);

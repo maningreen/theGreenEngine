@@ -2,7 +2,6 @@
   mkShell,
   clang,
   sol2,
-  raylib,
   zig,
   libGL,
 
@@ -17,7 +16,6 @@ mkShell {
   packages = [
     clang
     sol2 # lib for lua
-    raylib
     zig
     libGL
 

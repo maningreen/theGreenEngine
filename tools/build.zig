@@ -11,11 +11,26 @@ pub fn build(b: *std.Build) void {
 
     const header = b.dependency("headerTranslator", .{ .target = target, .optimize = opt });
     const headerExe = header.artifact("translator");
-    const installHeader = b.addInstallArtifact(headerExe, .{});
-    b.getInstallStep().dependOn(&installHeader.step);
+    const headerLib = header.artifact("helper");
+    const installHeaderExe = b.addInstallArtifact(headerExe, .{});
+    const installHeaderLib = b.addInstallArtifact(headerLib, .{});
+    b.getInstallStep().dependOn(&installHeaderExe.step);
+    b.getInstallStep().dependOn(&installHeaderLib.step);
 
-    const ccHelper = b.dependency("ccHelper", .{ .target = target, .optimize = opt});
-    const ccExe = ccHelper.artifact("ccHelper");
-    const installCC = b.addInstallArtifact(ccExe, .{});
-    b.getInstallStep().dependOn(&installCC.step);
+    const libMod = b.createModule(.{
+        .optimize = opt,
+        .target = target,
+        .root_source_file = b.path("./tools.zig"),
+        .imports = &.{
+            std.Build.Module.Import{
+                .name = "header",
+                .module = headerLib.root_module
+            }
+        }
+    });
+    const lib = b.addLibrary(.{
+        .name = "tools",
+        .root_module = libMod,
+    });
+    b.getInstallStep().dependOn(&lib.step);
 }

@@ -9,6 +9,8 @@ const Build = std.Build;
 const Module = Build.Module;
 const CSourceLanguage = Module.CSourceLanguage;
 
+const getSystemFile = @import("tools").getSystemFile;
+
 const additional_flags: []const []const u8 = &.{};
 const debug_flags = runtime_check_flags ++ warning_flags;
 
@@ -26,6 +28,26 @@ const libraries: []const Library = &.{
     .{ .name = "lua", .type = .dependency },
 };
 
+const raylibLibraries: []const Library = &.{
+    .{ .name = "GL", .type = .systemLib },
+    .{
+        .name = "m",
+        .type = .systemLib,
+    },
+    .{
+        .name = "pthread",
+        .type = .systemLib,
+    },
+    .{
+        .name = "dl",
+        .type = .systemLib,
+    },
+    .{
+        .name = "rt",
+        .type = .systemLib,
+    },
+};
+
 pub fn build(b: *std.Build) void {
     var threaded = std.Io.Threaded.init_single_threaded;
     defer threaded.deinit();
@@ -36,10 +58,12 @@ pub fn build(b: *std.Build) void {
 
     const optimize = b.standardOptimizeOption(.{});
 
+    const cmds = b.step("cmds", "generates compile_commands.json");
+
     const exe_mod = b.addModule("exe", .{
         .target = target,
         .optimize = optimize,
-        .link_libcpp = true, // May need to change this to linkLibC() for your project
+        .link_libcpp = true,
     });
 
     const exe = b.addExecutable(.{
@@ -74,14 +98,14 @@ pub fn build(b: *std.Build) void {
     });
     zigMod.addIncludePath(b.path("src"));
     const zig_lib = b.addLibrary(.{
-        .name = "engine",
+        .name = "zig_engine",
         .root_module = zigMod,
         .linkage = .static,
     });
 
     exe.root_module.linkLibrary(zig_lib);
 
-    for (libraries) |lib| {
+    for (libraries ++ raylibLibraries) |lib| {
         switch (lib.type) {
             .dependency => {
                 const dep = b.dependency(lib.name, .{});
@@ -100,8 +124,8 @@ pub fn build(b: *std.Build) void {
                     exe.root_module.addLibraryPath(b.path(p));
                     exe.root_module.addIncludePath(b.path(p));
                 }
-                exe.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
-                zig_lib.root_module.linkSystemLibrary(lib.name, .{ .needed = true });
+                exe.root_module.linkSystemLibrary(lib.name, .{ .preferred_link_mode = .dynamic });
+                zig_lib.root_module.linkSystemLibrary(lib.name, .{ .preferred_link_mode = .dynamic });
             },
         }
     }
@@ -129,13 +153,24 @@ pub fn build(b: *std.Build) void {
     glueStep.dependOn(&runTranslator.step);
 
     const rl = b.dependency("raylib", .{});
-    const headers = rl.artifact("raylib").installed_headers;
-    for (headers.items) |header| {
+    const rlArtifact = rl.artifact("raylib");
+
+    runTranslator.step.dependOn(&rlArtifact.step);
+    const headers = rlArtifact.installed_headers;
+    for (headers.items) |header|
         if (std.mem.eql(u8, header.file.source.basename(b, &runTranslator.step), "raylib.h"))
-            runTranslator.addArgs(&.{ "--silent", "--ignore=.{\"capacity\"}", header.file.dest_rel_path });
-    }
+            runTranslator.addArgs(&.{
+                \\--silent
+                ,
+                \\--ignore=.{"capacity"}
+                ,
+                header.file.dest_rel_path,
+            });
     const stdout = runTranslator.captureStdOut(.{ .basename = "glue.h" });
     exe_mod.addIncludePath(stdout.dirname());
+
+    const cc = CompileCommands.fromCompile(b, exe) catch |err| @panic(@errorName(err));
+    cmds.dependOn(&cc.step);
 }
 
 /// Used to recursively fetch source files from a directory
@@ -153,7 +188,13 @@ pub fn getCSrcFiles(
     var file_list = ArrayList([]const u8).empty;
     errdefer file_list.deinit(alloc);
 
-    const extension = @tagName(opts.language); // Will break for obj-c and assembly
+    const extension = switch (opts.language) {
+        inline .c, .cpp => |c| @tagName(c),
+        .assembly => ".s",
+        .objective_c => ".m",
+        .objective_cpp => ".mm",
+        .assembly_with_preprocessor => undefined,
+    };
 
     var src_iterator = src.iterate();
     while (try src_iterator.next(io)) |entry| {
@@ -205,3 +246,167 @@ fn getBuildFlags(
     }
     return cpp_flags;
 }
+
+const CompileCommands = struct {
+    step: Build.Step,
+    obj: []const std.Build.Module.LinkObject,
+    gen: std.Build.GeneratedFile,
+
+    pub fn fromCompile(b: *Build, cpl: *const std.Build.Step.Compile) !*CompileCommands {
+        const cc = try CompileCommands.fromLinkObjects(b, cpl.root_module.link_objects.items);
+        for (cpl.step.dependencies.items) |dep|
+            cc.step.dependOn(dep);
+        return cc;
+    }
+
+    pub fn fromLinkObjects(b: *Build, objs: []std.Build.Module.LinkObject) !*CompileCommands {
+        const self = try b.allocator.create(CompileCommands);
+        const step = Build.Step.init(.{
+            .id = .custom,
+            .name = "compile_commands.json",
+            .owner = b,
+            .makeFn = make,
+        });
+        self.* = .{
+            .step = step,
+            .gen = .{ .step = &self.step },
+            .obj = objs,
+        };
+        for (self.obj) |object| {
+            switch (object) {
+                .other_step => |other| {
+                    self.step.dependOn(other.getEmittedIncludeTree().generated.file.step);
+                },
+                else => {},
+            }
+        }
+        return self;
+    }
+
+    fn make(step: *Build.Step, opts: Build.Step.MakeOptions) anyerror!void {
+        _ = opts;
+        var threaded = std.Io.Threaded.init_single_threaded;
+        const io = threaded.io();
+        const self: *CompileCommands = @fieldParentPtr("step", step);
+        try self.write(io, step.owner);
+    }
+
+    pub fn write(self: *CompileCommands, io: std.Io, b: *Build) !void {
+        const gpa = b.allocator;
+        // the way this one works is *scanning*.
+        // we go through one of the type, then the next.
+        var sysLibs = std.ArrayList(Build.Module.SystemLib).empty;
+        var localLibs = std.ArrayList(*Build.Step.Compile).empty;
+        for (self.obj) |object| {
+            switch (object) {
+                .system_lib => |lib| try sysLibs.append(gpa, lib),
+                .other_step => |s| {
+                    switch (s.step.id) {
+                        .compile => {
+                            const comp: *std.Build.Step.Compile = @fieldParentPtr("step", &s.step);
+                            switch (comp.kind) {
+                                .lib => try localLibs.append(gpa, comp),
+                                else => {},
+                            }
+                        },
+                        else => {},
+                    }
+                },
+                else => continue,
+            }
+        }
+        var tFlags = std.ArrayList([]const u8).empty;
+        var paths = std.ArrayList([]const u8).empty;
+        for (self.obj) |object| {
+            switch (object) {
+                .c_source_file => |src| {
+                    flg: for (src.flags) |flag|
+                        for (tFlags.items) |savedFlags| {
+                            if (std.mem.eql(u8, flag, savedFlags))
+                                continue :flg;
+                        } else try tFlags.append(gpa, flag);
+                    try paths.append(gpa, src.file.cwd_relative);
+                },
+                .c_source_files => |srcs| {
+                    flg: for (srcs.flags) |flag|
+                        for (tFlags.items) |savedFlags| {
+                            if (std.mem.eql(u8, flag, savedFlags))
+                                continue :flg;
+                        } else try tFlags.append(gpa, flag);
+                    try paths.appendSlice(gpa, srcs.files);
+                },
+                else => continue,
+            }
+        }
+
+        var libFlags = std.ArrayList([]const u8).empty;
+        for (sysLibs.items) |lib|
+            try libFlags.appendSlice(
+                gpa,
+                &.{
+                    try std.mem.concat(gpa, u8, &.{ "-l", lib.name }),
+                },
+            );
+        for (localLibs.items) |lib| {
+            const p = try lib.getEmittedIncludeTree().getPath4(b, &self.step);
+            try libFlags.appendSlice(gpa, &.{
+                try std.fmt.allocPrint(gpa, "-L{s}", .{p.sub_path}),
+                try std.fmt.allocPrint(gpa, "-I{s}", .{p.sub_path}),
+                try std.fmt.allocPrint(gpa, "-l{s}", .{lib.name}),
+            });
+        }
+        var parsedFlags = std.ArrayList([]const u8).empty;
+        for (tFlags.items) |flag|
+            try parsedFlags.append(gpa, flag);
+        const Item = struct {
+            file: []const u8,
+            arguments: []const []const u8,
+            directory: []const u8,
+            output: []const u8,
+        };
+        var items = std.ArrayList(Item).empty;
+        const cwd = try std.Io.Dir.cwd().realPathFileAlloc(io, ".", b.allocator);
+
+        const flags: []const []const u8 = try std.mem.concat(b.allocator, []const u8, &.{ parsedFlags.items, libFlags.items });
+
+        for (paths.items) |value| {
+            const localPath = value;
+            try items.append(b.allocator, .{
+                .file = localPath,
+                .arguments = try std.mem.concat(b.allocator, []const u8, &.{
+                    &.{
+                        "clang",
+                        "-c",
+                        localPath,
+                        "-o",
+                        "t",
+                    },
+                    flags,
+                }),
+                .output = "t.o",
+                .directory = cwd,
+            });
+        }
+        var tempWriter = std.Io.Writer.Allocating.init(b.allocator);
+        var stringifiery = std.json.Stringify{
+            .writer = &tempWriter.writer,
+            .options = .{
+                .whitespace = .indent_4,
+            },
+        };
+        try stringifiery.beginArray();
+        for (items.items) |value| {
+            try stringifiery.write(value);
+        }
+        try stringifiery.endArray();
+        // const writeFile = b.addWriteFile("compile_commands.json", try tempWriter.toOwnedSlice());
+        try b.cache_root.handle.writeFile(b.graph.io, .{
+            .sub_path = "THISISAREALLYGOODHASH-compile_commands.json",
+            .data = try tempWriter.toOwnedSlice(),
+        });
+        self.gen.path = try b.cache_root.join(b.allocator, &.{"THISISAREALLYGOODHASH-compile_commands.json"});
+        const s = try self.step.installFile(.{ .generated = .{ .file = &self.gen } }, "compile_commands.json");
+        self.step.result_cached = s == .fresh;
+        // b.installFile(self.gen.path orelse unreachable, "");
+    }
+};
