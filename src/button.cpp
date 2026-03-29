@@ -58,7 +58,7 @@ void Button::process(float delta) {
         }
 
         Vector2 mousePos = Border::wrapPos(Player::get().getCamera().getMousePosition());
-        Vector2 relativeMousePos = mousePos - position - (Vector2){length / 2, length / 2};
+        Vector2 relativeMousePos = mousePos - position;
         float theta = 30 * sin(sigmaDeltaPrime + sigmaDelta) * hovered * DEG2RAD;
         Vector2 angleVec = (Vector2){
           cos(theta),
@@ -73,8 +73,11 @@ void Button::process(float delta) {
           } +
           (Vector2){(length + l) / 2, (length + l) / 2};  // undo centering
 
-        isHovered = relativeMousePos.x <= length + l && relativeMousePos.y <= length + l &&
-                    relativeMousePos.x >= 0 && relativeMousePos.y >= 0;
+        isHovered = 
+            relativeMousePos.x <= length + l &&
+            relativeMousePos.y <= length + l &&
+            relativeMousePos.x >= 0 &&
+            relativeMousePos.y >= 0;
     } else
         isHovered = false;
 
@@ -117,9 +120,16 @@ void Button::render() {
             l += std::min(-(length + l) * ease(1 - sigmaDelta), 0.0f);
     }
     DrawRectanglePro(
-      (Rectangle){position.x + (length) / 2.0f, position.y + (length) / 2.0f, length + l, length + l
+      (Rectangle){
+        position.x,
+        position.y,
+        length + l,
+        length + l,
       },
-      (Vector2){(length + l) / 2.0f, (length + l) / 2.0f},
+      (Vector2){
+        (length + l) / 2.0f,
+        (length + l) / 2.0f,
+      },
       30 * sin(sigmaDeltaPrime + sigmaDelta) * e,
       ColorLerp(defaultColour, hoveredColour, e)
     );

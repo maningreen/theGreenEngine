@@ -76,6 +76,8 @@ class World {
     template <typename T>
     static void callEvent(std::string name, std::tuple<T> args) {
         const int count = world->events.count(name);
+        if(count == 0)
+            createEvent<T>(name);
         ((Event<T>*)world->events[name])->call(args);
     }
 

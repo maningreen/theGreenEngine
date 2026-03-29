@@ -9,7 +9,7 @@
 float Particle::MaxLifetime = .5;
 float Particle::MinLifetime = .1;
 
-float Particle::gravity = 10;
+float Particle::gravity = 1500;
 
 void Particle::render() {
     // sick so here's what we wanna do here
@@ -31,13 +31,14 @@ void Particle::process(float delta) {
     Border::wrapEntity(this);
     if(lifetime > maxLifetime) {
         length += -length * 1 * delta;
-        colour.a += -colour.a * 5 * delta;
+        colour.a += -colour.a * 1 * delta;
     }
+    if(hasGravity)
+        velocity.y += gravity * delta;
     if(length <= 1 || colour.a <= 10) killDefered();
 }
-
-Particle::Particle(Vector2 pos, Vector2 vel, bool g) : Entity2D("Particle", pos), velocity(vel) {
-    hasGravity = g;
+Particle::Particle(Vector2 pos, Vector2 vel, float length, bool g)
+  : Entity2D("Particle", pos), velocity(vel), length(length), hasGravity(g) {
     // then we set our stuff randomly :thumbsup:
     rotation = 360.0f * (float)rand() /
                (float)RAND_MAX;  // degrees cuz the raylib function are in degrees :/
@@ -51,11 +52,13 @@ Particle::Particle(Vector2 pos, Vector2 vel, bool g) : Entity2D("Particle", pos)
                 scalar * ((float)rand() / (float)RAND_MAX) - scalar / 2.0f}
     );
     rotationalVelocity = 360.0f * (float)rand() / (float)RAND_MAX;  // TODO random vel
-    length = (20 * (float)rand() / (float)RAND_MAX) - 10 + 20;
     lifetime = 0;
     colour = (Color){YELLOW.r, YELLOW.g, YELLOW.b, 150};
     maxLifetime = ((MaxLifetime - MinLifetime) * (float)rand() / (float)RAND_MAX) + MinLifetime;
 }
+
+Particle::Particle(Vector2 pos, Vector2 vel, bool g)
+  : Particle(pos, vel, (20 * (float)rand() / (float)RAND_MAX - 10 + 20), g) {}
 
 Particle::Particle(Vector2 p, Vector2 v) : Particle(p, v, false) {}
 

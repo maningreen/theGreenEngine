@@ -15,7 +15,7 @@ World::~World() {
         delete en;
     }
     for(auto& item: events)
-        delete item.second;
+        delete (Event<void*>*)item.second;
 }
 
 void World::init() {
@@ -48,6 +48,7 @@ void World::render() {
     for(Entity* en : world->entities) en->render();
 }
 
+// uses a binary search in order to find entity quickly.
 Entity* World::getEntity(unsigned key) {
     unsigned low = 0;
     unsigned high = world->entities.size() - 1;

@@ -8,11 +8,13 @@
 namespace StoreItem {
 Button init(Mod mod);
 
-static const unsigned maxParticleCount = 10;
-static const unsigned minParticleCount = 5;
+static const std::string purchaseEvent = "storeItemPurchased";
 
-static const float maxParticleSpeed = 300;
-static const float minParticleSpeed = 100;
+static const unsigned maxParticleCount = 100;
+static const unsigned minParticleCount = 50;
+
+static const float maxParticleSpeed = 1000;
+static const float minParticleSpeed = 500;
 };  // namespace StoreItem
 
 #endif
