@@ -2,4 +2,4 @@ build/
 .cache/
 .zig-cache/
 zig-*/
-compile-commands.json
+compile_commands.json
