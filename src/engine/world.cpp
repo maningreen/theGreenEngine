@@ -14,8 +14,7 @@ World::~World() {
         en->death();
         delete en;
     }
-    for(auto& item: events)
-        delete (Event<void*>*)item.second;
+    for(auto& item : events) delete(Event<void*>*)item.second;
 }
 
 void World::init() {
@@ -48,22 +47,10 @@ void World::render() {
     for(Entity* en : world->entities) en->render();
 }
 
-// uses a binary search in order to find entity quickly.
 Entity* World::getEntity(unsigned key) {
-    unsigned low = 0;
-    unsigned high = world->entities.size() - 1;
-    while(low <= high) {
-        unsigned avg = (high + low) / 2;
-        const unsigned got = world->entities[avg]->getId();
-        if(got < key) {
-            low = avg + 1;
-        } else if(got > key) {
-            high = avg - 1;
-        } else {
-            return world->entities[avg];
-            break;
-        }
-    }
+    for(Entity* en : world->entities)
+        if(en->getId() == key)
+            return en;
     return nullptr;
 }
 
