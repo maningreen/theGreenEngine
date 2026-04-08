@@ -2,15 +2,16 @@
 //! Used as the backend for drawing.
 
 const std = @import("std");
-const Line = @import("line.zig");
+const LineFile = @import("line.zig");
+const Line = @import("line.zig").Line(f32);
 const Laser = @This();
 const Vector2 = @import("root").Vector2;
 const rl = @import("root").rl;
 const distance = @import("root").distance;
 
 /// if `fun` returns .eq, returns `a`
-/// see also, `minBy`
-fn minBy(T: type, comptime fun: fn (T, T) std.math.Order, a: T, b: T) T {
+/// see also, `maxBy`
+fn minBy(comptime T: type, comptime fun: fn (T, T) std.math.Order, a: T, b: T) T {
     const order = fun(a, b);
     return switch (order) {
         .lt, .eq => a,
@@ -18,8 +19,8 @@ fn minBy(T: type, comptime fun: fn (T, T) std.math.Order, a: T, b: T) T {
     };
 }
 
-/// if `fun` returns .eq, returns `a`
-/// see also, `maxBy`
+/// if `fun` returns .eq, returns `b`
+/// see also, `minBy`
 fn maxBy(T: type, comptime fun: fn (T, T) std.math.Order, a: T, b: T) T {
     const order = fun(a, b);
     return switch (order) {
@@ -128,10 +129,12 @@ pub fn breakUpLaser(self: Laser, gpa: std.mem.Allocator, wrapL: f32) ![]Laser {
 }
 
 fn getDistanceToLaserCmp(a: Vector2, b: Vector2) std.math.Order {
-    return if (a.x <= b.x)
+    return if (a.x < b.x)
         .lt
+    else if (a.x > b.x)
+        .gt
     else
-        .gt;
+        .eq;
 }
 
 /// returns the distance to the closest point on the laser, does not wrap

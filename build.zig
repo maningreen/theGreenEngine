@@ -9,8 +9,6 @@ const Build = std.Build;
 const Module = Build.Module;
 const CSourceLanguage = Module.CSourceLanguage;
 
-const getSystemFile = @import("tools").getSystemFile;
-
 const additional_flags: []const []const u8 = &.{};
 const debug_flags = runtime_check_flags ++ warning_flags;
 
@@ -24,28 +22,18 @@ const Library = struct {
 };
 
 const libraries: []const Library = &.{
-    .{ .name = "raylib", .type = .dependency },
-    .{ .name = "lua", .type = .dependency },
+    .{
+        .name = "raylib",
+        .type = .dependency,
+    },
+    .{
+        .name = "lua",
+        .type = .dependency,
+    },
 };
 
 const raylibLibraries: []const Library = &.{
     .{ .name = "GL", .type = .systemLib },
-    .{
-        .name = "m",
-        .type = .systemLib,
-    },
-    .{
-        .name = "pthread",
-        .type = .systemLib,
-    },
-    .{
-        .name = "dl",
-        .type = .systemLib,
-    },
-    .{
-        .name = "rt",
-        .type = .systemLib,
-    },
 };
 
 pub fn build(b: *std.Build) void {
@@ -259,11 +247,11 @@ const CompileCommands = struct {
         return cc;
     }
 
-    pub fn fromLinkObjects(b: *Build, objs: []std.Build.Module.LinkObject) !*CompileCommands {
+    fn fromLinkObjects(b: *Build, objs: []std.Build.Module.LinkObject) !*CompileCommands {
         const self = try b.allocator.create(CompileCommands);
         const step = Build.Step.init(.{
             .id = .custom,
-            .name = "compile_commands.json",
+            .name = "generate compile_commands.json",
             .owner = b,
             .makeFn = make,
         });
@@ -315,24 +303,18 @@ const CompileCommands = struct {
                 else => continue,
             }
         }
-        var tFlags = std.ArrayList([]const u8).empty;
+        var tFlags = std.StringHashMap(void).init(b.allocator);
         var paths = std.ArrayList([]const u8).empty;
         for (self.obj) |object| {
             switch (object) {
                 .c_source_file => |src| {
-                    flg: for (src.flags) |flag|
-                        for (tFlags.items) |savedFlags| {
-                            if (std.mem.eql(u8, flag, savedFlags))
-                                continue :flg;
-                        } else try tFlags.append(gpa, flag);
+                    for (src.flags) |flag|
+                        try tFlags.put(flag, void{});
                     try paths.append(gpa, src.file.cwd_relative);
                 },
                 .c_source_files => |srcs| {
-                    flg: for (srcs.flags) |flag|
-                        for (tFlags.items) |savedFlags| {
-                            if (std.mem.eql(u8, flag, savedFlags))
-                                continue :flg;
-                        } else try tFlags.append(gpa, flag);
+                    for (srcs.flags) |flag|
+                        try tFlags.put(flag, void{});
                     try paths.appendSlice(gpa, srcs.files);
                 },
                 else => continue,
@@ -341,11 +323,9 @@ const CompileCommands = struct {
 
         var libFlags = std.ArrayList([]const u8).empty;
         for (sysLibs.items) |lib|
-            try libFlags.appendSlice(
+            try libFlags.append(
                 gpa,
-                &.{
-                    try std.mem.concat(gpa, u8, &.{ "-l", lib.name }),
-                },
+                try std.fmt.allocPrint(gpa, "-l{s}", .{lib.name}),
             );
         for (localLibs.items) |lib| {
             const p = try lib.getEmittedIncludeTree().getPath4(b, &self.step);
@@ -356,8 +336,12 @@ const CompileCommands = struct {
             });
         }
         var parsedFlags = std.ArrayList([]const u8).empty;
-        for (tFlags.items) |flag|
-            try parsedFlags.append(gpa, flag);
+        {
+            var it = tFlags.keyIterator();
+            while (it.next()) |flag|
+                try parsedFlags.append(gpa, flag.*);
+        }
+
         const Item = struct {
             file: []const u8,
             arguments: []const []const u8,
@@ -367,7 +351,14 @@ const CompileCommands = struct {
         var items = std.ArrayList(Item).empty;
         const cwd = try std.Io.Dir.cwd().realPathFileAlloc(io, ".", b.allocator);
 
-        const flags: []const []const u8 = try std.mem.concat(b.allocator, []const u8, &.{ parsedFlags.items, libFlags.items });
+        const flags: []const []const u8 = try std.mem.concat(
+            b.allocator,
+            []const u8,
+            &.{
+                parsedFlags.items,
+                libFlags.items,
+            },
+        );
 
         for (paths.items) |value| {
             const localPath = value;
@@ -379,11 +370,19 @@ const CompileCommands = struct {
                         "-c",
                         localPath,
                         "-o",
-                        "t",
+                        try std.fmt.allocPrint(
+                            b.allocator,
+                            "{s}.o",
+                            .{
+                                localPath,
+                            },
+                        ),
                     },
                     flags,
+                    additional_flags,
+                    debug_flags,
                 }),
-                .output = "t.o",
+                .output = try std.fmt.allocPrint(gpa, "{s}.o", .{localPath}),
                 .directory = cwd,
             });
         }
@@ -395,18 +394,34 @@ const CompileCommands = struct {
             },
         };
         try stringifiery.beginArray();
-        for (items.items) |value| {
+        for (items.items) |value|
             try stringifiery.write(value);
-        }
         try stringifiery.endArray();
-        // const writeFile = b.addWriteFile("compile_commands.json", try tempWriter.toOwnedSlice());
-        try b.cache_root.handle.writeFile(b.graph.io, .{
-            .sub_path = "THISISAREALLYGOODHASH-compile_commands.json",
-            .data = try tempWriter.toOwnedSlice(),
-        });
-        self.gen.path = try b.cache_root.join(b.allocator, &.{"THISISAREALLYGOODHASH-compile_commands.json"});
-        const s = try self.step.installFile(.{ .generated = .{ .file = &self.gen } }, "compile_commands.json");
+        try b.cache_root.handle.writeFile(
+            b.graph.io,
+            .{
+                .sub_path = "compile_commands.json",
+                .data = try tempWriter.toOwnedSlice(),
+            },
+        );
+        self.gen.path = try b.cache_root.join(
+            b.allocator,
+            &.{"compile_commands.json"},
+        );
+        const s = try self.step.installFile(
+            .{
+                .generated = .{
+                    .file = &self.gen,
+                },
+            },
+            try std.fmt.allocPrint(
+                gpa,
+                "{s}/compile_commands.json",
+                .{
+                    b.install_prefix,
+                },
+            ),
+        );
         self.step.result_cached = s == .fresh;
-        // b.installFile(self.gen.path orelse unreachable, "");
     }
 };

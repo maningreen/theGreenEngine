@@ -6,21 +6,21 @@
 #include "entity.hpp"
 #include "world.hpp"
 
-#define baseScreenScalar 1000
-#define initialScreenDimensions                                \
-    (Vector2) {                                                \
-        baseScreenScalar * 16 / 9, baseScreenScalar / (16 / 9) \
+#define baseScreenScalar 1
+#define initialScreenDimensions                                 \
+    (Vector2) {                                                 \
+        baseScreenScalar * 1920, baseScreenScalar * 1080, \
     }
 
 extern "C" {
 double getDelta();
 }
 
-void init();
+extern void init();
 
-void postRender();
+extern void postRender();
 
-void preRender();
+extern void preRender();
 
 int main() {
     World::init();
@@ -28,12 +28,11 @@ int main() {
     srand(time(0));
     SetTraceLogLevel(LOG_ERROR);
 
-    SetTargetFPS(60);
+    SetTargetFPS(120);
 
     InitWindow(initialScreenDimensions.x, initialScreenDimensions.y, "Game :)");
 
-    while(!IsWindowReady()) {
-    }
+    while(!IsWindowReady());
 
     init();
 

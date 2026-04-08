@@ -22,11 +22,11 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .root_source_file = b.path("./tools.zig"),
         .imports = &.{
-            std.Build.Module.Import{
-                .name = "header",
-                .module = headerLib.root_module
-            }
-        }
+            .{
+                .name = "helper",
+                .module = headerLib.root_module,
+            },
+        },
     });
     const lib = b.addLibrary(.{
         .name = "tools",

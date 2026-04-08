@@ -130,7 +130,7 @@ void Player::render() {
 
 void Player::process(float delta) {
     position = position + velocity * delta;
-    velocity = velocity * Entity2D::friction;
+    velocity -= velocity * (Entity2D::friction) * delta;
 
     healthManager->process(delta);
 
@@ -164,7 +164,7 @@ void Player::manageRotation() {
     rotation = atan2f(
       (mousePos.y - position.y),
       mousePos.x - position.x
-    );  // then it's as simple as b - a
+    );
 }
 
 void Player::manageDash(float delta) {
@@ -200,7 +200,8 @@ Player::Player(const std::string& name, Vector2 position)
       defaultDashControl,
       defaultDashSpeed
     ),
-    Entity2D(name, position) {
+    Entity2D(name, position),
+    speed(defaultSpeed) {
     healthManager = new HealthManager(
       maxHealth,
       BarManager(
@@ -238,7 +239,6 @@ Player::Player(const std::string& name, Vector2 position)
     World::addEntity(inputManager);
 
     velocity = (Vector2){0, 0};
-    speed = defaultSpeed;
 
     dashCooldownBar = new Bar(position, barDimensions, YELLOW, (Color){10, 10, 10, 255}, true);
     World::addEntity(dashCooldownBar);
@@ -283,4 +283,8 @@ Player* Player::getPtr() {
 
 Player& Player::get() {
     return *plr;
+}
+
+void Player::addMod(const Mod& m) {
+    get().getModManager()->addMod(m, get().getId());
 }

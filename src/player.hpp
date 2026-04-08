@@ -92,6 +92,8 @@ class Player : public Entity2D {
 
     static Player& get();
     static Player* getPtr();
+
+    static void addMod(const Mod& m);
 };
 
 #endif

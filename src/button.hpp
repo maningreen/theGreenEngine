@@ -24,6 +24,7 @@ class Button : public Entity2D {
     Button(Vector2, std::string, bool, std::function<void(Button*)>);
 
     void setState(enum State);
+    enum State getState() const;
 
     void process(float delta) override;
     void render() override;

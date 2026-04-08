@@ -11,7 +11,7 @@
 #include "postProcessing.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
-#include "storeitem.hpp"
+#include "store.hpp"
 #include "time.h"
 
 CameraEntity* cameraEnt = nullptr;
@@ -24,9 +24,7 @@ void managePostRendering() {
 void init() {
     Player::initPlr();
     World::addEntity(new Button(Vector2Zero(), "Begin Game", true, [](Button* self) {
-        World::addEntity(new Button(StoreItem::init(
-          Player::get().getModManager()->fromName(ModManager::pickRandomPoolMod()).value()
-        )));
+        World::addEntity(new Store());
     }));
 
     World::addEntity(&Player::get());
@@ -43,7 +41,6 @@ void init() {
 }
 
 void preRender() {
-    World::getEntity(World::get().entities[0]->getId());
     data->preRender();
 }
 

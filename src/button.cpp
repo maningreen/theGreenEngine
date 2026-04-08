@@ -173,3 +173,7 @@ void Button::setState(enum State s) {
     sigmaDeltaPrime += sigmaDelta;
     sigmaDelta = 0;
 }
+
+Button::State Button::getState() const {
+    return state;
+}

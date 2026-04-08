@@ -17,11 +17,10 @@ Button StoreItem::init(Mod mod) {
             const Vector2 vel = (Vector2){cosf(theta) * speed, sinf(theta) * speed};
             World::addEntity(new Particle(self->position, vel, 20, false));
         }
-        Player::get().getModManager()->addMod(mod, Player::get().getId());
-        World::callEvent(purchaseEvent, std::tuple<void*>(nullptr));
+        World::callEvent<Button*, const Mod*>(purchaseEvent, std::tuple<Button*, const Mod*>(self, &mod));
     };
     std::string str = mod.name + "\n-----\n" + mod.description;
-    Button b = Button(Vector2Zero(), str, false, callback);
+    Button b = Button(Vector2Zero(), str, true, callback);
     b.addTag(Tags::storeItem);
     return b;
 }

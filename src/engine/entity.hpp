@@ -19,17 +19,14 @@ class Entity {
     std::string name;
     Tags tags;
 
-    Entity(const std::string& name, Entity* parent);
     Entity(const std::string& name);
-    virtual ~Entity();
+    ~Entity();
 
     unsigned getId() const;
 
     void addTag(Tags tag);
     void removeTag(Tags tag);
     bool hasTag(Tags tag) const;
-
-    Entity* getRoot();
 
     void killDefered();
 

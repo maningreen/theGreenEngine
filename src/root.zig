@@ -2,7 +2,7 @@
 //! Has general functions, and all exported functions.
 
 const std = @import("std");
-const Line = @import("line.zig");
+const Line = @import("line.zig").Line(f32);
 const Laser = @import("laser.zig");
 pub const rl = @cImport({
     @cInclude("raylib.h");
@@ -14,19 +14,19 @@ pub fn distance(a: Vector2, b: Vector2) f32 {
     return @sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
-pub fn getLineFromPoints(a: rl.Vector2, b: rl.Vector2) Line {
+pub fn getLineFromPoints(a: Vector2, b: Vector2) Line {
     const dif: Vector2 = .{ .x = a.x - b.x, .y = a.y - b.y };
     const m = dif.y / dif.x;
     return .{ .m = m, .b = a.y + m * a.x };
 }
 
-export fn getLineFromPointsAndDistanceTo(a: rl.Vector2, b: rl.Vector2, c: rl.Vector2) callconv(.c) f32 {
+export fn getLineFromPointsAndDistanceTo(a: Vector2, b: Vector2, c: Vector2) callconv(.c) f32 {
     const line = getLineFromPoints(a, b);
     const dist = line.getDistanceFromPoint(.{ .x = c.x, .y = c.y }); // this is necessary for some reason :p
     return dist;
 }
 
-export fn drawLaser(length: f32, theta: f32, pos: rl.Vector2, wrapLength: f32, col: rl.Color) callconv(.c) void {
+export fn drawLaser(length: f32, theta: f32, pos: Vector2, wrapLength: f32, col: rl.Color) callconv(.c) void {
     const laser: Laser = .{ .pos = .{ .x = pos.x, .y = pos.y }, .length = length, .theta = theta };
     laser.draw(.{ .r = col.r, .g = col.g, .b = col.b, .a = col.a }, wrapLength);
 }
@@ -39,12 +39,18 @@ export fn getDistanceToLaser(length: f32, theta: f32, pos: Vector2, wrapLength: 
     return (Laser{ .length = length, .pos = pos, .theta = theta }).getDistanceToSplitLaser(wrapLength, p);
 }
 
-export fn drawStoreBody(length: f32, sigmaDelta: f32, ease: *const fn (f32) callconv(.c) f32) callconv(.c) void {
-    const e: f32 = std.math.clamp(ease(sigmaDelta), 0, 1);
-    const l: i32 = @intFromFloat(length * 3.0 + 30.0 * e);
-    const h: i32 = @intFromFloat(length * 0.75 + 30.0);
-    rl.DrawRectangle(-l + 15, -h + 15, l * 2, h * 2, rl.YELLOW);
-    rl.DrawRectangle(-(l - 30) + 15, -(h - 30) + 15, (l - 30) * 2, (h - 30) * 2, rl.BLACK);
+export fn drawStoreBody(itemL: f32, sigmaDelta: f32, ease: *const fn (f32) callconv(.c) f32) callconv(.c) void {
+    const e: f32 = ease(std.math.clamp(sigmaDelta, 0, 1));
+    const length: i32 = @intFromFloat((itemL * 3.0 + 30.0) * e * 2);
+    const height: i32 = @intFromFloat(itemL * 2);
+
+    const offsetL: i32 = @divTrunc(length, 2);
+    const offsetH: i32 = @divTrunc(height, 2);
+
+    const padding: comptime_int = 15;
+
+    rl.DrawRectangle(-offsetL, -offsetH, length, height, rl.YELLOW);
+    rl.DrawRectangle(-(offsetL - padding), -(offsetH - padding), (length - padding * 2), (height - padding * 2), rl.BLACK);
 }
 
 var threaded = std.Io.Threaded.init_single_threaded;

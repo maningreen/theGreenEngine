@@ -4,15 +4,23 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const main = b.addModule("root", .{ .root_source_file = b.path("src/main.zig"), .optimize = optimize, .target = target });
+    const main = b.addModule("root", .{
+        .root_source_file = b.path("src/main.zig"),
+        .optimize = optimize,
+        .target = target,
+    });
 
-    const exe = b.addExecutable(.{ .root_module = main, .name = "translator" });
+    const exe = b.addExecutable(.{
+        .root_module = main,
+        .name = "translator",
+    });
 
     const lib = b.addLibrary(.{
         .name = "helper",
         .root_module = b.addModule("helper", .{
+            .root_source_file = b.path("./src/lib.zig"),
             .target = target,
-            .optimize = optimize
+            .optimize = optimize,
         }),
     });
 

@@ -10,7 +10,7 @@ Button init(Mod mod);
 
 static const std::string purchaseEvent = "storeItemPurchased";
 
-static const unsigned maxParticleCount = 100;
+static const unsigned maxParticleCount = 75;
 static const unsigned minParticleCount = 50;
 
 static const float maxParticleSpeed = 1000;
