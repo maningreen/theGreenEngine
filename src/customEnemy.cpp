@@ -1,13 +1,12 @@
 #include "customEnemy.hpp"
 
+#include <iostream>
 #include <optional>
 #include <sol/sol.hpp>
 #include <unordered_map>
-#include <iostream>
 
 #include "enemy.hpp"
 #include "raylib.h"
-#include <iostream>
 
 std::unordered_map<std::string, CustomEnemy> CustomEnemy::customEnemies;
 

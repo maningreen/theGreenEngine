@@ -3,8 +3,8 @@
 #ifndef STORE_H
 #define STORE_H
 
-#include "engine/entity.hpp"
 #include "button.hpp"
+#include "engine/entity.hpp"
 #include "mod.hpp"
 
 struct Store : public Entity {

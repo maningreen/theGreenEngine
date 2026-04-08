@@ -33,8 +33,7 @@ void Particle::process(float delta) {
         length += -length * 1 * delta;
         colour.a += -colour.a * 1 * delta;
     }
-    if(hasGravity)
-        velocity.y += gravity * delta;
+    if(hasGravity) velocity.y += gravity * delta;
     if(length <= 1 || colour.a <= 10) killDefered();
 }
 Particle::Particle(Vector2 pos, Vector2 vel, float length, bool g)

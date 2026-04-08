@@ -1,8 +1,8 @@
 #include "postProcessing.hpp"
 
 #include "border.hpp"
-#include "player.hpp"
 #include "include.h"
+#include "player.hpp"
 
 const std::string PostProcessing::palletPath = "resources/shaders/palette.glsl";
 

@@ -7,8 +7,8 @@
 #include "world.hpp"
 
 #define baseScreenScalar 1
-#define initialScreenDimensions                                 \
-    (Vector2) {                                                 \
+#define initialScreenDimensions                           \
+    (Vector2) {                                           \
         baseScreenScalar * 1920, baseScreenScalar * 1080, \
     }
 

@@ -18,9 +18,7 @@ struct Listener {
     Listener<T...>(unsigned id, void (*callback)(Entity*, T...)) : callback(callback), id(id) {}
     ~Listener<T...>() = default;
 
-    Listener<T...>& operator=(Listener<T...>& a) {
-        return a;
-    }
+    Listener<T...>& operator=(Listener<T...>& a) { return a; }
 
     /// if fails to call returns false
     bool call(std::tuple<T...>);
@@ -76,8 +74,7 @@ class World {
     template <typename... T>
     static void callEvent(std::string name, std::tuple<T...> args) {
         const int count = world->events.count(name);
-        if(count == 0)
-            createEvent(name);
+        if(count == 0) createEvent(name);
         ((Event<T...>*)world->events[name])->call(args);
     }
 
@@ -90,8 +87,7 @@ class World {
     static void
     listenEvent(std::string eventName, void (*callback)(Entity*, T...), const unsigned id) {
         auto t = world->events.find(eventName);
-        if(t == world->events.end())
-            createEvent<T...>(eventName);
+        if(t == world->events.end()) createEvent<T...>(eventName);
         ((Event<T...>*)world->events[eventName])->listeners.push_back(Listener(id, callback));
     }
 };

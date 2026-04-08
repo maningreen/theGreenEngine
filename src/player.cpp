@@ -130,7 +130,7 @@ void Player::render() {
 
 void Player::process(float delta) {
     position = position + velocity * delta;
-    velocity -= velocity * (Entity2D::friction) * delta;
+    velocity -= velocity * (Entity2D::friction)*delta;
 
     healthManager->process(delta);
 
@@ -161,10 +161,7 @@ void Player::manageBar(Bar* b, int index, float p, bool shouldRender) {
 
 void Player::manageRotation() {
     Vector2 mousePos = cam->getMousePosition();
-    rotation = atan2f(
-      (mousePos.y - position.y),
-      mousePos.x - position.x
-    );
+    rotation = atan2f((mousePos.y - position.y), mousePos.x - position.x);
 }
 
 void Player::manageDash(float delta) {

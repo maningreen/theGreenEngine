@@ -45,8 +45,6 @@ float Store::ease(float x) {
 /// This is *strictly* for the buttons
 void Store::purchaseCallback(Entity* t, Button* called, const Mod* mod) {
     Button* const self = (Button*)t;
-    if(self->getState() != Button::Passing)
-        self->setState(Button::Passing);
-    if(self == called)
-        Player::addMod(*mod);
+    if(self->getState() != Button::Passing) self->setState(Button::Passing);
+    if(self == called) Player::addMod(*mod);
 }

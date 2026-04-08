@@ -102,7 +102,6 @@ Vector2 Laser::getEndPoint() {
 }
 
 void Laser::render() {
-    if(!shouldRender)
-        return;
+    if(!shouldRender) return;
     drawLaser(length, rotation, position, Border::length, colour);
 }

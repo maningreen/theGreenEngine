@@ -1,3 +1,6 @@
+#include <raylib.h>
+#include <raymath.h>
+
 #include "border.hpp"
 #include "customEnemy.hpp"
 #include "enemy.hpp"
@@ -5,8 +8,6 @@
 #include "player.hpp"
 #include "raylib.h"
 #include "sniper.hpp"
-#include <raylib.h>
-#include <raymath.h>
 
 void ModManager::initLua() {
     lua.open_libraries();
@@ -42,7 +43,7 @@ void ModManager::initLua() {
     sol::usertype<Player> plr = lua.new_usertype<Player>("player");
     plr["speed"] = &Player::speed;
     lua["test"] = &dumpStackTrace;
-    plr["test"] = [](){
+    plr["test"] = []() {
         dumpStackTrace();
     };
     plr["rotation"] = &Player::rotation;

@@ -73,11 +73,8 @@ void Button::process(float delta) {
           } +
           (Vector2){(length + l) / 2, (length + l) / 2};  // undo centering
 
-        isHovered = 
-            relativeMousePos.x <= length + l &&
-            relativeMousePos.y <= length + l &&
-            relativeMousePos.x >= 0 &&
-            relativeMousePos.y >= 0;
+        isHovered = relativeMousePos.x <= length + l && relativeMousePos.y <= length + l &&
+                    relativeMousePos.x >= 0 && relativeMousePos.y >= 0;
     } else
         isHovered = false;
 

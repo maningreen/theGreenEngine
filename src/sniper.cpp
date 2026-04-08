@@ -8,8 +8,8 @@
 #include "border.hpp"
 #include "enemy.hpp"
 #include "engine/entity.hpp"
-#include "healthPack.hpp"
 #include "engine/world.hpp"
+#include "healthPack.hpp"
 
 float Sniper::minDist = Border::length / 1.6f;
 float Sniper::maxDist = Border::length * 1.4;

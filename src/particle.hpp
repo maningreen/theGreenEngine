@@ -28,7 +28,8 @@ class Particle : public Entity2D {
     Particle(Vector2 position, Vector2 velocity);
     // sets the rotation randomly and the rotational velocity randomly, with/without gravity
     Particle(Vector2 position, Vector2 velocity, bool gravity);
-    // sets the rotation randomly and the rotational velocity randomly, specify length, with/without gravity
+    // sets the rotation randomly and the rotational velocity randomly, specify length, with/without
+    // gravity
     Particle(Vector2 position, Vector2 velocity, float length, bool gravity);
     ~Particle();
 

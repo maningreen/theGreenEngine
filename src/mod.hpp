@@ -44,8 +44,8 @@ class ModManager {
     sol::state lua;
 
     void initLua();
-  public:
 
+  public:
     ModManager();
     ~ModManager();
 
@@ -79,7 +79,7 @@ class ModManager {
 
     std::optional<Mod> fromPath(fs::path);
     std::optional<Mod> fromName(std::string);
-    
+
     // lists all possible mods to be loaded
     static std::list<std::string> listPoolMods();
     // picks a random pool mod to be loaded
