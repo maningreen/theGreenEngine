@@ -10,7 +10,6 @@
 struct Store : public Entity {
     enum State {
         opening,
-        neutral,
         closing,
     };
     void init() override;
@@ -25,6 +24,8 @@ struct Store : public Entity {
     Store();
 
     static float ease(float x);
+
+    static const std::string closeEvent;
 
   private:
     static void purchaseCallback(Entity*, Button* self, const Mod*);

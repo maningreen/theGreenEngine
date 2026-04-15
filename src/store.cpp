@@ -11,6 +11,8 @@ extern "C" void drawStoreBody(
   float (*const ease)(float)  // the easing function we use
 );
 
+const std::string Store::closeEvent = "StoreClose";
+
 Store::Store() : Entity("Store") {
     state = opening;
     stateTime = 0;
@@ -41,7 +43,10 @@ void Store::render() {
             break;
         case closing:
             drawStoreBody(Button::length, 1 - stateTime, &Store::ease);
-            if(stateTime >= 1) killDefered();
+            if(stateTime >= 1) {
+                killDefered();
+                World::callEvent(closeEvent, std::tuple<void*>(nullptr));
+            }
             break;
     }
 }
