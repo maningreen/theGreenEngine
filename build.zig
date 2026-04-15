@@ -30,10 +30,10 @@ const libraries: []const Library = &.{
         .name = "lua",
         .type = .dependency,
     },
-};
-
-const raylibLibraries: []const Library = &.{
-    .{ .name = "GL", .type = .systemLib },
+    .{
+        .name = "GL",
+        .type = .systemLib,
+    },
 };
 
 pub fn build(b: *std.Build) void {
@@ -93,7 +93,7 @@ pub fn build(b: *std.Build) void {
 
     exe.root_module.linkLibrary(zig_lib);
 
-    for (libraries ++ raylibLibraries) |lib| {
+    for (libraries) |lib| {
         switch (lib.type) {
             .dependency => {
                 const dep = b.dependency(lib.name, .{});
