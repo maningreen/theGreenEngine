@@ -25,9 +25,9 @@ void Store::init() {
         const Mod mod = Player::get().getModManager()->fromName(m).value();
         Button* const button = new Button(StoreItem::init(mod));
         button->position.x = targetX;
-        World::listenEvent(StoreItem::purchaseEvent, &purchaseCallback, button->getId());
         World::addEntity(button);
     }
+    World::listenEvent(StoreItem::purchaseEvent, &purchaseCallback, getId());
 }
 
 void Store::process(float delta) {
@@ -35,16 +35,23 @@ void Store::process(float delta) {
 }
 
 void Store::render() {
-    drawStoreBody(Button::length, stateTime, &Store::ease);
+    switch(state) {
+        case opening:
+            drawStoreBody(Button::length, stateTime, &Store::ease);
+            break;
+        case closing:
+            drawStoreBody(Button::length, 1 - stateTime, &Store::ease);
+            if(stateTime >= 1) killDefered();
+            break;
+    }
 }
 
 float Store::ease(float x) {
     return x < 0.5 ? 16 * x * x * x * x * x : 1 - pow(-2 * x + 2, 5) / 2;
 }
 
-/// This is *strictly* for the buttons
 void Store::purchaseCallback(Entity* t, Button* called, const Mod* mod) {
-    Button* const self = (Button*)t;
-    if(self->getState() != Button::Passing) self->setState(Button::Passing);
-    if(self == called) Player::addMod(*mod);
+    Store* self = (Store*)t;
+    self->stateTime = 0;
+    self->state = Store::closing;
 }

@@ -5,8 +5,7 @@
 
 #include "engine/entity.hpp"
 
-class Button : public Entity2D {
-  private:
+struct Button : public Entity2D {
     std::function<void(Button*)> callback;
 
     Vector2 textDems;
@@ -14,7 +13,6 @@ class Button : public Entity2D {
 
     bool postDip;
 
-  public:
     enum State { Hovered, Neutral, Passing, Opening };
 
     float sigmaDelta;
