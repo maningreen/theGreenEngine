@@ -99,7 +99,11 @@ std::optional<Mod> ModManager::fromName(std::string name) {
     return x;
 }
 
-/// TODO:
 std::string ModManager::pickRandomPoolMod() {
-    return "Speed";
+    const unsigned count = GetDirectoryFileCount(mod::poolPath.c_str());
+    const unsigned i = (unsigned)((float)count * ((float)rand() / (float)RAND_MAX));
+    unsigned index = 0;
+    for(auto item : fs::directory_iterator(mod::poolPath))
+        if(index++ >= i) return item.path().filename().replace_extension("");
+    throw "Missing mod";
 }
