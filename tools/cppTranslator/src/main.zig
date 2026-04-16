@@ -389,8 +389,6 @@ pub fn main(init: std.process.Init) !void {
             .eof => {
                 break;
             },
-            .xml_declaration => {
-            },
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = item.token.getItem(element_name.local);
@@ -409,15 +407,6 @@ pub fn main(init: std.process.Init) !void {
                         try x.append(init.gpa, m);
                     },
                 }
-            },
-            .element_end, .comment => {},
-            .pi => {
-            },
-            .cdata => {
-            },
-            .entity_reference => {
-            },
-            .character_reference => {
             },
             else => continue,
         }
