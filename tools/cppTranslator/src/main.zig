@@ -72,7 +72,6 @@ fn printT(gpa: std.mem.Allocator, indentation: u8, prefix: []const u8, val: anyt
     }
     defer gpa.free(iprefix);
     if (@TypeOf(val) == []const u8 or @TypeOf(val) == []u8) {
-        std.debug.print("{s} {s}: {s}\n", .{ iprefix, prefix, val });
         return;
     }
     switch (fieldInfo) {
@@ -280,7 +279,6 @@ const item = struct {
             inline for (@typeInfo(T).@"struct".fields) |field| {
                 if (std.mem.eql(u8, field.name, name)) {
                     if (field.type == []u8 or field.type == []const u8) {
-                        std.debug.print("{s}, setting {s} ([]const u8) to {s} (alloc)\n", .{ @typeName(T), field.name, value });
                         const mem = try gpa.alloc(u8, value.len);
                         @memcpy(mem, value);
                         @field(m, field.name) = mem;
@@ -330,10 +328,8 @@ const item = struct {
         pub fn getItem(str: []const u8) ?@"type" {
             inline for (std.enums.values(@"type")) |T|
                 if (std.mem.eql(u8, str, @tagName(T))) {
-                    std.debug.print("Matched with " ++ @tagName(T) ++ "\n", .{});
                     return T;
                 };
-            std.debug.print("No match\n", .{});
             return null;
         }
     };
@@ -342,14 +338,10 @@ const item = struct {
     fn deinitToken(comptime T: type) fn (*T, std.mem.Allocator) void {
         const fun = (struct {
             fn function(self: *T, gpa: std.mem.Allocator) void {
-                std.debug.print("Freeing {s}\n", .{@typeName(T)});
                 switch (@typeInfo(T)) {
                     .pointer => |ptr| {
                         switch (ptr.size) {
                             .slice => {
-                                if (self.len > 0) {
-                                    std.debug.print("{s}\n", .{self.*});
-                                }
                                 if (!isFundamental(ptr.child)) for (self.*) |*i|
                                     deinitToken(ptr.child)(i, gpa);
                                 gpa.free(self.*);
@@ -398,11 +390,6 @@ pub fn main(init: std.process.Init) !void {
                 break;
             },
             .xml_declaration => {
-                debug.print("xml_declaration: version={s} encoding={?s} standalone={?}\n", .{
-                    reader.xmlDeclarationVersion(),
-                    reader.xmlDeclarationEncoding(),
-                    reader.xmlDeclarationStandalone(),
-                });
             },
             .element_start => {
                 const element_name = reader.elementNameNs();
@@ -425,32 +412,14 @@ pub fn main(init: std.process.Init) !void {
             },
             .element_end, .comment => {},
             .pi => {
-                debug.print("pi: \"{f}\" \"{f}\"\n", .{
-                    std.zig.fmtString(reader.piTarget()),
-                    std.zig.fmtString(try reader.piData()),
-                });
             },
             .cdata => {
-                debug.print("cdata: \"{f}\"\n", .{
-                    std.zig.fmtString(try reader.cdata()),
-                });
             },
             .entity_reference => {
-                debug.print("entity_reference: \"{f}\"\n", .{
-                    std.zig.fmtString(reader.entityReferenceName()),
-                });
             },
             .character_reference => {
-                var buf: [4]u8 = undefined;
-                const len = std.unicode.utf8Encode(reader.characterReferenceChar(), &buf) catch unreachable;
-                debug.print("character_reference: {} (\"{f}\")\n", .{
-                    reader.characterReferenceChar(),
-                    std.zig.fmtString(buf[0..len]),
-                });
             },
             else => continue,
         }
     }
-    std.debug.print("Finished\n", .{});
-    try printT(init.arena.allocator(), 0, "", x);
 }
