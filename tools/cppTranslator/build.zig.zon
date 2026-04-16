@@ -2,9 +2,9 @@
     .name = .cppTranslator,
     .version = "0.0.1",
     .dependencies = .{
-        .llvm_zig = .{
-            .url = "git+https://github.com/maningreen/llvm-zig-bindings#fcaa11697e92659e74b45f9c6f8b9e4cef4c1ca3",
-            .hash = "llvm_zig-0.3.0-gKayR1D1AACj9F2ERjRTVdAq-oeZLD_RDv2dc2A-Qb3C",
+        .xml = .{
+            .url = "git+https://github.com/ianprime0509/zig-xml#b97f2ab4868ae3cac9902b33a40d3f31d2df739d",
+            .hash = "xml-0.2.0-ZTbP3yI6AgB9Rpd2hQrueO63ib0Bm6mQiL_WB1t7JAmP",
         },
     },
     .minimum_zig_version = "0.16.0-dev.2860+9c5460316",

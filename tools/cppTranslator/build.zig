@@ -16,11 +16,9 @@ pub fn build(b: *std.Build) void {
         .name = "translator",
     });
 
-    const llvmBindings = b.dependency("llvm_zig", .{ .target = target, .optimize = optimize });
-    const clangBindings = llvmBindings.module("clang-zig");
-    main.addImport("clang", clangBindings);
-
-    main.linkSystemLibrary("clang", .{ .needed = true });
+    const xmlDep = b.dependency("xml", .{ .target = target, .optimize = optimize });
+    const xml = xmlDep.module("xml");
+    main.addImport("xml", xml);
 
     const install = b.addInstallArtifact(exe, .{});
     b.getInstallStep().dependOn(&install.step);

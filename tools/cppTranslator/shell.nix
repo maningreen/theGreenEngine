@@ -1,14 +1,14 @@
 {
   mkShell,
   clang,
-  libclang,
   zig,
+  castxml,
   ...
 }:
 mkShell {
   packages = [
     clang
     zig
-    libclang
+    castxml
   ];
 }

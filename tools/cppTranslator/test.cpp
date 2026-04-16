@@ -3,6 +3,7 @@ class Test {
     virtual void testingFunction() {}
 
     int testingItem;
+    int* testingptr;
     char testingChar;
 
     Test() : testingItem(3) {}
@@ -14,7 +15,3 @@ class Test2 : public Test {
     Test2() {}
     ~Test2() {}
 };
-
-int main() {
-    return 0;
-}
