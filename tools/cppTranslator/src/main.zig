@@ -51,7 +51,7 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
     const argv = &.{ "castxml", "--castxml-output=1", path, "-o", "-" };
     var child = try std.process.spawn(io, .{
         .argv = argv,
-        .stderr = .inherit,
+        .stderr = .ignore, // why is this ignore? well, because we want to ignore global headers.
         .cwd = .inherit,
         .stdin = .ignore,
         .stdout = .pipe,
@@ -247,6 +247,7 @@ const item = struct {
             arguments: ?[]Argument = null,
             access: Access,
             virtual: bool,
+            @"const": bool,
         };
         const Class = struct {
             name: []u8,
@@ -261,6 +262,7 @@ const item = struct {
                 var paddingIndex: u64 = 0;
                 try writer.print("pub const @\"{s}\" = struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+                var initIterator: u64 = 0;
                 while (memberIterator.next()) |member| {
                     const containerChild = data.find(member) orelse continue;
                     switch (containerChild) {
@@ -269,7 +271,7 @@ const item = struct {
                                 switch (method.access) {
                                     .public => {
                                         try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
-                                        try writer.print("extern \"c\" fn @\"{s}\"(*{s}, ", .{ method.mangled, self.name });
+                                        try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), ", .{ method.mangled, if (method.@"const") " " else "*" });
                                         for (method.arguments orelse &.{}) |arg|
                                             try writer.print("{s}, ", .{arg.type});
                                         try writer.print(") {s};\n", .{method.returns});
@@ -278,7 +280,7 @@ const item = struct {
                                 }
                             } else {
                                 // GOD DAMN IT.; we just return
-                                try writer.print("{s}: *const fn (*{s}, ", .{ method.name, self.name });
+                                try writer.print("{s}: *const fn ({s}@This, ", .{ method.name, if (method.@"const") " " else "*" });
                                 for (method.arguments orelse &.{}) |arg| {
                                     try writer.print("{s}, ", .{arg.type});
                                 }
@@ -309,9 +311,19 @@ const item = struct {
                                 },
                             }
                         },
-                        .Constructor => {},
+                        .Constructor => |constructor| {
+                            try writer.print("pub const init{d} = extern fn @\"{s}\"(", .{ initIterator, self.name });
+                            if (constructor.arguments != null)
+                                for (constructor.arguments.?) |arg| {
+                                    try writer.print("{s}, ", .{arg.type});
+                                };
+                            try writer.print(") @This();\n", .{});
+                            initIterator += 1;
+                        },
                         .Enumeration => {},
-                        .Destructor => {},
+                        .Destructor => {
+                            try writer.print("pub const deinit = extern fn @\"~{s}\"(*@This()) .callconv(c) void\n", .{self.name});
+                        },
                         .Typedef => {},
                         else => continue,
                     }

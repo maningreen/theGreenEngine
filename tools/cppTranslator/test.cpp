@@ -8,9 +8,15 @@ class Test {
     int* testingptr;
     char testingChar;
 
-    Test() : testingItem(3) {}
+    Test() {
+        std::cout << "Init test\n";
+        testingItem = 3;
+        testingptr = nullptr;
+        testingItem = 4;
+        testingChar = 'a';
+    }
     virtual ~Test() {}
-    void test() { std::cout << "WOOO\n"; }
+    void test() const { std::cout << "WOOO\n"; }
 };
 
 class Test2 : public Test {
