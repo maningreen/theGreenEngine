@@ -280,7 +280,7 @@ const item = struct {
                                 }
                             } else {
                                 // GOD DAMN IT.; we just return
-                                try writer.print("{s}: *const fn ({s}@This, ", .{ method.name, if (method.@"const") " " else "*" });
+                                try writer.print("{s}: *const fn ({s}@This(), ", .{ method.name, if (method.@"const") " " else "*" });
                                 for (method.arguments orelse &.{}) |arg| {
                                     try writer.print("{s}, ", .{arg.type});
                                 }
@@ -312,19 +312,26 @@ const item = struct {
                             }
                         },
                         .Constructor => |constructor| {
-                            try writer.print("pub const init{d} = extern fn @\"{s}\"(", .{ initIterator, self.name });
-                            if (constructor.arguments != null)
-                                for (constructor.arguments.?) |arg| {
-                                    try writer.print("{s}, ", .{arg.type});
-                                };
-                            try writer.print(") @This();\n", .{});
-                            initIterator += 1;
+                            switch (constructor.access) {
+                                .public => {
+                                    try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
+                                    if (constructor.arguments != null)
+                                        for (constructor.arguments.?) |arg| {
+                                            try writer.print("{s}, ", .{arg.type});
+                                        };
+                                    try writer.print(") @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
+                                    initIterator += 1;
+                                },
+                                else => continue,
+                            }
                         },
-                        .Enumeration => {},
                         .Destructor => {
-                            try writer.print("pub const deinit = extern fn @\"~{s}\"(*@This()) .callconv(c) void\n", .{self.name});
+                            try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
+                            try writer.print("pub const deinit = @\"~{s}\";", .{self.name});
                         },
-                        .Typedef => {},
+                        .Typedef => |td| {
+                            try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
+                        },
                         else => continue,
                     }
                 }
@@ -608,63 +615,23 @@ pub fn main(init: std.process.Init) !void {
         try out.writer.print("const {s} = {s};\n", .{ t.id, t.type });
         try out.writer.print("const {s} = {s};\n", .{ t.name, t.id });
     }
-    const fields = container.get(.Field);
     const classes = container.get(.Class);
-    for (classes.values()) |class| {
-        // try out.writer.print("pub const {s} = struct {{\n", .{class.name});
-        // {
-        // var it = std.mem.splitScalar(u8, class.members, ' ');
-        // var i: u64 = 0;
-        // while (it.next()) |str| : (i += 1) {
-        // if (fields.get(str)) |t|
-        // try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
-        // }
-        // }
-        // blk: {
-        // var it = std.mem.splitScalar(u8, class.bases orelse break :blk, ' ');
-        // var i: u64 = 0;
-        // while (it.next()) |str| : (i += 1) {
-        // if (classes.get(str)) |t|
-        // try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.id });
-        // }
-        // }
-        // try out.writer.print("}};\nconst {s} = {s};\n", .{ class.id, class.name });
+    for (classes.values()) |class|
         try class.write(container, &out.writer);
-    }
     const structs = container.get(.Struct);
-    for (structs.values()) |class| {
-        try out.writer.print("pub const {s} = struct {{\n", .{class.name});
-        {
-            var it = std.mem.splitScalar(u8, class.members, ' ');
-            var i: u64 = 0;
-            while (it.next()) |str| : (i += 1) {
-                if (fields.get(str)) |t|
-                    try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
-            }
-        }
-        blk: {
-            var it = std.mem.splitScalar(u8, class.bases orelse break :blk, ' ');
-            var i: u64 = 0;
-            while (it.next()) |str| : (i += 1) {
-                if (fields.get(str)) |t|
-                    try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
-            }
-        }
-        try out.writer.print("}};\nconst {s} = {s};\n", .{ class.id, class.name });
-    }
+    for (structs.values()) |class|
+        try class.write(container, &out.writer);
     const ptrTypes = container.get(.PointerType);
-    for (ptrTypes.values()) |ptrT| {
+    for (ptrTypes.values()) |ptrT|
         try out.writer.print("const {s} = *{s};\n", .{ ptrT.id, ptrT.type });
-    }
     const arrayTypes = container.get(.ArrayType);
-    for (arrayTypes.values()) |arrT| {
+    for (arrayTypes.values()) |arrT|
         try out.writer.print("const {s} = [*c]{s};\n", .{ arrT.id, arrT.type });
-    }
     const cvTypes = container.get(.CvQualifiedType);
-    for (cvTypes.values()) |cvT| {
+    for (cvTypes.values()) |cvT|
         try out.writer.print("const {s} = {s};\n", .{ cvT.id, cvT.type });
-    }
+    const refTypes = container.get(.ReferenceType);
+    for (refTypes.values()) |rt|
+        try out.writer.print("const {s} = *{s};\n", .{ rt.id, rt.type });
     std.debug.print("{s}\n", .{out.written()});
-    // const fmt = std.json.fmt(container.get(.FundamentalType).items, .{ .whitespace = .indent_4 });
-    // std.debug.print("{f}\n", .{fmt});
 }
