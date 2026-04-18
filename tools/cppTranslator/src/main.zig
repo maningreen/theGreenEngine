@@ -30,6 +30,12 @@ fn isFundamental(comptime T: type) bool {
         else => false,
     };
 }
+fn isNamespaceType(comptime T: type) bool {
+    return switch (@typeInfo(T)) {
+        .@"enum", .@"union", .@"struct", .@"opaque" => true,
+        else => false,
+    };
+}
 
 fn getBaseName(comptime T: type) []const u8 {
     const full_name = @typeName(T);
@@ -126,20 +132,19 @@ fn printT(gpa: std.mem.Allocator, indentation: u8, prefix: []const u8, val: anyt
 
 const item = struct {
     const TokenContainer = struct {
-        data: dataType = .{},
+        data: Data,
 
-        const dataType: type = blk: {
+        const Data: type = blk: {
             const count: comptime_int = std.enums.values(item.token.type).len;
             var typeNames: [count][]const u8 = undefined;
             var typeAttrs: [count]std.builtin.Type.StructField.Attributes = undefined;
             var typeTypes: [count]type = undefined;
             for (std.enums.values(item.token.type), 0..) |value, i| {
                 typeNames[i] = @tagName(value);
-                typeTypes[i] = std.ArrayList(item.token.structType(value));
+                typeTypes[i] = std.StringArrayHashMap(item.token.structType(value));
                 typeAttrs[i] = std.builtin.Type.StructField.Attributes{
                     .@"align" = null,
                     .@"comptime" = false,
-                    .default_value_ptr = &typeTypes[i].empty,
                 };
             }
             break :blk @Struct(
@@ -151,28 +156,63 @@ const item = struct {
             );
         };
 
-        pub fn get(self: @This(), comptime t: item.token.type) std.ArrayList(item.token.structType(t)) {
+        const TokenUnion: type = blk: {
+            const types = std.enums.values(item.token.type);
+            var typeNames: [types.len][]const u8 = undefined;
+            var fieldTypes: [types.len]type = undefined;
+            var fieldAttrs = [1]std.builtin.Type.UnionField.Attributes{.{ .@"align" = null }} ** types.len;
+            for (types, 0..) |t, i| {
+                typeNames[i] = @tagName(t);
+                fieldTypes[i] = item.token.structType(t);
+            }
+            break :blk @Union(.auto, item.token.type, &typeNames, &fieldTypes, &fieldAttrs);
+        };
+
+        pub fn init(gpa: std.mem.Allocator) TokenContainer {
+            var self: TokenContainer = undefined;
+            inline for (@typeInfo(Data).@"struct".fields) |value| {
+                @field(self.data, value.name) = .init(gpa);
+            }
+            return self;
+        }
+
+        pub fn get(self: @This(), comptime t: item.token.type) std.StringArrayHashMap(item.token.structType(t)) {
             return @field(self.data, @tagName(t));
         }
         pub fn appendExplicit(self: *@This(), gpa: std.mem.Allocator, comptime t: item.type, value: item.token.structType(t)) !void {
             return @field(self.data, @tagName(t)).append(gpa, value);
         }
 
-        pub fn append(self: *@This(), gpa: std.mem.Allocator, value: anytype) !void {
+        pub fn append(self: *@This(), value: anytype) !void {
             const inType = @TypeOf(value);
             ensure(@hasField(@TypeOf(self.data), getBaseName(inType))) catch {
                 @panic("Error! " ++ comptime getBaseName(inType) ++ " is not acceptable!");
             };
 
-            try @field(self.data, getBaseName(inType)).append(gpa, value);
+            try @field(self.data, getBaseName(inType)).put(value.id, value);
         }
 
         pub fn deinit(self: *@This(), gpa: std.mem.Allocator) void {
             inline for (comptime std.enums.values(token.type)) |t| {
-                for (@field(self.data, @tagName(t)).items) |*value|
+                for (@field(self.data, @tagName(t)).values()) |*value|
                     deinitToken(@TypeOf(value.*))(value, gpa);
-                @field(self.data, @tagName(t)).deinit(gpa);
+                @field(self.data, @tagName(t)).deinit();
             }
+        }
+
+        pub fn getType(self: @This(), id: []const u8) ?token.type {
+            inline for (@typeInfo(Data).@"struct".fields, std.enums.values(token.type)) |field, tokenType| {
+                const set = @field(self.data, field.name);
+                if (set.contains(id))
+                    return tokenType;
+            }
+            return null;
+        }
+        pub fn find(self: @This(), id: []const u8) ?TokenUnion {
+            inline for (std.enums.values(token.type)) |tokenType|
+                if (@field(self.data, @tagName(tokenType)).get(id)) |val|
+                    return @unionInit(TokenUnion, @tagName(tokenType), val);
+            return null;
         }
     };
     const token = struct {
@@ -184,6 +224,7 @@ const item = struct {
         const @"type" = enum {
             Method,
             Class,
+            Struct,
             FundamentalType,
             Field,
             Constructor,
@@ -193,13 +234,17 @@ const item = struct {
             Destructor,
             Namespace,
             Typedef,
+            ArrayType,
+            CvQualifiedType,
+            Function,
         };
         const Method = struct {
             name: []u8,
             mangled: []u8,
             id: []u8,
             returns: []u8,
-            context: []u8,
+            // context: []u8,
+            arguments: ?[]Argument = null,
             access: Access,
             virtual: bool,
         };
@@ -207,10 +252,74 @@ const item = struct {
             name: []u8,
             members: []u8,
             id: []u8,
-            context: []u8,
+            // context: []u8,
             size: u64,
             @"align": u64,
+            bases: ?[]u8 = null,
+
+            pub fn write(self: Class, data: TokenContainer, writer: *std.Io.Writer) !void {
+                var paddingIndex: u64 = 0;
+                try writer.print("pub const @\"{s}\" = struct {{\n", .{self.name});
+                var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+                while (memberIterator.next()) |member| {
+                    const containerChild = data.find(member) orelse continue;
+                    switch (containerChild) {
+                        .Method => |method| {
+                            if (!method.virtual) {
+                                switch (method.access) {
+                                    .public => {
+                                        try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
+                                        try writer.print("extern \"c\" fn @\"{s}\"(*{s}, ", .{ method.mangled, self.name });
+                                        for (method.arguments orelse &.{}) |arg|
+                                            try writer.print("{s}, ", .{arg.type});
+                                        try writer.print(") {s};\n", .{method.returns});
+                                    },
+                                    else => continue,
+                                }
+                            } else {
+                                // GOD DAMN IT.; we just return
+                                try writer.print("{s}: *const fn (*{s}, ", .{ method.name, self.name });
+                                for (method.arguments orelse &.{}) |arg| {
+                                    try writer.print("{s}, ", .{arg.type});
+                                }
+                                try writer.print(") callconv(.c) {s},\n", .{method.returns});
+                                paddingIndex += 1;
+                            }
+                        },
+                        .Field => |field| {
+                            switch (field.access) {
+                                .public => {
+                                    try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
+                                },
+                                else => {
+                                    // Get size of type
+                                    const tType = data.find(field.type) orelse @panic("Errror! type not found!");
+                                    const size = switch (tType) {
+                                        inline .Class,
+                                        .Struct,
+                                        .FundamentalType,
+                                        .Enumeration,
+                                        .PointerType,
+                                        .ReferenceType,
+                                        => |t| t.size,
+                                        .ArrayType => @bitSizeOf(usize),
+                                        else => undefined,
+                                    };
+                                    try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
+                                },
+                            }
+                        },
+                        .Constructor => {},
+                        .Enumeration => {},
+                        .Destructor => {},
+                        .Typedef => {},
+                        else => continue,
+                    }
+                }
+                try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
+            }
         };
+        const Struct = Class;
         const FundamentalType = struct {
             id: []u8,
             name: []u8,
@@ -221,14 +330,15 @@ const item = struct {
             id: []u8,
             name: []u8,
             type: []u8,
-            context: []u8,
+            // context: []u8,
             access: Access,
             offset: u64,
         };
         const Constructor = struct {
             id: []u8,
-            context: []u8,
+            // context: []u8,
             access: Access,
+            arguments: ?[]Argument = null,
             @"inline": bool,
         };
         const Enumeration = struct {
@@ -253,20 +363,42 @@ const item = struct {
         };
         const Destructor = struct {
             id: []u8,
-            context: []u8,
+            // context: []u8,
             access: Access,
             @"inline": bool,
         };
         const Namespace = struct {
             id: []u8,
             name: []u8,
-            context: ?[]u8 = null,
+            // context: ?[]u8 = null,
         };
         const Typedef = struct {
             id: []u8,
             name: []u8,
             type: []u8,
-            context: []u8,
+            // context: []u8,
+        };
+        const ArrayType = struct {
+            id: []u8,
+            type: []u8,
+            min: u64,
+            max: u64,
+        };
+        const CvQualifiedType = struct {
+            id: []u8,
+            type: []u8,
+            @"const": bool,
+        };
+        const Function = struct {
+            id: []u8,
+            name: []u8,
+            returns: []u8,
+            // context: []u8,
+            mangled: []u8,
+            arguments: ?[]Argument = null,
+        };
+        const Argument = struct {
+            type: []u8,
         };
 
         pub fn setValue(
@@ -350,9 +482,12 @@ const item = struct {
                         }
                     },
                     .@"struct" => |str| {
-                        inline for (str.fields) |value|
-                            if (!isFundamental(value.type))
-                                deinitToken(value.type)(&@field(self, value.name), gpa);
+                        if (@hasDecl(T, "deinit"))
+                            self.deinit(gpa)
+                        else inline for (str.fields) |field| {
+                            if (!isFundamental(field.type))
+                                deinitToken(field.type)(&@field(self, field.name), gpa);
+                        }
                     },
                     .optional => |opt| {
                         if (self.*) |*val|
@@ -373,9 +508,10 @@ pub fn main(init: std.process.Init) !void {
     var streaming_reader: xml.Reader.Streaming = .init(init.arena.allocator(), &xmlReader, .{});
     const reader = &streaming_reader.interface;
 
-    var x = item.TokenContainer{};
-    defer x.deinit(init.gpa);
+    var container = item.TokenContainer.init(init.gpa);
+    defer container.deinit(init.gpa);
 
+    var state: ?item.TokenContainer.TokenUnion = null;
     while (true) {
         const node = reader.read() catch |err| switch (err) {
             error.MalformedXml => {
@@ -389,11 +525,36 @@ pub fn main(init: std.process.Init) !void {
             .eof => {
                 break;
             },
-            .xml_declaration => {
-            },
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = item.token.getItem(element_name.local);
+                if (std.mem.eql(u8, element_name.local, getBaseName(item.token.Argument))) if (state != null) switch (state.?) {
+                    inline else => |*s| {
+                        if (@hasField(@TypeOf(s.*), "arguments")) {
+                            if (s.arguments != null) {
+                                s.arguments = try init.gpa.realloc(s.arguments.?, s.arguments.?.len + 1);
+                                var arg: item.token.Argument = undefined;
+                                for (0..reader.attributeCount()) |i| {
+                                    const attribute_name = reader.attributeNameNs(i);
+                                    const value = try reader.attributeValue(i);
+                                    try item.token.setValue(item.token.Argument, &arg, init.gpa, attribute_name.local, value);
+                                }
+                                s.arguments.?[s.arguments.?.len - 1] = arg;
+                            } else {
+                                s.arguments = try init.gpa.alloc(item.token.Argument, 1);
+                                var arg: item.token.Argument = undefined;
+                                for (0..reader.attributeCount()) |i| {
+                                    const attribute_name = reader.attributeNameNs(i);
+                                    const value = try reader.attributeValue(i);
+                                    try item.token.setValue(item.token.Argument, &arg, init.gpa, attribute_name.local, value);
+                                }
+                                s.arguments.?[s.arguments.?.len - 1] = arg;
+                            }
+                        }
+                        continue;
+                    },
+                };
+                if (state != null) continue;
                 switch (t orelse continue) {
                     inline else => |v| {
                         const T = item.token.structType(v);
@@ -406,20 +567,92 @@ pub fn main(init: std.process.Init) !void {
                             const value = try reader.attributeValue(i);
                             try item.token.setValue(item.token.structType(v), &m, init.gpa, attribute_name.local, value);
                         }
-                        try x.append(init.gpa, m);
+                        state = @unionInit(item.TokenContainer.TokenUnion, getBaseName(T), m);
                     },
                 }
             },
-            .element_end, .comment => {},
-            .pi => {
-            },
-            .cdata => {
-            },
-            .entity_reference => {
-            },
-            .character_reference => {
+            .element_end => {
+                switch (state orelse continue) {
+                    inline else => |v| try container.append(v),
+                }
+                state = null;
             },
             else => continue,
         }
     }
+    var out = std.Io.Writer.Allocating.init(init.gpa);
+    defer out.deinit();
+    const fundamentalTypes = container.get(.FundamentalType);
+    for (fundamentalTypes.values()) |t| {
+        const signed: std.builtin.Signedness = if (std.mem.indexOf(u8, t.name, "unsigned") == null) .signed else .unsigned;
+        const prefix: u8 = switch (signed) {
+            .signed => 'i',
+            .unsigned => 'u',
+        };
+        try out.writer.print("const {s} = {c}{d};\n", .{ t.id, prefix, t.size });
+    }
+    const typedefs = container.get(.Typedef);
+    for (typedefs.values()) |t| {
+        try out.writer.print("const {s} = {s};\n", .{ t.id, t.type });
+        try out.writer.print("const {s} = {s};\n", .{ t.name, t.id });
+    }
+    const fields = container.get(.Field);
+    const classes = container.get(.Class);
+    for (classes.values()) |class| {
+        // try out.writer.print("pub const {s} = struct {{\n", .{class.name});
+        // {
+        // var it = std.mem.splitScalar(u8, class.members, ' ');
+        // var i: u64 = 0;
+        // while (it.next()) |str| : (i += 1) {
+        // if (fields.get(str)) |t|
+        // try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
+        // }
+        // }
+        // blk: {
+        // var it = std.mem.splitScalar(u8, class.bases orelse break :blk, ' ');
+        // var i: u64 = 0;
+        // while (it.next()) |str| : (i += 1) {
+        // if (classes.get(str)) |t|
+        // try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.id });
+        // }
+        // }
+        // try out.writer.print("}};\nconst {s} = {s};\n", .{ class.id, class.name });
+        try class.write(container, &out.writer);
+    }
+    const structs = container.get(.Struct);
+    for (structs.values()) |class| {
+        try out.writer.print("pub const {s} = struct {{\n", .{class.name});
+        {
+            var it = std.mem.splitScalar(u8, class.members, ' ');
+            var i: u64 = 0;
+            while (it.next()) |str| : (i += 1) {
+                if (fields.get(str)) |t|
+                    try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
+            }
+        }
+        blk: {
+            var it = std.mem.splitScalar(u8, class.bases orelse break :blk, ' ');
+            var i: u64 = 0;
+            while (it.next()) |str| : (i += 1) {
+                if (fields.get(str)) |t|
+                    try out.writer.print("@\"{s}\": {s},\n", .{ t.name, t.type });
+            }
+        }
+        try out.writer.print("}};\nconst {s} = {s};\n", .{ class.id, class.name });
+    }
+    const ptrTypes = container.get(.PointerType);
+    for (ptrTypes.values()) |ptrT| {
+        try out.writer.print("const {s} = *{s};\n", .{ ptrT.id, ptrT.type });
+    }
+    const arrayTypes = container.get(.ArrayType);
+    for (arrayTypes.values()) |arrT| {
+        try out.writer.print("const {s} = [*c]{s};\n", .{ arrT.id, arrT.type });
+    }
+    const cvTypes = container.get(.CvQualifiedType);
+    for (cvTypes.values()) |cvT| {
+        try out.writer.print("const {s} = {s};\n", .{ cvT.id, cvT.type });
+    }
+    std.debug.print("{s}\n", .{out.written()});
+    // const fmt = std.json.fmt(container.get(.FundamentalType).items, .{ .whitespace = .indent_4 });
+    // std.debug.print("{f}\n", .{fmt});
 }

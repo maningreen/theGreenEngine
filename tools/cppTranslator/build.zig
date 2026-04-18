@@ -20,8 +20,7 @@ pub fn build(b: *std.Build) void {
     const xml = xmlDep.module("xml");
     main.addImport("xml", xml);
 
-    const install = b.addInstallArtifact(exe, .{});
-    b.getInstallStep().dependOn(&install.step);
+    _ = b.installArtifact(exe);
 
     const runStep = b.step("run", "Runs the artifact");
     const run = b.addRunArtifact(exe);
