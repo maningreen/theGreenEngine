@@ -20,7 +20,7 @@ class Entity {
     Tags tags;
 
     Entity(const std::string& name);
-    ~Entity();
+    virtual ~Entity();
 
     unsigned getId() const;
 

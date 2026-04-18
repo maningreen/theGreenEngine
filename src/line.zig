@@ -57,7 +57,10 @@ pub fn Line(T: type) type {
         pub fn getClosestPointToPoint(self: @This(), x: Vector2) Vector2 {
             if (self.m) |m| {
                 if (m == 0)
-                    return .{ .x = x.x, .y = self.b };
+                    return .{
+                        .x = x.x,
+                        .y = self.b,
+                    };
                 const fPrime: @This() = .{ .m = -1 / m, .b = x.y + x.x / m };
                 // the slopes are defined to be different, causing both exceptions to be impossible
                 return self.solve(fPrime) catch unreachable;
