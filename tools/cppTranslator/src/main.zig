@@ -493,11 +493,23 @@ const item = struct {
                     .pointer => |ptr| {
                         switch (ptr.size) {
                             .slice => {
-                                if (!isFundamental(ptr.child)) for (self.*) |*i|
+                                for (self.*) |*i|
                                     deinitToken(ptr.child)(i, gpa);
                                 gpa.free(self.*);
                             },
-                            else => unreachable,
+                            .one => {
+                                deinitToken(ptr.child)(&self.*);
+                                gpa.destroy(self);
+                            },
+                            .many => {
+                                for (self.*) |*v|
+                                    deinitToken(ptr.child)(v, gpa);
+                                gpa.free(self);
+                            },
+                            .c => {
+                                deinitToken(ptr.child)(&self.*);
+                                gpa.destroy(self);
+                            },
                         }
                     },
                     .@"struct" => |str| {
@@ -510,8 +522,18 @@ const item = struct {
                     },
                     .optional => |opt| {
                         if (self.*) |*val|
-                            if (!isFundamental(opt.child))
-                                deinitToken(opt.child)(val, gpa);
+                            deinitToken(opt.child)(val, gpa);
+                    },
+                    .@"union" => {
+                        switch (self.*) {
+                            inline else => |*v| {
+                                deinitToken(@TypeOf(v.*))(v, gpa);
+                            },
+                        }
+                    },
+                    .vector => |v| {
+                        for (v) |*value|
+                            deinitToken(v.child)(value, gpa);
                     },
                     else => {},
                 }
