@@ -331,6 +331,9 @@ const item = struct {
                             if (!destructor.@"inline") {
                                 try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
                                 try writer.print("pub const deinit = @\"~{s}\";", .{self.name});
+                            } else {
+                                // write a dummy deinit
+                                try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
                             }
                         },
                         .Typedef => |td| {

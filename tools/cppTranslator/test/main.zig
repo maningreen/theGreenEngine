@@ -4,5 +4,6 @@ const Testing = @import("testing");
 pub fn main() !void {
     std.debug.print("{s}", .{"Hello, World!\n"});
     var t = Testing.Test{};
+    defer t.deinit();
     _ = t.print();
 }
