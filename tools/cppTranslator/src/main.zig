@@ -350,7 +350,7 @@ const item = struct {
                         .Method => |method| {
                             if (method.virtual) {
                                 try writer.print(
-                                    \\extern "c" fn @"{s}"({s}@This()
+                                    \\extern "c" fn @"{s}"({s}@This(),
                                 , .{ method.mangled, if (method.@"const") "" else "*" });
                                 for (method.arguments orelse &.{}) |arg|
                                     try writer.print("{s}, ", .{arg.type});
