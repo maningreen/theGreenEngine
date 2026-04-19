@@ -23,10 +23,44 @@ pub fn build(b: *std.Build) void {
     _ = b.installArtifact(exe);
 
     const runStep = b.step("run", "Runs the artifact");
-    const run = b.addRunArtifact(exe);
-    runStep.dependOn(&run.step);
+    const runExe = b.addRunArtifact(exe);
+    runStep.dependOn(&runExe.step);
 
     if (b.args) |args| {
-        run.addArgs(args);
+        runExe.addArgs(args);
     }
+
+    const runTest = b.step("runtest", "Runs a simple test");
+    runTest.dependOn(&exe.step);
+
+    const runTestMod = b.createModule(.{
+        .optimize = optimize,
+        .target = target,
+        .root_source_file = b.path("test/main.zig"),
+        .link_libcpp = true,
+    });
+    runTestMod.addCSourceFiles(.{
+        .files = &.{"test.cpp"},
+        .flags = &.{},
+        .language = .cpp,
+        .root = b.path("test"),
+    });
+
+    const runTool = b.addRunArtifact(exe);
+
+    runTool.addArgs(&.{"test/test.hpp"});
+
+    runTestMod.addImport("testing", b.createModule(.{
+        .link_libcpp = true,
+        .optimize = optimize,
+        .target = target,
+        .root_source_file = runTool.captureStdOut(.{ .basename = "testing.zig" }),
+    }));
+
+    const testExe = b.addExecutable(.{
+        .name = "test",
+        .root_module = runTestMod,
+    });
+    testExe.step.dependOn(&runTool.step);
+    runTest.dependOn(&b.addRunArtifact(testExe).step);
 }

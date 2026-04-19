@@ -260,7 +260,7 @@ const item = struct {
 
             pub fn write(self: Class, data: TokenContainer, writer: *std.Io.Writer) !void {
                 var paddingIndex: u64 = 0;
-                try writer.print("pub const @\"{s}\" = struct {{\n", .{self.name});
+                try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
                 var initIterator: u64 = 0;
                 while (memberIterator.next()) |member| {
@@ -314,20 +314,24 @@ const item = struct {
                         .Constructor => |constructor| {
                             switch (constructor.access) {
                                 .public => {
-                                    try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
-                                    if (constructor.arguments != null)
-                                        for (constructor.arguments.?) |arg| {
-                                            try writer.print("{s}, ", .{arg.type});
-                                        };
-                                    try writer.print(") @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
-                                    initIterator += 1;
+                                    if (!constructor.@"inline") {
+                                        try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
+                                        if (constructor.arguments != null)
+                                            for (constructor.arguments.?) |arg| {
+                                                try writer.print("{s}, ", .{arg.type});
+                                            };
+                                        try writer.print(") callconv(.c) @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
+                                        initIterator += 1;
+                                    }
                                 },
                                 else => continue,
                             }
                         },
-                        .Destructor => {
-                            try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
-                            try writer.print("pub const deinit = @\"~{s}\";", .{self.name});
+                        .Destructor => |destructor| {
+                            if (!destructor.@"inline") {
+                                try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
+                                try writer.print("pub const deinit = @\"~{s}\";", .{self.name});
+                            }
                         },
                         .Typedef => |td| {
                             try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
@@ -358,7 +362,7 @@ const item = struct {
             // context: []u8,
             access: Access,
             arguments: ?[]Argument = null,
-            @"inline": bool,
+            @"inline": bool = false,
         };
         const Enumeration = struct {
             id: []u8,
@@ -384,7 +388,7 @@ const item = struct {
             id: []u8,
             // context: []u8,
             access: Access,
-            @"inline": bool,
+            @"inline": bool = false,
         };
         const Namespace = struct {
             id: []u8,
@@ -543,14 +547,17 @@ const item = struct {
     }
 };
 
-pub fn main(init: std.process.Init) !void {
-    const ret = try getAST(init.io, init.arena.allocator(), "test.cpp");
-    var xmlReader = std.Io.Reader.fixed(ret);
-    var streaming_reader: xml.Reader.Streaming = .init(init.arena.allocator(), &xmlReader, .{});
+/// returned memory is owned by caller.
+fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
+    var xmlReader = std.Io.Reader.fixed(input);
+
+    var streaming_reader: xml.Reader.Streaming = .init(gpa, &xmlReader, .{});
+    defer streaming_reader.deinit();
+
     const reader = &streaming_reader.interface;
 
-    var container = item.TokenContainer.init(init.gpa);
-    defer container.deinit(init.gpa);
+    var container = item.TokenContainer.init(gpa);
+    errdefer container.deinit(gpa);
 
     var state: ?item.TokenContainer.TokenUnion = null;
     while (true) {
@@ -573,21 +580,21 @@ pub fn main(init: std.process.Init) !void {
                     inline else => |*s| {
                         if (@hasField(@TypeOf(s.*), "arguments")) {
                             if (s.arguments != null) {
-                                s.arguments = try init.gpa.realloc(s.arguments.?, s.arguments.?.len + 1);
+                                s.arguments = try gpa.realloc(s.arguments.?, s.arguments.?.len + 1);
                                 var arg: item.token.Argument = undefined;
                                 for (0..reader.attributeCount()) |i| {
                                     const attribute_name = reader.attributeNameNs(i);
                                     const value = try reader.attributeValue(i);
-                                    try item.token.setValue(item.token.Argument, &arg, init.gpa, attribute_name.local, value);
+                                    try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
                                 }
                                 s.arguments.?[s.arguments.?.len - 1] = arg;
                             } else {
-                                s.arguments = try init.gpa.alloc(item.token.Argument, 1);
+                                s.arguments = try gpa.alloc(item.token.Argument, 1);
                                 var arg: item.token.Argument = undefined;
                                 for (0..reader.attributeCount()) |i| {
                                     const attribute_name = reader.attributeNameNs(i);
                                     const value = try reader.attributeValue(i);
-                                    try item.token.setValue(item.token.Argument, &arg, init.gpa, attribute_name.local, value);
+                                    try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
                                 }
                                 s.arguments.?[s.arguments.?.len - 1] = arg;
                             }
@@ -606,7 +613,7 @@ pub fn main(init: std.process.Init) !void {
                         for (0..reader.attributeCount()) |i| {
                             const attribute_name = reader.attributeNameNs(i);
                             const value = try reader.attributeValue(i);
-                            try item.token.setValue(item.token.structType(v), &m, init.gpa, attribute_name.local, value);
+                            try item.token.setValue(item.token.structType(v), &m, gpa, attribute_name.local, value);
                         }
                         state = @unionInit(item.TokenContainer.TokenUnion, getBaseName(T), m);
                     },
@@ -621,39 +628,71 @@ pub fn main(init: std.process.Init) !void {
             else => continue,
         }
     }
-    var out = std.Io.Writer.Allocating.init(init.gpa);
-    defer out.deinit();
+    return container;
+}
+
+fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []const u8) !void {
+    const ret = try getAST(io, gpa, file);
+    defer gpa.free(ret);
+    var container = try parseTokens(gpa, ret);
+    defer container.deinit(gpa);
     const fundamentalTypes = container.get(.FundamentalType);
     for (fundamentalTypes.values()) |t| {
-        const signed: std.builtin.Signedness = if (std.mem.indexOf(u8, t.name, "unsigned") == null) .signed else .unsigned;
-        const prefix: u8 = switch (signed) {
-            .signed => 'i',
-            .unsigned => 'u',
-        };
-        try out.writer.print("const {s} = {c}{d};\n", .{ t.id, prefix, t.size });
+        const @"type": enum { float, int } =
+            if (std.mem.find(u8, t.name, "float") != null or std.mem.find(u8, t.name, "double") != null)
+                .float
+            else
+                .int;
+
+        switch (@"type") {
+            .float => {
+                try out.print("const {s} = f{d};\n", .{ t.id, t.size });
+            },
+            .int => {
+                const signed: std.builtin.Signedness = if (std.mem.find(u8, t.name, "unsigned") == null) .signed else .unsigned;
+
+                const prefix: u8 = switch (signed) {
+                    .signed => 'i',
+                    .unsigned => 'u',
+                };
+                try out.print("const {s} = {c}{d};\n", .{ t.id, prefix, t.size });
+            },
+        }
     }
     const typedefs = container.get(.Typedef);
     for (typedefs.values()) |t| {
-        try out.writer.print("const {s} = {s};\n", .{ t.id, t.type });
-        try out.writer.print("const {s} = {s};\n", .{ t.name, t.id });
+        try out.print("const {s} = {s};\n", .{ t.id, t.type });
+        try out.print("const {s} = {s};\n", .{ t.name, t.id });
     }
     const classes = container.get(.Class);
     for (classes.values()) |class|
-        try class.write(container, &out.writer);
+        try class.write(container, out);
     const structs = container.get(.Struct);
     for (structs.values()) |class|
-        try class.write(container, &out.writer);
+        try class.write(container, out);
     const ptrTypes = container.get(.PointerType);
     for (ptrTypes.values()) |ptrT|
-        try out.writer.print("const {s} = *{s};\n", .{ ptrT.id, ptrT.type });
+        try out.print("const {s} = *{s};\n", .{ ptrT.id, ptrT.type });
     const arrayTypes = container.get(.ArrayType);
     for (arrayTypes.values()) |arrT|
-        try out.writer.print("const {s} = [*c]{s};\n", .{ arrT.id, arrT.type });
+        try out.print("const {s} = [*c]{s};\n", .{ arrT.id, arrT.type });
     const cvTypes = container.get(.CvQualifiedType);
     for (cvTypes.values()) |cvT|
-        try out.writer.print("const {s} = {s};\n", .{ cvT.id, cvT.type });
+        try out.print("const {s} = {s};\n", .{ cvT.id, cvT.type });
     const refTypes = container.get(.ReferenceType);
     for (refTypes.values()) |rt|
-        try out.writer.print("const {s} = *{s};\n", .{ rt.id, rt.type });
-    std.debug.print("{s}\n", .{out.written()});
+        try out.print("const {s} = *{s};\n", .{ rt.id, rt.type });
+}
+
+pub fn main(init: std.process.Init) !void {
+    if (init.minimal.args.vector.len == 1) return;
+    const file = std.Io.File.stdout();
+    defer file.close(init.io);
+    var writeBuf: [1028]u8 = undefined;
+    var writer = file.writer(init.io, &writeBuf);
+    for (init.minimal.args.vector[1..]) |arg| {
+        const l = std.mem.len(arg);
+        try printFile(init.io, init.gpa, &writer.interface, arg[0..l]);
+    }
+    try writer.flush();
 }
