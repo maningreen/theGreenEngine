@@ -3,7 +3,8 @@
 
 class Test {
   public:
-    void print();
+    virtual void print();
+    char thingy;
     Test() {}
     ~Test() {}
 };

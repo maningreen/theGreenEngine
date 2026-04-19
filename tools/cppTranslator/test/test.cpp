@@ -2,5 +2,5 @@
 #include <iostream>
 
 void Test::print() {
-    std::cout << "WOOO\n";
+    std::cout << "WOOO " << this->thingy << '\n';
 }

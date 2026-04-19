@@ -263,6 +263,7 @@ const item = struct {
                 try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
                 var initIterator: u64 = 0;
+                // TODO: sort items: virtual functions, fields
                 while (memberIterator.next()) |member| {
                     const containerChild = data.find(member) orelse continue;
                     switch (containerChild) {
@@ -279,16 +280,16 @@ const item = struct {
                                     else => continue,
                                 }
                             } else {
-                                // GOD DAMN IT.; we just return
                                 try writer.print("{s}: *const fn ({s}@This(), ", .{ method.name, if (method.@"const") " " else "*" });
                                 for (method.arguments orelse &.{}) |arg| {
                                     try writer.print("{s}, ", .{arg.type});
                                 }
-                                try writer.print(") callconv(.c) {s},\n", .{method.returns});
+                                try writer.print(") callconv(.c) {s} = {s},\n", .{ method.returns, method.mangled });
                                 paddingIndex += 1;
                             }
                         },
                         .Field => |field| {
+                            std.log.debug("field name {s}", .{field.name});
                             switch (field.access) {
                                 .public => {
                                     try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
@@ -338,6 +339,23 @@ const item = struct {
                         },
                         .Typedef => |td| {
                             try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
+                        },
+                        else => continue,
+                    }
+                }
+                memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+                while (memberIterator.next()) |member| {
+                    const containerChild = data.find(member) orelse continue;
+                    switch (containerChild) {
+                        .Method => |method| {
+                            if (method.virtual) {
+                                try writer.print(
+                                    \\extern "c" fn @"{s}"({s}@This()
+                                , .{ method.mangled, if (method.@"const") "" else "*" });
+                                for (method.arguments orelse &.{}) |arg|
+                                    try writer.print("{s}, ", .{arg.type});
+                                try writer.print(") {s};", .{method.returns});
+                            }
                         },
                         else => continue,
                     }

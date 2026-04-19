@@ -41,7 +41,7 @@ pub fn build(b: *std.Build) void {
     });
     runTestMod.addCSourceFiles(.{
         .files = &.{"test.cpp"},
-        .flags = &.{},
+        .flags = &.{"-fno-inline"},
         .language = .cpp,
         .root = b.path("test"),
     });
