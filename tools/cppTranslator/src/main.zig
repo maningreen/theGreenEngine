@@ -253,7 +253,7 @@ const item = struct {
             name: []u8,
             members: []u8,
             id: []u8,
-            // context: []u8,
+            context: []u8,
             size: u64,
             @"align": u64,
             bases: ?[]u8 = null,
@@ -264,101 +264,108 @@ const item = struct {
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
                 var initIterator: u64 = 0;
                 // TODO: sort items: virtual functions, fields
-                while (memberIterator.next()) |member| {
-                    const containerChild = data.find(member) orelse continue;
-                    switch (containerChild) {
-                        .Method => |method| {
-                            if (!method.virtual) {
-                                switch (method.access) {
+
+                // second member of tuple is `pass`
+                const order = [_]@Tuple(&.{ @"type", u8 }){
+                    .{ .Method, 0 },
+                    .{ .Field, 0 },
+                    .{ .Constructor, 0 },
+                    .{ .Destructor, 0 },
+                    .{ .Method, 1 },
+                };
+
+                inline for (order) |t| {
+                    while (memberIterator.next()) |member| {
+                        const containerChild = data.find(member) orelse continue;
+                        if (containerChild != t[0]) continue;
+                        switch (containerChild) {
+                            .Method => |method| {
+                                const prefix = if (method.@"const") "" else "*";
+                                switch (t[1]) {
+                                    0 => {
+                                        switch (method.access) {
+                                            .public => {
+                                                if (method.virtual) {
+                                                    try writer.print("{s}: *const fn ({s}@This(),", .{ method.name, prefix });
+                                                    for (method.arguments orelse &.{}) |arg|
+                                                        try writer.print("{s}, ", .{arg.type});
+                                                    try writer.print(") callconv(.c) {s} = {s},\n", .{ method.returns, method.mangled });
+                                                } else continue;
+                                            },
+                                            else => {
+                                                try writer.print("_{d}: u{d},\n", .{ paddingIndex, @bitSizeOf(usize) });
+                                                paddingIndex += 1;
+                                            },
+                                        }
+                                    },
+                                    1 => {
+                                        switch (method.access) {
+                                            .public => {
+                                                if (!method.virtual) {
+                                                    try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
+                                                }
+                                                try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), \n", .{ method.mangled, prefix });
+                                                for (method.arguments orelse &.{}) |arg|
+                                                    try writer.print("{s},\n", .{arg.type});
+                                                try writer.print(") callconv(.c) {s};\n", .{method.returns});
+                                            },
+                                            else => continue,
+                                        }
+                                    },
+                                    else => undefined,
+                                }
+                            },
+                            .Field => |field| {
+                                std.log.debug("field name {s}", .{field.name});
+                                switch (field.access) {
                                     .public => {
-                                        try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
-                                        try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), ", .{ method.mangled, if (method.@"const") " " else "*" });
-                                        for (method.arguments orelse &.{}) |arg|
-                                            try writer.print("{s}, ", .{arg.type});
-                                        try writer.print(") {s};\n", .{method.returns});
+                                        try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
+                                    },
+                                    else => {
+                                        // Get size of type
+                                        const tType = data.find(field.type) orelse @panic("Errror! type not found!");
+                                        const size = switch (tType) {
+                                            inline .Class, .Struct, .FundamentalType, .Enumeration, .PointerType, .ReferenceType => |j| j.size,
+                                            .ArrayType => @bitSizeOf(usize),
+                                            else => undefined,
+                                        };
+                                        try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
+                                    },
+                                }
+                            },
+                            .Constructor => |constructor| {
+                                switch (constructor.access) {
+                                    .public => {
+                                        if (!constructor.@"inline") {
+                                            try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
+                                            if (constructor.arguments != null)
+                                                for (constructor.arguments.?) |arg| {
+                                                    try writer.print("{s}, ", .{arg.type});
+                                                };
+                                            try writer.print(") callconv(.c) @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
+                                            initIterator += 1;
+                                        }
                                     },
                                     else => continue,
                                 }
-                            } else {
-                                try writer.print("{s}: *const fn ({s}@This(), ", .{ method.name, if (method.@"const") " " else "*" });
-                                for (method.arguments orelse &.{}) |arg| {
-                                    try writer.print("{s}, ", .{arg.type});
+                            },
+                            .Destructor => |destructor| {
+                                if (!destructor.@"inline") {
+                                    // try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
+                                    // try writer.print("pub const deinit = @\"~{s}\"\n;\n", .{self.name});
+                                    try destructor.writeMangled(data, writer);
+                                } else {
+                                    // write a dummy deinit
+                                    try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
                                 }
-                                try writer.print(") callconv(.c) {s} = {s},\n", .{ method.returns, method.mangled });
-                                paddingIndex += 1;
-                            }
-                        },
-                        .Field => |field| {
-                            std.log.debug("field name {s}", .{field.name});
-                            switch (field.access) {
-                                .public => {
-                                    try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
-                                },
-                                else => {
-                                    // Get size of type
-                                    const tType = data.find(field.type) orelse @panic("Errror! type not found!");
-                                    const size = switch (tType) {
-                                        inline .Class,
-                                        .Struct,
-                                        .FundamentalType,
-                                        .Enumeration,
-                                        .PointerType,
-                                        .ReferenceType,
-                                        => |t| t.size,
-                                        .ArrayType => @bitSizeOf(usize),
-                                        else => undefined,
-                                    };
-                                    try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
-                                },
-                            }
-                        },
-                        .Constructor => |constructor| {
-                            switch (constructor.access) {
-                                .public => {
-                                    if (!constructor.@"inline") {
-                                        try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
-                                        if (constructor.arguments != null)
-                                            for (constructor.arguments.?) |arg| {
-                                                try writer.print("{s}, ", .{arg.type});
-                                            };
-                                        try writer.print(") callconv(.c) @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
-                                        initIterator += 1;
-                                    }
-                                },
-                                else => continue,
-                            }
-                        },
-                        .Destructor => |destructor| {
-                            if (!destructor.@"inline") {
-                                try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
-                                try writer.print("pub const deinit = @\"~{s}\";", .{self.name});
-                            } else {
-                                // write a dummy deinit
-                                try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
-                            }
-                        },
-                        .Typedef => |td| {
-                            try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
-                        },
-                        else => continue,
+                            },
+                            .Typedef => |td| {
+                                try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
+                            },
+                            else => continue,
+                        }
                     }
-                }
-                memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-                while (memberIterator.next()) |member| {
-                    const containerChild = data.find(member) orelse continue;
-                    switch (containerChild) {
-                        .Method => |method| {
-                            if (method.virtual) {
-                                try writer.print(
-                                    \\extern "c" fn @"{s}"({s}@This(),
-                                , .{ method.mangled, if (method.@"const") "" else "*" });
-                                for (method.arguments orelse &.{}) |arg|
-                                    try writer.print("{s}, ", .{arg.type});
-                                try writer.print(") {s};", .{method.returns});
-                            }
-                        },
-                        else => continue,
-                    }
+                    memberIterator = std.mem.splitScalar(u8, self.members, ' ');
                 }
                 try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
             }
@@ -380,7 +387,7 @@ const item = struct {
         };
         const Constructor = struct {
             id: []u8,
-            // context: []u8,
+            context: []u8,
             access: Access,
             arguments: ?[]Argument = null,
             @"inline": bool = false,
@@ -407,14 +414,39 @@ const item = struct {
         };
         const Destructor = struct {
             id: []u8,
-            // context: []u8,
+            context: []u8,
             access: Access,
             @"inline": bool = false,
+
+            pub fn writeMangled(self: Destructor, data: item.TokenContainer, writer: *std.Io.Writer) (error{Inline} || std.Io.Writer.Error)!void {
+                if (self.@"inline") return error.Inline;
+
+                const manglePrefix = "_Z";
+                const rootNamespace = "::";
+                const totalSuffix = "D0Ev";
+                try writer.print(manglePrefix, .{});
+
+                const parent = data.find(self.context) orelse unreachable;
+                switch (parent) {
+                    .Class, .Struct => |class| {
+                        const context = data.find(class.context) orelse unreachable;
+                        switch (context) {
+                            inline .Class, .Namespace, .Struct => |grandpa| {
+                                if (std.mem.eql(u8, grandpa.name, rootNamespace)) {
+                                    try writer.print("{d}{s};\n" ++ totalSuffix, .{ class.name.len, class.name });
+                                } else undefined;
+                            },
+                            else => unreachable,
+                        }
+                    },
+                    else => unreachable,
+                }
+            }
         };
         const Namespace = struct {
             id: []u8,
             name: []u8,
-            // context: ?[]u8 = null,
+            context: ?[]u8 = null,
         };
         const Typedef = struct {
             id: []u8,
@@ -468,15 +500,12 @@ const item = struct {
                             @field(m, field.name) = val;
                         },
                         .@"enum" => |e| {
-                            if (!e.is_exhaustive) lbl: {
-                                @field(m, field.name) = try std.fmt.parseInt(e.tag_type, value, 0) catch break :lbl;
-                            }
                             inline for (comptime std.enums.values(field.type)) |tag| {
                                 if (std.mem.eql(u8, @tagName(tag), value)) {
                                     @field(m, field.name) = tag;
                                     break;
                                 }
-                            }
+                            } else if (!e.is_exhaustive) @field(m, field.name) = try std.fmt.parseInt(e.tag_type, value, 0);
                         },
                         .bool => {
                             @field(m, field.name) = std.mem.eql(u8, "1", value);
@@ -503,9 +532,8 @@ const item = struct {
 
         pub fn getItem(str: []const u8) ?@"type" {
             inline for (std.enums.values(@"type")) |T|
-                if (std.mem.eql(u8, str, @tagName(T))) {
+                if (std.mem.eql(u8, str, @tagName(T)))
                     return T;
-                };
             return null;
         }
     };
@@ -540,10 +568,9 @@ const item = struct {
                     .@"struct" => |str| {
                         if (@hasDecl(T, "deinit"))
                             self.deinit(gpa)
-                        else inline for (str.fields) |field| {
+                        else inline for (str.fields) |field|
                             if (!isFundamental(field.type))
                                 deinitToken(field.type)(&@field(self, field.name), gpa);
-                        }
                     },
                     .optional => |opt| {
                         if (self.*) |*val|
@@ -693,10 +720,10 @@ fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []co
         try class.write(container, out);
     const ptrTypes = container.get(.PointerType);
     for (ptrTypes.values()) |ptrT|
-        try out.print("const {s} = *{s};\n", .{ ptrT.id, ptrT.type });
+        try out.print("const {s} = ?*{s};\n", .{ ptrT.id, ptrT.type });
     const arrayTypes = container.get(.ArrayType);
     for (arrayTypes.values()) |arrT|
-        try out.print("const {s} = [*c]{s};\n", .{ arrT.id, arrT.type });
+        try out.print("const {s} = ?[*]{s};\n", .{ arrT.id, arrT.type });
     const cvTypes = container.get(.CvQualifiedType);
     for (cvTypes.values()) |cvT|
         try out.print("const {s} = {s};\n", .{ cvT.id, cvT.type });

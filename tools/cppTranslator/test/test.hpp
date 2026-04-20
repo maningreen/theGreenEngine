@@ -1,5 +1,3 @@
-
-
 class Test {
   public:
     virtual void testingFunction(float delta);
@@ -8,9 +6,11 @@ class Test {
     int* testingptr;
     char testingChar;
 
-    Test();
     virtual ~Test();
     void test() const;
+
+    Test();
+    Test(int i);
 };
 
 class Test2 : public Test {

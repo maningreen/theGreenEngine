@@ -2,10 +2,20 @@
 
 #include <iostream>
 
-void Test::testingFunction(float delta) {}
+void Test::testingFunction(float delta) {
+    std::cout << delta << ' ' << testingChar << '\n';
+}
 
 Test::Test() {
     std::cout << "Wooo\n";
+}
+
+Test::Test(int i) {
+    std::cout << "test alt\n";
+}
+
+void Test::test() const {
+    std::cout << "SD:LFKJDSF\n";
 }
 
 Test::~Test() {}
