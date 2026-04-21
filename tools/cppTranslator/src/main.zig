@@ -388,6 +388,95 @@ const item = struct {
             access: Access,
             arguments: ?[]Argument = null,
             @"inline": bool = false,
+
+            pub fn writeMangled(self: Destructor, constructorIndex: u64, gpa: std.mem.Allocator, data: item.TokenContainer, writer: *std.Io.Writer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)!void {
+                if (self.@"inline") return error.Inline;
+
+                const manglePrefix = "_Z";
+                const rootNamespace = "::";
+                const totalSuffix = "";
+
+                var mangledName = std.Io.Writer.Allocating.init(gpa);
+                defer mangledName.deinit();
+
+                var parents: std.ArrayList([]const u8) = try .initCapacity(gpa, 1);
+                defer parents.deinit(gpa);
+
+                {
+                    var parent = self.context;
+                    while (data.find(parent)) |grandparent| {
+                        switch (grandparent) {
+                            inline .Class, .Struct => |parentVal| {
+                                parent = parentVal.context;
+                                try parents.append(gpa, parentVal.name);
+                            },
+                            .Namespace => |namespace| {
+                                parent = namespace.context orelse break;
+                                try parents.append(gpa, namespace.name);
+                            },
+                            else => unreachable,
+                        }
+                    }
+                }
+
+                try mangledName.writer.print(manglePrefix, .{});
+                if (parents.items.len >= 1) {
+                    try mangledName.writer.print("N", .{});
+                }
+
+                const ltEscape = "<";
+                const gtEscape = ">";
+
+                const typeMap = std.static_string_map.StaticStringMap(struct { []const u8, enum {
+                    custom,
+                    primitive,
+                } }).initComptime(&.{
+                    .{ "void", .{ "v", .primitive } },
+                    .{ "wchar_t", .{ "w", .primitive } },
+                    .{ "bool", .{ "b", .primitive } },
+                    .{ "char", .{ "c", .primitive } },
+                    .{ "signed char", .{ "a", .primitive } },
+                    .{ "unsigned char", .{ "h", .primitive } },
+                    .{ "short", .{ "s", .primitive } },
+                    .{ "unsigned short", .{ "t", .primitive } },
+                    .{ "int", .{ "i", .primitive } },
+                    .{ "unsigned int", .{ "j", .primitive } },
+                    .{ "long", .{ "l", .primitive } },
+                    .{ "unsigned long", .{ "m", .primitive } },
+                    .{ "long long", .{ "x", .primitive } },
+                    .{ "unsigned long long", .{ "y", .primitive } },
+                    .{ "__int128", .{ "n", .primitive } },
+                    .{ "unsigned __int128", .{ "o", .primitive } },
+                    .{ "float", .{ "f", .primitive } },
+                    .{ "double", .{ "d", .primitive } },
+                    .{ "long double", .{ "e", .primitive } },
+                    .{ "__float128", .{ "g", .primitive } },
+                    .{ "char32_t", .{ "Di", .primitive } },
+                    .{ "char16_t", .{ "Ds", .primitive } },
+                    .{ "auto", .{ "Da", .primitive } },
+                    .{ "std::nullptr_t", .{ "Dn", .primitive } },
+                });
+
+                for (0..parents.items.len) |i| {
+                    const parent = parents.items[i];
+                    if (std.mem.find(u8, parent, ltEscape)) |lt| lbl: {
+                        const gt = std.mem.find(u8, parent, gtEscape) orelse break :lbl;
+                        const templateType = parent[lt + ltEscape.len .. gt];
+                        const t = typeMap.get(templateType) orelse .{ templateType, .custom };
+                        switch (t.@"1") {
+                            .custom => try mangledName.writer.print("I{d}{s}E", .{ t.@"0".len, t.@"0" }),
+                            .primitive => try mangledName.writer.print("I{s}E", .{t.@"0"}),
+                        }
+                        continue;
+                    }
+                    if (std.mem.eql(u8, parent, rootNamespace)) continue;
+                    try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
+                }
+                try mangledName.writer.print(totalSuffix, .{});
+
+                try writer.print("pub const deinit = {s};\n", .{mangledName.writer.buffered()});
+                try writer.print("extern \"c\" fn {s}(*@This()) void;\n", .{mangledName.writer.buffered()});
+            }
         };
         const Enumeration = struct {
             id: []u8,

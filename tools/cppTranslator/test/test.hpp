@@ -14,7 +14,7 @@ class Test {
     char testingChar;
 
     virtual ~Test();
-    void test() const;
+    unsigned fizzbuzzFunc(int);
 
     Test();
     Test(int i);

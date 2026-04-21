@@ -20,15 +20,18 @@ Test<T>::Test(int i) {
 }
 
 template <typename T>
-void Test<T>::test() const {
-    std::cout << "SD:LFKJDSF\n";
+inline unsigned Test<T>::fizzbuzzFunc(int i) {
+    const unsigned f = i / 5;
+    const unsigned b = i / 5;
+    return f + b;
 }
 
 template <typename T>
 Test<T>::~Test() {}
 
 void Test2::testingFunction(float delta) {
-    std::cout << delta << '\n';
+    std::cout << fizzbuzzFunc(delta)<< '\n';
+    
 }
 
 Test2::Test2() {}
@@ -38,4 +41,4 @@ float sum(float a, float b) {
     return a + b;
 }
 
-using TestInt = Test<int>;
+Test<int> t;
