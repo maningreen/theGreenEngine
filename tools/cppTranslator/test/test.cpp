@@ -4,23 +4,28 @@
 
 using namespace Foo;
 
-void Test::testingFunction(float delta) {
+template <typename T>
+void Test<T>::testingFunction(float delta) {
     std::cout << delta << ' ' << testingChar << '\n';
 }
 
-Test::Test() {
+template <typename T>
+Test<T>::Test() {
     std::cout << "Wooo\n";
 }
 
-Test::Test(int i) {
+template <typename T>
+Test<T>::Test(int i) {
     std::cout << "test alt\n";
 }
 
-void Test::test() const {
+template <typename T>
+void Test<T>::test() const {
     std::cout << "SD:LFKJDSF\n";
 }
 
-Test::~Test() {}
+template <typename T>
+Test<T>::~Test() {}
 
 void Test2::testingFunction(float delta) {
     std::cout << delta << '\n';
@@ -32,3 +37,5 @@ Test2::~Test2() {}
 float sum(float a, float b) {
     return a + b;
 }
+
+using TestInt = Test<int>;

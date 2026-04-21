@@ -138,7 +138,7 @@ const item = struct {
             var typeTypes: [count]type = undefined;
             for (std.enums.values(item.token.type), 0..) |value, i| {
                 typeNames[i] = @tagName(value);
-                typeTypes[i] = std.StringArrayHashMap(item.token.structType(value));
+                typeTypes[i] = std.array_hash_map.String(item.token.structType(value));
                 typeAttrs[i] = std.builtin.Type.StructField.Attributes{
                     .@"align" = null,
                     .@"comptime" = false,
@@ -165,35 +165,35 @@ const item = struct {
             break :blk @Union(.auto, item.token.type, &typeNames, &fieldTypes, &fieldAttrs);
         };
 
-        pub fn init(gpa: std.mem.Allocator) TokenContainer {
+        pub fn init() TokenContainer {
             var self: TokenContainer = undefined;
             inline for (@typeInfo(Data).@"struct".fields) |value| {
-                @field(self.data, value.name) = .init(gpa);
+                @field(self.data, value.name) = .empty;
             }
             return self;
         }
 
-        pub fn get(self: @This(), comptime t: item.token.type) std.StringArrayHashMap(item.token.structType(t)) {
+        pub fn get(self: @This(), comptime t: item.token.type) std.array_hash_map.String(item.token.structType(t)) {
             return @field(self.data, @tagName(t));
         }
         pub fn appendExplicit(self: *@This(), gpa: std.mem.Allocator, comptime t: item.type, value: item.token.structType(t)) !void {
             return @field(self.data, @tagName(t)).append(gpa, value);
         }
 
-        pub fn append(self: *@This(), value: anytype) !void {
+        pub fn append(self: *@This(), gpa: std.mem.Allocator, value: anytype) !void {
             const inType = @TypeOf(value);
             ensure(@hasField(@TypeOf(self.data), getBaseName(inType))) catch {
                 @panic("Error! " ++ comptime getBaseName(inType) ++ " is not acceptable!");
             };
 
-            try @field(self.data, getBaseName(inType)).put(value.id, value);
+            try @field(self.data, getBaseName(inType)).put(gpa, value.id, value);
         }
 
         pub fn deinit(self: *@This(), gpa: std.mem.Allocator) void {
             inline for (comptime std.enums.values(token.type)) |t| {
                 for (@field(self.data, @tagName(t)).values()) |*value|
                     deinitToken(@TypeOf(value.*))(value, gpa);
-                @field(self.data, @tagName(t)).deinit();
+                @field(self.data, @tagName(t)).deinit(gpa);
             }
         }
 
@@ -446,9 +446,52 @@ const item = struct {
                 if (parents.items.len >= 1) {
                     try mangledName.writer.print("N", .{});
                 }
-                for (0..parents.items.len) |j| {
-                    const i = parents.items.len - 1 - j;
+
+                const ltEscape = "<";
+                const gtEscape = ">";
+
+                const typeMap = std.static_string_map.StaticStringMap(struct { []const u8, enum {
+                    custom,
+                    primitive,
+                } }).initComptime(&.{
+                    .{ "void", .{ "v", .primitive } },
+                    .{ "wchar_t", .{ "w", .primitive } },
+                    .{ "bool", .{ "b", .primitive } },
+                    .{ "char", .{ "c", .primitive } },
+                    .{ "signed char", .{ "a", .primitive } },
+                    .{ "unsigned char", .{ "h", .primitive } },
+                    .{ "short", .{ "s", .primitive } },
+                    .{ "unsigned short", .{ "t", .primitive } },
+                    .{ "int", .{ "i", .primitive } },
+                    .{ "unsigned int", .{ "j", .primitive } },
+                    .{ "long", .{ "l", .primitive } },
+                    .{ "unsigned long", .{ "m", .primitive } },
+                    .{ "long long", .{ "x", .primitive } },
+                    .{ "unsigned long long", .{ "y", .primitive } },
+                    .{ "__int128", .{ "n", .primitive } },
+                    .{ "unsigned __int128", .{ "o", .primitive } },
+                    .{ "float", .{ "f", .primitive } },
+                    .{ "double", .{ "d", .primitive } },
+                    .{ "long double", .{ "e", .primitive } },
+                    .{ "__float128", .{ "g", .primitive } },
+                    .{ "char32_t", .{ "Di", .primitive } },
+                    .{ "char16_t", .{ "Ds", .primitive } },
+                    .{ "auto", .{ "Da", .primitive } },
+                    .{ "std::nullptr_t", .{ "Dn", .primitive } },
+                });
+
+                for (0..parents.items.len) |i| {
                     const parent = parents.items[i];
+                    if (std.mem.find(u8, parent, ltEscape)) |lt| lbl: {
+                        const gt = std.mem.find(u8, parent, gtEscape) orelse break :lbl;
+                        const templateType = parent[lt + ltEscape.len .. gt];
+                        const t = typeMap.get(templateType) orelse .{ templateType, .custom };
+                        switch (t.@"1") {
+                            .custom => try mangledName.writer.print("I{d}{s}E", .{ t.@"0".len, t.@"0" }),
+                            .primitive => try mangledName.writer.print("I{s}E", .{t.@"0"}),
+                        }
+                        continue;
+                    }
                     if (std.mem.eql(u8, parent, rootNamespace)) continue;
                     try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
                 }
@@ -619,7 +662,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
 
     const reader = &streaming_reader.interface;
 
-    var container = item.TokenContainer.init(gpa);
+    var container = item.TokenContainer.init();
     errdefer container.deinit(gpa);
 
     var state: ?item.TokenContainer.TokenUnion = null;
@@ -684,7 +727,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
             },
             .element_end => {
                 switch (state orelse continue) {
-                    inline else => |v| try container.append(v),
+                    inline else => |v| try container.append(gpa, v),
                 }
                 state = null;
             },

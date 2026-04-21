@@ -1,4 +1,10 @@
+struct Bar {
+    int _3;
+};
+
 namespace Foo {
+
+template <typename T>
 class Test {
   public:
     virtual void testingFunction(float delta);
@@ -14,7 +20,7 @@ class Test {
     Test(int i);
 };
 
-class Test2 : public Test {
+class Test2 : public Test<Bar> {
     void testingFunction(float delta) override;
     Test2();
     ~Test2();
