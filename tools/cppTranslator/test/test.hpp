@@ -1,3 +1,4 @@
+namespace Foo {
 class Test {
   public:
     virtual void testingFunction(float delta);
@@ -20,3 +21,5 @@ class Test2 : public Test {
 };
 
 float sum(float a, float b);
+
+};  // namespace Foo

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+using namespace Foo;
+
 void Test::testingFunction(float delta) {
     std::cout << delta << ' ' << testingChar << '\n';
 }

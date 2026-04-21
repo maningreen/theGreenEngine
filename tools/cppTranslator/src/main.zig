@@ -31,10 +31,7 @@ fn isFundamental(comptime T: type) bool {
     };
 }
 fn isNamespaceType(comptime T: type) bool {
-    return switch (@typeInfo(T)) {
-        .@"enum", .@"union", .@"struct", .@"opaque" => true,
-        else => false,
-    };
+    return switch (@typeInfo(T)) {};
 }
 
 fn getBaseName(comptime T: type) []const u8 {
@@ -258,7 +255,7 @@ const item = struct {
             @"align": u64,
             bases: ?[]u8 = null,
 
-            pub fn write(self: Class, data: TokenContainer, writer: *std.Io.Writer) !void {
+            pub fn write(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 var paddingIndex: u64 = 0;
                 try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
@@ -316,7 +313,6 @@ const item = struct {
                                 }
                             },
                             .Field => |field| {
-                                std.log.debug("field name {s}", .{field.name});
                                 switch (field.access) {
                                     .public => {
                                         try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
@@ -351,9 +347,7 @@ const item = struct {
                             },
                             .Destructor => |destructor| {
                                 if (!destructor.@"inline") {
-                                    // try writer.print("extern \"c\" fn @\"~{s}\"(*@This()) void;\n", .{self.name});
-                                    // try writer.print("pub const deinit = @\"~{s}\"\n;\n", .{self.name});
-                                    try destructor.writeMangled(data, writer);
+                                    try destructor.writeMangled(gpa, data, writer);
                                 } else {
                                     // write a dummy deinit
                                     try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
@@ -418,29 +412,50 @@ const item = struct {
             access: Access,
             @"inline": bool = false,
 
-            pub fn writeMangled(self: Destructor, data: item.TokenContainer, writer: *std.Io.Writer) (error{Inline} || std.Io.Writer.Error)!void {
+            pub fn writeMangled(self: Destructor, gpa: std.mem.Allocator, data: item.TokenContainer, writer: *std.Io.Writer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)!void {
                 if (self.@"inline") return error.Inline;
 
                 const manglePrefix = "_Z";
                 const rootNamespace = "::";
                 const totalSuffix = "D0Ev";
-                try writer.print(manglePrefix, .{});
 
-                const parent = data.find(self.context) orelse unreachable;
-                switch (parent) {
-                    .Class, .Struct => |class| {
-                        const context = data.find(class.context) orelse unreachable;
-                        switch (context) {
-                            inline .Class, .Namespace, .Struct => |grandpa| {
-                                if (std.mem.eql(u8, grandpa.name, rootNamespace)) {
-                                    try writer.print("{d}{s};\n" ++ totalSuffix, .{ class.name.len, class.name });
-                                } else undefined;
+                var mangledName = std.Io.Writer.Allocating.init(gpa);
+                defer mangledName.deinit();
+
+                var parents: std.ArrayList([]const u8) = try .initCapacity(gpa, 1);
+                defer parents.deinit(gpa);
+
+                {
+                    var parent = self.context;
+                    while (data.find(parent)) |grandparent| {
+                        switch (grandparent) {
+                            inline .Class, .Struct => |parentVal| {
+                                parent = parentVal.context;
+                                try parents.append(gpa, parentVal.name);
+                            },
+                            .Namespace => |namespace| {
+                                parent = namespace.context orelse break;
+                                try parents.append(gpa, namespace.name);
                             },
                             else => unreachable,
                         }
-                    },
-                    else => unreachable,
+                    }
                 }
+
+                try mangledName.writer.print(manglePrefix, .{});
+                if (parents.items.len >= 1) {
+                    try mangledName.writer.print("N", .{});
+                }
+                for (0..parents.items.len) |j| {
+                    const i = parents.items.len - 1 - j;
+                    const parent = parents.items[i];
+                    if (std.mem.eql(u8, parent, rootNamespace)) continue;
+                    try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
+                }
+                try mangledName.writer.print(totalSuffix, .{});
+
+                try writer.print("pub const deinit = {s};\n", .{mangledName.writer.buffered()});
+                try writer.print("extern \"c\" fn {s}(*@This()) void;\n", .{mangledName.writer.buffered()});
             }
         };
         const Namespace = struct {
@@ -686,9 +701,20 @@ fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []co
     defer container.deinit(gpa);
     const fundamentalTypes = container.get(.FundamentalType);
     for (fundamentalTypes.values()) |t| {
-        const @"type": enum { float, int } =
+        const FundTypes = enum {
+            float,
+            int,
+            bool,
+            void,
+        };
+
+        const @"type": FundTypes =
             if (std.mem.find(u8, t.name, "float") != null or std.mem.find(u8, t.name, "double") != null)
                 .float
+            else if (std.mem.eql(u8, t.name, "void"))
+                .void
+            else if (std.mem.eql(u8, t.name, "bool"))
+                .bool
             else
                 .int;
 
@@ -705,6 +731,9 @@ fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []co
                 };
                 try out.print("const {s} = {c}{d};\n", .{ t.id, prefix, t.size });
             },
+            inline .bool, .void => |v| {
+                try out.print("const {s} = " ++ @tagName(v) ++ ";\n", .{t.id});
+            },
         }
     }
     const typedefs = container.get(.Typedef);
@@ -714,10 +743,10 @@ fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []co
     }
     const classes = container.get(.Class);
     for (classes.values()) |class|
-        try class.write(container, out);
+        try class.write(gpa, container, out);
     const structs = container.get(.Struct);
     for (structs.values()) |class|
-        try class.write(container, out);
+        try class.write(gpa, container, out);
     const ptrTypes = container.get(.PointerType);
     for (ptrTypes.values()) |ptrT|
         try out.print("const {s} = ?*{s};\n", .{ ptrT.id, ptrT.type });
