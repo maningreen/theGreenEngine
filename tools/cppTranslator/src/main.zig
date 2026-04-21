@@ -244,6 +244,7 @@ const item = struct {
             arguments: ?[]Argument = null,
             access: Access,
             virtual: bool,
+            @"inline": bool,
             @"const": bool,
         };
         const Class = struct {
@@ -277,6 +278,8 @@ const item = struct {
                         if (containerChild != t[0]) continue;
                         switch (containerChild) {
                             .Method => |method| {
+                                // inline methods have no labels, so we can't link
+                                if (method.@"inline") continue;
                                 const prefix = if (method.@"const") "" else "*";
                                 switch (t[1]) {
                                     0 => {
