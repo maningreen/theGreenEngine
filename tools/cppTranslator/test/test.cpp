@@ -39,11 +39,3 @@ float sum(float a, float b) {
 }
 
 Test<int> t;
-
-void* testFunc() {
-    Test2 c;
-
-    void (*ptr)(void) = (void (*)(void))(&c);
-    std::cout << ptr << '\n';
-    return (void*)ptr;
-}

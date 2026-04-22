@@ -202,7 +202,11 @@ const item = struct {
                 var paddingIndex: u64 = 0;
                 try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-                var initIterator: u64 = 1;
+                var initIterator: u64 = 0;
+
+                var fields = std.ArrayList([]const u8).empty;
+                defer fields.deinit(gpa);
+                var virtual: bool = false;
 
                 // second member of tuple is `pass`
                 const order = [_]@Tuple(&.{ @"type", u8 }){
@@ -224,27 +228,15 @@ const item = struct {
                                 const prefix = if (method.@"const") "" else "*";
                                 switch (t[1]) {
                                     0 => {
-                                        switch (method.access) {
-                                            .public => {
-                                                if (method.virtual) {
-                                                    try writer.print("{s}: *const fn ({s}@This(),", .{ method.name, prefix });
-                                                    for (method.arguments orelse &.{}) |arg|
-                                                        try writer.print("{s}, ", .{arg.type});
-                                                    try writer.print(") callconv(.c) {s} = {s},\n", .{ method.returns, method.mangled });
-                                                } else continue;
-                                            },
-                                            else => {
-                                                try writer.print("_{d}: u{d},\n", .{ paddingIndex, @bitSizeOf(usize) });
-                                                paddingIndex += 1;
-                                            },
-                                        }
+                                        virtual = virtual or method.virtual;
                                     },
                                     1 => {
                                         switch (method.access) {
                                             .public => {
-                                                if (!method.virtual) {
-                                                    try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
-                                                }
+                                                // TODO create an interface to call virtual functions
+                                                if (method.virtual)
+                                                    continue;
+                                                try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
                                                 try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), \n", .{ method.mangled, prefix });
                                                 for (method.arguments orelse &.{}) |arg|
                                                     try writer.print("{s},\n", .{arg.type});
@@ -257,21 +249,7 @@ const item = struct {
                                 }
                             },
                             .Field => |field| {
-                                switch (field.access) {
-                                    .public => {
-                                        try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
-                                    },
-                                    else => {
-                                        // Get size of type
-                                        const tType = data.find(field.type) orelse @panic("Errror! type not found!");
-                                        const size = switch (tType) {
-                                            inline .Class, .Struct, .FundamentalType, .Enumeration, .PointerType, .ReferenceType => |j| j.size,
-                                            .ArrayType => @bitSizeOf(usize),
-                                            else => undefined,
-                                        };
-                                        try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
-                                    },
-                                }
+                                try fields.append(gpa, field.id);
                             },
                             .Constructor => |constructor| {
                                 switch (constructor.access) {
@@ -300,6 +278,35 @@ const item = struct {
                     }
                     memberIterator = std.mem.splitScalar(u8, self.members, ' ');
                 }
+
+                const cmp = (struct {
+                    pub fn cmp(d: item.TokenContainer, idA: []const u8, idB: []const u8) bool {
+                        const a = d.find(idA).?.Field.offset;
+                        const b = d.find(idB).?.Field.offset;
+                        return a < b;
+                    }
+                }).cmp;
+                std.mem.sort([]const u8, fields.items, data, cmp);
+
+                for (fields.items) |fieldId| {
+                    const field = data.find(fieldId).?.Field;
+                    switch (field.access) {
+                        .public => {
+                            try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
+                        },
+                        else => {
+                            // Get size of type
+                            const tType = data.find(field.type) orelse @panic("Errror! type not found!");
+                            const size = switch (tType) {
+                                inline .Class, .Struct, .FundamentalType, .Enumeration, .PointerType, .ReferenceType => |j| j.size,
+                                .ArrayType => @bitSizeOf(usize),
+                                else => undefined,
+                            };
+                            try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
+                        },
+                    }
+                }
+
                 try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
             }
         };
@@ -407,7 +414,7 @@ const item = struct {
                     if (std.mem.eql(u8, parent, rootNamespace)) continue;
                     try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
                 }
-                try mangledName.writer.print("C{d}E", .{constructorIndex});
+                try mangledName.writer.print("C{d}E", .{constructorIndex + 1});
                 for (self.arguments orelse &.{}) |arg| {
                     var t: []const u8 = arg.type;
                     while (true) {
