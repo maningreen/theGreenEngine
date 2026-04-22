@@ -255,8 +255,32 @@ const item = struct {
                                 switch (constructor.access) {
                                     .public => {
                                         if (!constructor.@"inline") {
-                                            try constructor.writeMangled(initIterator, gpa, data, writer);
+                                            const mangled = try constructor.writeMangled(initIterator, gpa, data);
+                                            defer gpa.free(mangled);
                                             initIterator += 1;
+                                            try writer.print(
+                                                \\pub fn init{d}(
+                                            , .{initIterator});
+                                            for (constructor.arguments orelse &.{}, 0..) |arg, i| {
+                                                try writer.print("_{d}: {s}, ", .{ i, arg.type });
+                                            }
+                                            try writer.print(
+                                                \\) @This() {{
+                                                \\  var t: @This() = undefined;
+                                                \\  {s}(&t, 
+                                            , .{mangled});
+                                            for (constructor.arguments orelse &.{}, 0..) |_, i|
+                                                try writer.print("_{d}, ", .{i});
+                                            try writer.print(
+                                                \\);
+                                                \\  return t;
+                                                \\}}
+                                                \\
+                                            , .{});
+                                            try writer.print("extern \"c\" fn {s}(*@This(), ", .{mangled});
+                                            for (constructor.arguments orelse &.{}) |arg|
+                                                try writer.print("{s}, ", .{arg.type});
+                                            try writer.print(") void;\n", .{});
                                         }
                                     },
                                     else => continue,
@@ -277,6 +301,11 @@ const item = struct {
                         }
                     }
                     memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+                }
+
+                if (virtual) {
+                    try writer.print("_{d}: u{d},\n", .{ paddingIndex, @bitSizeOf(usize) });
+                    paddingIndex += 1;
                 }
 
                 const cmp = (struct {
@@ -303,6 +332,7 @@ const item = struct {
                                 else => undefined,
                             };
                             try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
+                            paddingIndex += 1;
                         },
                     }
                 }
@@ -332,7 +362,8 @@ const item = struct {
             arguments: ?[]Argument = null,
             @"inline": bool = false,
 
-            pub fn writeMangled(self: Constructor, constructorIndex: u64, gpa: std.mem.Allocator, data: item.TokenContainer, writer: *std.Io.Writer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)!void {
+            /// user owns returned memory
+            pub fn writeMangled(self: Constructor, constructorIndex: u64, gpa: std.mem.Allocator, data: item.TokenContainer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)![]u8 {
                 if (self.@"inline") return error.Inline;
 
                 const manglePrefix = "_Z";
@@ -448,9 +479,7 @@ const item = struct {
                     // we break from every other case
                     try mangledName.writer.print(comptime typeMap.get("void").?.@"0", .{});
                 }
-
-                try writer.print("pub const init{d} = {s};\n", .{ constructorIndex, mangledName.writer.buffered() });
-                try writer.print("extern \"c\" fn {s}(*@This()) void;\n", .{mangledName.writer.buffered()});
+                return mangledName.toOwnedSlice();
             }
         };
         const Enumeration = struct {
