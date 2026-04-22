@@ -7,21 +7,22 @@ namespace Foo {
 template <typename T>
 class Test {
   public:
-    virtual void testingFunction(float delta);
+    virtual void testingFunction(double delta);
 
     int testingItem;
     int* testingptr;
     char testingChar;
 
-    virtual ~Test();
-    unsigned fizzbuzzFunc(int);
+    ~Test();
+    void test() const;
 
     Test();
     Test(int i);
 };
 
 class Test2 : public Test<Bar> {
-    void testingFunction(float delta) override;
+  public:
+    void testingFunction(double delta) override;
     Test2();
     ~Test2();
 };

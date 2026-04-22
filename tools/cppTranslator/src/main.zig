@@ -255,13 +255,14 @@ const item = struct {
             size: u64,
             @"align": u64,
             bases: ?[]u8 = null,
+            incomplete: bool = false,
 
             pub fn write(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                if (self.incomplete) return;
                 var paddingIndex: u64 = 0;
                 try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
                 var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-                var initIterator: u64 = 0;
-                // TODO: sort items: virtual functions, fields
+                var initIterator: u64 = 1;
 
                 // second member of tuple is `pass`
                 const order = [_]@Tuple(&.{ @"type", u8 }){
@@ -336,12 +337,7 @@ const item = struct {
                                 switch (constructor.access) {
                                     .public => {
                                         if (!constructor.@"inline") {
-                                            try writer.print("extern fn @\"{s}{d}\"(", .{ self.name, initIterator });
-                                            if (constructor.arguments != null)
-                                                for (constructor.arguments.?) |arg| {
-                                                    try writer.print("{s}, ", .{arg.type});
-                                                };
-                                            try writer.print(") callconv(.c) @This();\npub const init{d} = @\"{s}{d}\";\n", .{ initIterator, self.name, initIterator });
+                                            try constructor.writeMangled(initIterator, gpa, data, writer);
                                             initIterator += 1;
                                         }
                                     },
@@ -389,12 +385,11 @@ const item = struct {
             arguments: ?[]Argument = null,
             @"inline": bool = false,
 
-            pub fn writeMangled(self: Destructor, constructorIndex: u64, gpa: std.mem.Allocator, data: item.TokenContainer, writer: *std.Io.Writer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)!void {
+            pub fn writeMangled(self: Constructor, constructorIndex: u64, gpa: std.mem.Allocator, data: item.TokenContainer, writer: *std.Io.Writer) (error{ Inline, OutOfMemory } || std.Io.Writer.Error)!void {
                 if (self.@"inline") return error.Inline;
 
                 const manglePrefix = "_Z";
                 const rootNamespace = "::";
-                const totalSuffix = "";
 
                 var mangledName = std.Io.Writer.Allocating.init(gpa);
                 defer mangledName.deinit();
@@ -458,7 +453,7 @@ const item = struct {
                 });
 
                 for (0..parents.items.len) |i| {
-                    const parent = parents.items[i];
+                    const parent = parents.items[parents.items.len - 1 - i];
                     if (std.mem.find(u8, parent, ltEscape)) |lt| lbl: {
                         const gt = std.mem.find(u8, parent, gtEscape) orelse break :lbl;
                         const templateType = parent[lt + ltEscape.len .. gt];
@@ -472,9 +467,42 @@ const item = struct {
                     if (std.mem.eql(u8, parent, rootNamespace)) continue;
                     try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
                 }
-                try mangledName.writer.print(totalSuffix, .{});
+                try mangledName.writer.print("C{d}E", .{constructorIndex});
+                for (self.arguments orelse &.{}) |arg| {
+                    var t: []const u8 = arg.type;
+                    while (true) {
+                        switch ((data.find(t) orelse unreachable)) {
+                            .FundamentalType => |fund| {
+                                const value = typeMap.get(fund.name) orelse std.debug.panic("reached invalid type: {s}", .{fund.name});
+                                try mangledName.writer.print("{s}", .{value.@"0"});
+                                break;
+                            },
+                            inline .ArrayType, .PointerType => |ptr| {
+                                try mangledName.writer.print("P", .{});
+                                t = ptr.type;
+                            },
+                            .ReferenceType => |ref| {
+                                try mangledName.writer.print("R", .{});
+                                t = ref.type;
+                            },
+                            inline .Class, .Struct => |cplx| {
+                                try mangledName.writer.print("{d}{s}", .{ cplx.name.len, cplx.name });
+                                break;
+                            },
+                            .CvQualifiedType => |cv| {
+                                try mangledName.writer.print("{s}", .{if (cv.@"const") "K" else ""});
+                                t = cv.type;
+                            },
+                            else => unreachable,
+                        }
+                    }
+                } else {
+                    // the only way to get here is if there're no arguments
+                    // we break from every other case
+                    try mangledName.writer.print(comptime typeMap.get("void").?.@"0", .{});
+                }
 
-                try writer.print("pub const deinit = {s};\n", .{mangledName.writer.buffered()});
+                try writer.print("pub const init{d} = {s};\n", .{ constructorIndex, mangledName.writer.buffered() });
                 try writer.print("extern \"c\" fn {s}(*@This()) void;\n", .{mangledName.writer.buffered()});
             }
         };
@@ -509,7 +537,7 @@ const item = struct {
 
                 const manglePrefix = "_Z";
                 const rootNamespace = "::";
-                const totalSuffix = "D0Ev";
+                const totalSuffix = "D1Ev";
 
                 var mangledName = std.Io.Writer.Allocating.init(gpa);
                 defer mangledName.deinit();
@@ -573,7 +601,7 @@ const item = struct {
                 });
 
                 for (0..parents.items.len) |i| {
-                    const parent = parents.items[i];
+                    const parent = parents.items[parents.items.len - 1 - i];
                     if (std.mem.find(u8, parent, ltEscape)) |lt| lbl: {
                         const gt = std.mem.find(u8, parent, gtEscape) orelse break :lbl;
                         const templateType = parent[lt + ltEscape.len .. gt];

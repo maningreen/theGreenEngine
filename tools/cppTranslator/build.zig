@@ -30,7 +30,7 @@ pub fn build(b: *std.Build) void {
         runExe.addArgs(args);
     }
 
-    const runTest = b.step("runtest", "Runs a simple test");
+    const runTest = b.step("test", "runs tests");
     runTest.dependOn(&exe.step);
 
     const runTestMod = b.createModule(.{
