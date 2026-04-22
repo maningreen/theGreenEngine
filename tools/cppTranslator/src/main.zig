@@ -67,66 +67,6 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
     return contents;
 }
 
-fn printT(gpa: std.mem.Allocator, indentation: u8, prefix: []const u8, val: anytype) std.mem.Allocator.Error!void {
-    const fieldInfo = @typeInfo(@TypeOf(val));
-    const iprefix: []u8 = try gpa.alloc(u8, indentation);
-    for (iprefix) |*element| {
-        element.* = ' ';
-    }
-    defer gpa.free(iprefix);
-    if (@TypeOf(val) == []const u8 or @TypeOf(val) == []u8) {
-        return;
-    }
-    switch (fieldInfo) {
-        .bool => {
-            std.debug.print("{s} {s}: {s}\n", .{ iprefix, prefix, if (val) "true" else "false" });
-        },
-        .int, .float, .comptime_float, .comptime_int => {
-            std.debug.print("{s} {s}: {d}\n", .{ iprefix, prefix, val });
-        },
-        .array => |ari| {
-            const nprefix: []const u8 = try std.fmt.allocPrint(gpa, "\t{s}", .{iprefix});
-            defer gpa.free(nprefix);
-            std.debug.print("{s} {s}:\n", .{ iprefix, prefix });
-            for (ari) |i| {
-                try printT(gpa, indentation + 1, "", i);
-            }
-        },
-        .optional => {
-            if (val) |v|
-                try printT(gpa, indentation, prefix, v)
-            else
-                std.debug.print("{s} {s}: null\n", .{ iprefix, prefix });
-        },
-        .@"struct" => |info| {
-            inline for (info.fields) |field| {
-                try printT(gpa, indentation + 1, field.name, @field(val, field.name));
-            }
-        },
-        .@"union" => {
-            try printT(gpa, indentation, "", @field(val, @tagName(val)));
-        },
-        .@"enum", .enum_literal => {
-            std.debug.print("{s} {s}: {s}\n", .{ iprefix, prefix, @tagName(val) });
-        },
-        .pointer => |i| {
-            switch (i.size) {
-                .c, .one => {
-                    @compileLog("one");
-                    std.debug.print("{s} {s}: {x}", .{ iprefix, prefix, val });
-                },
-                .slice, .many => {
-                    std.debug.print("{s} {s}:\n", .{ iprefix, prefix });
-                    for (val) |value| {
-                        try printT(gpa, indentation + 1, "", value);
-                    }
-                },
-            }
-        },
-        else => undefined,
-    }
-}
-
 const item = struct {
     const TokenContainer = struct {
         data: Data,
