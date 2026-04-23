@@ -676,22 +676,30 @@ const item = struct {
 
             pub fn write(selfM: ?@This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 const members = comptime [_]token.type{
-                    .Class,
-                    .Struct,
-                    .Typedef,
-                    .Function,
-                    .Namespace,
-                    .Enumeration,
                     .FundamentalType,
                     .ArrayType,
                     .CvQualifiedType,
                     .PointerType,
                     .ReferenceType,
+                    .Typedef,
+                    .Namespace,
+                    .Function,
+                    .Class,
+                    .Struct,
+                    .Enumeration,
                 };
+
+                const isroot = if (selfM) |self| std.mem.eql(u8, self.name, "::") else false;
+
+                if (!isroot)
+                    if (selfM) |self|
+                        try writer.print("pub const {s} = struct {{\n", .{self.name});
 
                 inline for (members) |member| {
                     const values = data.get(member);
+                    std.log.debug("Looping over {s}", .{@tagName(member)});
                     for (values.values()) |value| {
+                        std.log.debug("Found value {s} ({s})", .{ value.id, @tagName(member) });
                         if (!@hasField(item.token.structType(member), "context")) {
                             if (selfM == null) {
                                 try value.write(gpa, data, writer);
@@ -700,21 +708,22 @@ const item = struct {
                         }
 
                         if (selfM) |self| {
-                            const isroot = std.mem.eql(u8, self.name, "::");
-
-                            if (!isroot) {
-                                try writer.print("pub const {s} = struct {{\n", .{self.name});
-                            }
-
                             const inSelf = switch (@typeInfo(@TypeOf(value.context))) {
                                 .optional => std.mem.eql(u8, self.id, value.context orelse continue),
                                 else => std.mem.eql(u8, self.id, value.context),
-                            };
+                            } and if (member == .Namespace) !std.mem.eql(u8, self.id, value.id) else true;
+
+                            std.log.debug("Context of item: {s}, this context: {s}, {s}", .{
+                                switch (@typeInfo(@TypeOf(value.context))) {
+                                    .optional => value.context orelse "null",
+                                    else => value.context,
+                                },
+                                self.id,
+                                if (inSelf) "fits" else "doesn't fit",
+                            });
+
                             if (inSelf)
                                 try value.write(gpa, data, writer);
-
-                            if (!isroot)
-                                try writer.print("}};\n", .{});
                         } else {
                             const inSelf = switch (@typeInfo(@TypeOf(value.context))) {
                                 .optional => value.context == null,
@@ -725,6 +734,9 @@ const item = struct {
                         }
                     }
                 }
+                if (!isroot)
+                    if (selfM) |_|
+                        try writer.print("}};\n", .{});
             }
         };
         const Typedef = struct {
