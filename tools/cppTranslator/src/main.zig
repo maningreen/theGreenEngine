@@ -30,9 +30,6 @@ fn isFundamental(comptime T: type) bool {
         else => false,
     };
 }
-fn isNamespaceType(comptime T: type) bool {
-    return switch (@typeInfo(T)) {};
-}
 
 fn getBaseName(comptime T: type) []const u8 {
     const full_name = @typeName(T);
@@ -48,7 +45,7 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
     const argv = &.{ "castxml", "--castxml-output=1", path, "-o", "-" };
     var child = try std.process.spawn(io, .{
         .argv = argv,
-        .stderr = .ignore, // why is this ignore? well, because we want to ignore global headers.
+        .stderr = .close, // why is this ignore? well, because we want to ignore global headers.
         .cwd = .inherit,
         .stdin = .ignore,
         .stdout = .pipe,
@@ -262,7 +259,9 @@ const item = struct {
                                                 \\pub fn init{d}(
                                             , .{initIterator});
                                             for (constructor.arguments orelse &.{}, 0..) |arg, i| {
-                                                try writer.print("_{d}: {s}, ", .{ i, arg.type });
+                                                const name = try namespacedType(arg.type, data, gpa) orelse continue;
+                                                defer gpa.free(name);
+                                                try writer.print("_{d}: {s}, ", .{ i, name });
                                             }
                                             try writer.print(
                                                 \\) @This() {{
@@ -295,7 +294,10 @@ const item = struct {
                                 }
                             },
                             .Typedef => |td| {
-                                try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, td.type });
+                                const name = try namespacedType(td.type, data, gpa) orelse continue;
+                                defer gpa.free(name);
+
+                                try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, name });
                             },
                             else => continue,
                         }
@@ -560,7 +562,7 @@ const item = struct {
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                try writer.print("const {s} = ?*{s};\n", .{ self.id, self.type });
+                try writer.print("const {s} = ?*{s}; //ptr type\n", .{ self.id, self.type });
             }
         };
         const ReferenceType = struct {
@@ -569,9 +571,9 @@ const item = struct {
             size: u64,
             @"align": u64,
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
-                _ = gpa;
-                _ = data;
-                try writer.print("const {s} = *{s};\n", .{ self.id, self.type });
+                const name = try namespacedType(self.type, data, gpa) orelse unreachable;
+                defer gpa.free(name);
+                try writer.print("const {s} = *{s}; //ref type\n", .{ self.id, name });
             }
         };
         const Destructor = struct {
@@ -584,7 +586,6 @@ const item = struct {
                 if (self.@"inline") return error.Inline;
 
                 const manglePrefix = "_Z";
-                const rootNamespace = "::";
                 const totalSuffix = "D1Ev";
 
                 var mangledName = std.Io.Writer.Allocating.init(gpa);
@@ -660,7 +661,7 @@ const item = struct {
                         }
                         continue;
                     }
-                    if (std.mem.eql(u8, parent, rootNamespace)) continue;
+                    if (std.mem.eql(u8, parent, Namespace.rootNamespace)) continue;
                     try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
                 }
                 try mangledName.writer.print(totalSuffix, .{});
@@ -673,6 +674,9 @@ const item = struct {
             id: []u8,
             name: []u8,
             context: ?[]u8 = null,
+
+            pub const rootNamespaceId = "_1";
+            pub const rootNamespace = "::";
 
             pub fn write(selfM: ?@This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 const members = comptime [_]token.type{
@@ -689,7 +693,11 @@ const item = struct {
                     .Enumeration,
                 };
 
-                const isroot = if (selfM) |self| std.mem.eql(u8, self.name, "::") else false;
+                const isroot =
+                    if (selfM) |self|
+                        std.mem.eql(u8, self.id, Namespace.rootNamespaceId)
+                    else
+                        false;
 
                 if (!isroot)
                     if (selfM) |self|
@@ -748,8 +756,8 @@ const item = struct {
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                try writer.print("const {s} = {s};\n", .{ self.id, self.name });
-                try writer.print("const {s} = {s};\n", .{ self.name, self.type });
+                try writer.print("const {s} = {s}; // typedef\n", .{ self.id, self.name });
+                try writer.print("const {s} = {s}; // typedef\n", .{ self.name, self.type });
             }
         };
         const ArrayType = struct {
@@ -760,7 +768,7 @@ const item = struct {
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                try writer.print("const {s} = ?[*]{s};\n", .{ self.id, self.type });
+                try writer.print("const {s} = ?[*]{s}; // arr type\n", .{ self.id, self.type });
             }
         };
         const CvQualifiedType = struct {
@@ -768,9 +776,9 @@ const item = struct {
             type: []u8,
             @"const": bool,
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
-                _ = gpa;
-                _ = data;
-                try writer.print("const {s} = {s};\n", .{ self.id, self.type });
+                const name = try namespacedType(self.type, data, gpa) orelse unreachable;
+                defer gpa.free(name);
+                try writer.print("const {s} = {s}; // cv type\n", .{ self.id, name });
             }
         };
         const Function = struct {
@@ -801,6 +809,7 @@ const item = struct {
             }
         };
         const Argument = struct {
+            // name: []u8,
             type: []u8,
         };
 
@@ -862,6 +871,51 @@ const item = struct {
                 if (std.mem.eql(u8, str, @tagName(T)))
                     return T;
             return null;
+        }
+
+        /// writes the full namespaced type
+        /// returns the outputted slice
+        pub fn namespacedType(id: []const u8, data: TokenContainer, gpa: std.mem.Allocator) !?[]u8 {
+            var parent = switch (data.find(id) orelse return null) {
+                inline else => |val| val.id,
+            };
+
+            var parents: std.ArrayList([]const u8) = try .initCapacity(gpa, 1);
+            defer {
+                for (parents.items) |value|
+                    gpa.free(value);
+                parents.deinit(gpa);
+            }
+
+            const fmt =
+                \\@"{s}"
+            ;
+
+            while (data.find(parent)) |grandparent| {
+                switch (grandparent) {
+                    inline else => |v| {
+                        std.log.debug("Finding parent: {s}", .{v.id});
+                    },
+                }
+                switch (grandparent) {
+                    inline .Class, .Struct => |parentVal| {
+                        parent = parentVal.context;
+                        try parents.append(gpa, try std.fmt.allocPrint(gpa, fmt, .{parentVal.name}));
+                    },
+                    .Namespace => |namespace| {
+                        parent = namespace.context orelse break;
+                        try parents.append(gpa, try std.fmt.allocPrint(gpa, fmt, .{namespace.name}));
+                    },
+                    inline .FundamentalType, .CvQualifiedType, .ReferenceType => |t| {
+                        try parents.append(gpa, try std.fmt.allocPrint(gpa, fmt, .{t.id}));
+                        break;
+                    },
+                    inline else => |_, t| @panic("reached " ++ @tagName(t) ++ ", undefined!"),
+                }
+            }
+            std.mem.reverse([]const u8, parents.items);
+
+            return try std.mem.join(gpa, ".", parents.items);
         }
     };
 
@@ -961,6 +1015,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
                                     const attribute_name = reader.attributeNameNs(i);
                                     const value = try reader.attributeValue(i);
                                     try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
+                                    std.log.debug("Found argument: {s}", .{ s.arguments.?[i].type});
                                 }
                                 s.arguments.?[s.arguments.?.len - 1] = arg;
                             } else {
@@ -974,7 +1029,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
                                 s.arguments.?[s.arguments.?.len - 1] = arg;
                             }
                         }
-                        continue;
+                        // continue;
                     },
                 };
                 if (state != null) continue;

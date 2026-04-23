@@ -17,8 +17,7 @@ class Test {
     void test() const;
 
     Test();
-    Test(int i);
-};
+    Test(int i); };
 
 class Test2 : public Test<Bar> {
   public:
@@ -30,3 +29,5 @@ class Test2 : public Test<Bar> {
 float sum(float a, float b);
 
 };  // namespace Foo
+
+float sum(float a, float b);

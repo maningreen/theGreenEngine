@@ -33,6 +33,10 @@ Test2::Test2() {
 }
 Test2::~Test2() {}
 
+float Foo::sum(float a, float b) {
+    return a + b;
+}
+
 float sum(float a, float b) {
     return a + b;
 }
