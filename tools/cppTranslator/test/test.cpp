@@ -4,6 +4,10 @@
 
 using namespace Foo;
 
+extern "C" {
+    void callstack();
+}
+
 template <typename T>
 void Test<T>::testingFunction(double delta) {
     std::cout << delta << ' ' << testingChar << '\n';
@@ -11,7 +15,6 @@ void Test<T>::testingFunction(double delta) {
 
 template <typename T>
 Test<T>::Test() {
-    std::cout << "Wooo\n";
 }
 
 template <typename T>
@@ -31,6 +34,8 @@ Test2::Test2() {
     testingChar = 0;
     testingItem = 0;
     testingptr = (int*)0;
+    callstack();
+    std::cout << "Wooo\n";
 }
 Test2::~Test2() {}
 

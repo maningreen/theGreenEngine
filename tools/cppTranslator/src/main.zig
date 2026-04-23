@@ -262,18 +262,18 @@ const item = struct {
                                                 \\pub fn init{d}(
                                             , .{initIterator});
                                             for (constructor.arguments orelse &.{}, 0..) |arg, i| {
-                                                try writer.print("_{d}: {s}, ", .{ i, arg.type });
+                                                try writer.print("_{d}: {s}, ", .{i, arg.type});
                                             }
                                             try writer.print(
                                                 \\) @This() {{
-                                                \\  var t: @This() = undefined;
-                                                \\  {s}(&t, 
-                                            , .{mangled});
+                                                \\  var t: [{d}]u8 align({d}) = undefined;
+                                                \\  {s}(@ptrCast(&t),
+                                            , .{self.size / 8, self.@"align", mangled});
                                             for (constructor.arguments orelse &.{}, 0..) |_, i|
                                                 try writer.print("_{d}, ", .{i});
                                             try writer.print(
                                                 \\);
-                                                \\  return t;
+                                                \\  return @as(*@This(), @ptrCast(&t)).*;
                                                 \\}}
                                                 \\
                                             , .{});
