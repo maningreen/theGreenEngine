@@ -262,13 +262,13 @@ const item = struct {
                                                 \\pub fn init{d}(
                                             , .{initIterator});
                                             for (constructor.arguments orelse &.{}, 0..) |arg, i| {
-                                                try writer.print("_{d}: {s}, ", .{i, arg.type});
+                                                try writer.print("_{d}: {s}, ", .{ i, arg.type });
                                             }
                                             try writer.print(
                                                 \\) @This() {{
                                                 \\  var t: [{d}]u8 align({d}) = undefined;
                                                 \\  {s}(@ptrCast(&t),
-                                            , .{self.size / 8, self.@"align", mangled});
+                                            , .{ self.size / 8, self.@"align", mangled });
                                             for (constructor.arguments orelse &.{}, 0..) |_, i|
                                                 try writer.print("_{d}, ", .{i});
                                             try writer.print(
@@ -489,18 +489,42 @@ const item = struct {
             scoped: bool,
             size: u64,
             @"align": u64,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                writer.print(
+                    \\pub const {s} = enum (u{d} align({d})) { };
+                    \\const {s} = {s};
+                , .{
+                    self.name,
+                    self.size,
+                    self.@"align",
+                    self.id,
+                    self.name,
+                });
+            }
         };
         const PointerType = struct {
             id: []u8,
             type: []u8,
             size: u64,
             @"align": u64,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                writer.print("const {s} = {s}", .{ self.id, self.type });
+            }
         };
         const ReferenceType = struct {
             id: []u8,
             type: []u8,
             size: u64,
             @"align": u64,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                writer.print("const {s} = {s}", .{ self.id, self.type });
+            }
         };
         const Destructor = struct {
             id: []u8,
