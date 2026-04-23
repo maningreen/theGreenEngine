@@ -346,6 +346,53 @@ const item = struct {
             name: []u8,
             size: u64,
             @"align": u64,
+
+            const FundTypes = enum {
+                float,
+                int,
+                bool,
+                void,
+            };
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                const t: FundTypes =
+                    if (std.mem.find(u8, self.name, "float") != null or std.mem.find(u8, self.name, "double") != null)
+                        .float
+                    else if (std.mem.eql(u8, self.name, "void"))
+                        .void
+                    else if (std.mem.eql(u8, self.name, "bool"))
+                        .bool
+                    else
+                        .int;
+
+                switch (t) {
+                    .float => {
+                        try writer.print("const {s} = f{d};\n", .{
+                            self.id,
+                            self.size,
+                        });
+                    },
+                    .int => {
+                        const signed: std.builtin.Signedness = if (std.mem.find(u8, self.name, "unsigned") == null) .signed else .unsigned;
+
+                        const prefix: u8 = switch (signed) {
+                            .signed => 'i',
+                            .unsigned => 'u',
+                        };
+                        try writer.print("const {s} = {c}{d};\n", .{
+                            self.id,
+                            prefix,
+                            self.size,
+                        });
+                    },
+                    inline .bool, .void => |v| {
+                        try writer.print("const {s} = " ++ @tagName(v) ++ ";\n", .{
+                            self.id,
+                        });
+                    },
+                }
+            }
         };
         const Field = struct {
             id: []u8,
@@ -486,14 +533,15 @@ const item = struct {
             id: []u8,
             name: []u8,
             type: []u8,
+            context: []u8,
             scoped: bool,
             size: u64,
             @"align": u64,
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                writer.print(
-                    \\pub const {s} = enum (u{d} align({d})) { };
+                try writer.print(
+                    \\pub const {s} = enum (u{d} align({d})) {{ }};
                     \\const {s} = {s};
                 , .{
                     self.name,
@@ -512,7 +560,7 @@ const item = struct {
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                writer.print("const {s} = {s}", .{ self.id, self.type });
+                try writer.print("const {s} = ?*{s};\n", .{ self.id, self.type });
             }
         };
         const ReferenceType = struct {
@@ -523,7 +571,7 @@ const item = struct {
             pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
                 _ = gpa;
                 _ = data;
-                writer.print("const {s} = {s}", .{ self.id, self.type });
+                try writer.print("const {s} = *{s};\n", .{ self.id, self.type });
             }
         };
         const Destructor = struct {
@@ -625,31 +673,120 @@ const item = struct {
             id: []u8,
             name: []u8,
             context: ?[]u8 = null,
+
+            pub fn write(selfM: ?@This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                const members = comptime [_]token.type{
+                    .Class,
+                    .Struct,
+                    .Typedef,
+                    .Function,
+                    .Namespace,
+                    .Enumeration,
+                    .FundamentalType,
+                    .ArrayType,
+                    .CvQualifiedType,
+                    .PointerType,
+                    .ReferenceType,
+                };
+
+                inline for (members) |member| {
+                    const values = data.get(member);
+                    for (values.values()) |value| {
+                        if (!@hasField(item.token.structType(member), "context")) {
+                            if (selfM == null) {
+                                try value.write(gpa, data, writer);
+                            }
+                            continue;
+                        }
+
+                        if (selfM) |self| {
+                            const isroot = std.mem.eql(u8, self.name, "::");
+
+                            if (!isroot) {
+                                try writer.print("pub const {s} = struct {{\n", .{self.name});
+                            }
+
+                            const inSelf = switch (@typeInfo(@TypeOf(value.context))) {
+                                .optional => std.mem.eql(u8, self.id, value.context orelse continue),
+                                else => std.mem.eql(u8, self.id, value.context),
+                            };
+                            if (inSelf)
+                                try value.write(gpa, data, writer);
+
+                            if (!isroot)
+                                try writer.print("}};\n", .{});
+                        } else {
+                            const inSelf = switch (@typeInfo(@TypeOf(value.context))) {
+                                .optional => value.context == null,
+                                else => false,
+                            };
+                            if (inSelf)
+                                try value.write(gpa, data, writer);
+                        }
+                    }
+                }
+            }
         };
         const Typedef = struct {
             id: []u8,
             name: []u8,
             type: []u8,
-            // context: []u8,
+            context: []u8,
+
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                try writer.print("const {s} = {s};\n", .{ self.id, self.name });
+                try writer.print("const {s} = {s};\n", .{ self.name, self.type });
+            }
         };
         const ArrayType = struct {
             id: []u8,
             type: []u8,
             min: u64,
             max: u64,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                try writer.print("const {s} = ?[*]{s};\n", .{ self.id, self.type });
+            }
         };
         const CvQualifiedType = struct {
             id: []u8,
             type: []u8,
             @"const": bool,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                try writer.print("const {s} = {s};\n", .{ self.id, self.type });
+            }
         };
         const Function = struct {
             id: []u8,
             name: []u8,
             returns: []u8,
-            // context: []u8,
+            context: []u8,
             mangled: []u8,
             arguments: ?[]Argument = null,
+            pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
+                _ = gpa;
+                _ = data;
+                try writer.print(
+                    \\extern "c" fn {s}(
+                ,
+                    .{self.mangled},
+                );
+                for (self.arguments orelse &.{}) |arg| {
+                    try writer.print("{s}, ", .{arg.type});
+                }
+                try writer.print(
+                    \\) {s};
+                    \\pub const {s} = {s};
+                    \\
+                ,
+                    .{ self.returns, self.name, self.mangled },
+                );
+            }
         };
         const Argument = struct {
             type: []u8,
@@ -862,66 +999,7 @@ fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []co
     defer gpa.free(ret);
     var container = try parseTokens(gpa, ret);
     defer container.deinit(gpa);
-    const fundamentalTypes = container.get(.FundamentalType);
-    for (fundamentalTypes.values()) |t| {
-        const FundTypes = enum {
-            float,
-            int,
-            bool,
-            void,
-        };
-
-        const @"type": FundTypes =
-            if (std.mem.find(u8, t.name, "float") != null or std.mem.find(u8, t.name, "double") != null)
-                .float
-            else if (std.mem.eql(u8, t.name, "void"))
-                .void
-            else if (std.mem.eql(u8, t.name, "bool"))
-                .bool
-            else
-                .int;
-
-        switch (@"type") {
-            .float => {
-                try out.print("const {s} = f{d};\n", .{ t.id, t.size });
-            },
-            .int => {
-                const signed: std.builtin.Signedness = if (std.mem.find(u8, t.name, "unsigned") == null) .signed else .unsigned;
-
-                const prefix: u8 = switch (signed) {
-                    .signed => 'i',
-                    .unsigned => 'u',
-                };
-                try out.print("const {s} = {c}{d};\n", .{ t.id, prefix, t.size });
-            },
-            inline .bool, .void => |v| {
-                try out.print("const {s} = " ++ @tagName(v) ++ ";\n", .{t.id});
-            },
-        }
-    }
-    const typedefs = container.get(.Typedef);
-    for (typedefs.values()) |t| {
-        try out.print("const {s} = {s};\n", .{ t.id, t.type });
-        try out.print("const {s} = {s};\n", .{ t.name, t.id });
-    }
-    const classes = container.get(.Class);
-    for (classes.values()) |class|
-        try class.write(gpa, container, out);
-    const structs = container.get(.Struct);
-    for (structs.values()) |class|
-        try class.write(gpa, container, out);
-    const ptrTypes = container.get(.PointerType);
-    for (ptrTypes.values()) |ptrT|
-        try out.print("const {s} = ?*{s};\n", .{ ptrT.id, ptrT.type });
-    const arrayTypes = container.get(.ArrayType);
-    for (arrayTypes.values()) |arrT|
-        try out.print("const {s} = ?[*]{s};\n", .{ arrT.id, arrT.type });
-    const cvTypes = container.get(.CvQualifiedType);
-    for (cvTypes.values()) |cvT|
-        try out.print("const {s} = {s};\n", .{ cvT.id, cvT.type });
-    const refTypes = container.get(.ReferenceType);
-    for (refTypes.values()) |rt|
-        try out.print("const {s} = *{s};\n", .{ rt.id, rt.type });
+    try item.token.Namespace.write(null, gpa, container, out);
 }
 
 pub fn main(init: std.process.Init) !void {
