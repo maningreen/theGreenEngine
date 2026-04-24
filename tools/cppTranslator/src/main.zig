@@ -209,8 +209,8 @@ const item = struct {
 
                 // second member of tuple is `pass`
                 const order = [_]@Tuple(&.{ @"type", u8 }){
-                    .{ .Destructor, 0 },
                     .{ .Method, 0 },
+                    .{ .Destructor, 0 },
                     .{ .Field, 0 },
                     .{ .Constructor, 0 },
                 };
@@ -229,6 +229,7 @@ const item = struct {
                                         switch (method.access) {
                                             .public => {
                                                 if (method.virtual) {
+                                                    virtual = (virtual orelse 0) + 1;
                                                     try writer.print(
                                                         \\pub fn {s}(self: @This(),
                                                     ,
@@ -251,7 +252,7 @@ const item = struct {
                                                         \\) {s}, @alignCast(@ptrCast(self._vtable)));
                                                         \\    const _{s} = vtable[{d}];
                                                         \\    return _{s}(self, 
-                                                    , .{ method.returns, method.name, virtual orelse unreachable, method.name });
+                                                    , .{ method.returns, method.name, (virtual orelse unreachable) - 1, method.name });
                                                     for (method.arguments orelse &.{}, 0..) |_, i| {
                                                         try writer.print("@\"{d}\", ", .{i});
                                                     }
@@ -326,10 +327,10 @@ const item = struct {
                                             try writer.print(
                                                 \\pub fn deinit(self: *@This()) void {{
                                                 \\    const completeDestructor = 
-                                                \\        @as([*]*const fn (*@This()) void, @alignCast(@ptrCast(self._vtable)))[1];
+                                                \\        @as([*]*const fn (*@This()) void, @alignCast(@ptrCast(self._vtable)))[{d}];
                                                 \\    completeDestructor(self);
                                                 \\}}
-                                            , .{});
+                                            , .{(virtual orelse unreachable) - 2});
                                         } else {
                                             // write a dummy deinit
                                             try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
