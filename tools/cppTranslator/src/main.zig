@@ -705,9 +705,7 @@ const item = struct {
 
                 inline for (members) |member| {
                     const values = data.get(member);
-                    std.log.debug("Looping over {s}", .{@tagName(member)});
                     for (values.values()) |value| {
-                        std.log.debug("Found value {s} ({s})", .{ value.id, @tagName(member) });
                         if (!@hasField(item.token.structType(member), "context")) {
                             if (selfM == null) {
                                 try value.write(gpa, data, writer);
@@ -720,15 +718,6 @@ const item = struct {
                                 .optional => std.mem.eql(u8, self.id, value.context orelse continue),
                                 else => std.mem.eql(u8, self.id, value.context),
                             } and if (member == .Namespace) !std.mem.eql(u8, self.id, value.id) else true;
-
-                            std.log.debug("Context of item: {s}, this context: {s}, {s}", .{
-                                switch (@typeInfo(@TypeOf(value.context))) {
-                                    .optional => value.context orelse "null",
-                                    else => value.context,
-                                },
-                                self.id,
-                                if (inSelf) "fits" else "doesn't fit",
-                            });
 
                             if (inSelf)
                                 try value.write(gpa, data, writer);
@@ -893,11 +882,6 @@ const item = struct {
 
             while (data.find(parent)) |grandparent| {
                 switch (grandparent) {
-                    inline else => |v| {
-                        std.log.debug("Finding parent: {s}", .{v.id});
-                    },
-                }
-                switch (grandparent) {
                     inline .Class, .Struct => |parentVal| {
                         parent = parentVal.context;
                         try parents.append(gpa, try std.fmt.allocPrint(gpa, fmt, .{parentVal.name}));
@@ -1005,33 +989,37 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = item.token.getItem(element_name.local);
-                if (std.mem.eql(u8, element_name.local, getBaseName(item.token.Argument))) if (state != null) switch (state.?) {
-                    inline else => |*s| {
-                        if (@hasField(@TypeOf(s.*), "arguments")) {
-                            if (s.arguments != null) {
-                                s.arguments = try gpa.realloc(s.arguments.?, s.arguments.?.len + 1);
-                                var arg: item.token.Argument = undefined;
-                                for (0..reader.attributeCount()) |i| {
-                                    const attribute_name = reader.attributeNameNs(i);
-                                    const value = try reader.attributeValue(i);
-                                    try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
-                                    std.log.debug("Found argument: {s}", .{ s.arguments.?[i].type});
+                if (std.mem.eql(u8, element_name.local, getBaseName(item.token.Argument))) {
+                    std.log.debug("found argument!", .{});
+                    if (state != null) switch (state.?) {
+                        inline else => |*s| {
+                            if (@hasField(@TypeOf(s.*), "arguments")) {
+                                if (s.arguments) |*args| {
+                                    std.log.debug("{s} ({s}) already has {d} args", .{ s.id, @tagName(state.?), args.len });
+                                    args.* = try gpa.realloc(args.*, args.len + 1);
+                                    var arg: item.token.Argument = undefined;
+                                    for (0..reader.attributeCount()) |i| {
+                                        const attribute_name = reader.attributeNameNs(i);
+                                        const value = try reader.attributeValue(i);
+                                        try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
+                                    }
+                                    args.*[args.len - 1] = arg;
+                                } else {
+                                    std.log.debug("{s} ({s}) already has no args", .{ s.id, @tagName(state.?) });
+                                    s.arguments = try gpa.alloc(item.token.Argument, 1);
+                                    var arg: item.token.Argument = undefined;
+                                    for (0..reader.attributeCount()) |i| {
+                                        const attribute_name = reader.attributeNameNs(i);
+                                        const value = try reader.attributeValue(i);
+                                        try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
+                                    }
+                                    s.arguments.?[s.arguments.?.len - 1] = arg;
                                 }
-                                s.arguments.?[s.arguments.?.len - 1] = arg;
-                            } else {
-                                s.arguments = try gpa.alloc(item.token.Argument, 1);
-                                var arg: item.token.Argument = undefined;
-                                for (0..reader.attributeCount()) |i| {
-                                    const attribute_name = reader.attributeNameNs(i);
-                                    const value = try reader.attributeValue(i);
-                                    try item.token.setValue(item.token.Argument, &arg, gpa, attribute_name.local, value);
-                                }
-                                s.arguments.?[s.arguments.?.len - 1] = arg;
                             }
-                        }
-                        // continue;
-                    },
-                };
+                            continue;
+                        },
+                    };
+                }
                 if (state != null) continue;
                 switch (t orelse continue) {
                     inline else => |v| {
@@ -1050,9 +1038,13 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
                 }
             },
             .element_end => {
+                if (std.mem.eql(u8, reader.elementName(), getBaseName(item.token.Argument)))
+                    continue;
+
                 switch (state orelse continue) {
                     inline else => |v| try container.append(gpa, v),
                 }
+
                 state = null;
             },
             else => continue,
