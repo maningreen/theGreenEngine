@@ -31,7 +31,9 @@ Test2::Test2() {
     testingptr = (int*)0;
     std::cout << "Wooo\n";
 }
-Test2::~Test2() {}
+Test2::~Test2() {
+    std::cout << "Test2 Died!\n";
+}
 
 float Foo::sum(float a, float b) {
     return a + b;

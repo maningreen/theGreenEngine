@@ -41,7 +41,9 @@ pub fn build(b: *std.Build) void {
     });
     runTestMod.addCSourceFiles(.{
         .files = &.{"test.cpp"},
-        .flags = &.{"-fno-inline"},
+        .flags = &.{
+            "-fno-inline",
+        },
         .language = .cpp,
         .root = b.path("test"),
     });
@@ -60,6 +62,7 @@ pub fn build(b: *std.Build) void {
     const testExe = b.addExecutable(.{
         .name = "test",
         .root_module = runTestMod,
+        .use_llvm = true,
     });
     testExe.step.dependOn(&runTool.step);
     runTest.dependOn(&b.addRunArtifact(testExe).step);

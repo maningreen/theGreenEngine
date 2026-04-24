@@ -6,6 +6,6 @@ export fn callstack() callconv(.c) void {
 }
 
 pub fn main() !void {
-    const t: f32 = Testing.Foo.sum(3, 3);
-    std.debug.print("{d}", .{ t });
+    var class = Testing.Foo.@"Test2".init1();
+    defer class.deinit();
 }
