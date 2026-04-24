@@ -13,8 +13,8 @@ class Test {
     int* testingptr;
     char testingChar;
 
-    virtual ~Test();
     void test() const;
+    virtual ~Test();
 
     Test();
     Test(int i); };
