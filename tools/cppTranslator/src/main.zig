@@ -2,6 +2,7 @@ const std = @import("std");
 const xml = @import("xml");
 const TokenContainer = @import("container.zig");
 const token = @import("token.zig");
+const util = @import("util.zig");
 const debug = std.debug;
 
 /// Caller owns memory
@@ -57,7 +58,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = token.getItem(element_name.local);
-                if (std.mem.eql(u8, element_name.local, getBaseName(token.Argument))) {
+                if (std.mem.eql(u8, element_name.local, util.getBaseName(token.Argument))) {
                     if (state != null) switch (state.?) {
                         inline else => |*s| {
                             if (@hasField(@TypeOf(s.*), "arguments")) {
@@ -98,12 +99,12 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
                             const value = try reader.attributeValue(i);
                             try token.setValue(token.structType(v), &m, gpa, attribute_name.local, value);
                         }
-                        state = @unionInit(TokenContainer.TokenUnion, getBaseName(T), m);
+                        state = @unionInit(TokenContainer.TokenUnion, util.getBaseName(T), m);
                     },
                 }
             },
             .element_end => {
-                if (std.mem.eql(u8, reader.elementName(), getBaseName(token.Argument)))
+                if (std.mem.eql(u8, reader.elementName(), util.getBaseName(token.Argument)))
                     continue;
 
                 switch (state orelse continue) {
