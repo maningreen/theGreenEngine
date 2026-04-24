@@ -500,7 +500,7 @@ const item = struct {
                     while (true) {
                         switch ((data.find(t) orelse unreachable)) {
                             .FundamentalType => |fund| {
-                                const value = typeMap.get(fund.name) orelse std.debug.panic("reached invalid type: {s}", .{fund.name});
+                                const value = typeMap.get(fund.name) orelse debug.panic("reached invalid type: {s}", .{fund.name});
                                 try mangledName.writer.print("{s}", .{value.@"0"});
                                 break;
                             },
@@ -990,12 +990,10 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
                 const element_name = reader.elementNameNs();
                 const t = item.token.getItem(element_name.local);
                 if (std.mem.eql(u8, element_name.local, getBaseName(item.token.Argument))) {
-                    std.log.debug("found argument!", .{});
                     if (state != null) switch (state.?) {
                         inline else => |*s| {
                             if (@hasField(@TypeOf(s.*), "arguments")) {
                                 if (s.arguments) |*args| {
-                                    std.log.debug("{s} ({s}) already has {d} args", .{ s.id, @tagName(state.?), args.len });
                                     args.* = try gpa.realloc(args.*, args.len + 1);
                                     var arg: item.token.Argument = undefined;
                                     for (0..reader.attributeCount()) |i| {
@@ -1005,7 +1003,6 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !item.TokenContainer {
                                     }
                                     args.*[args.len - 1] = arg;
                                 } else {
-                                    std.log.debug("{s} ({s}) already has no args", .{ s.id, @tagName(state.?) });
                                     s.arguments = try gpa.alloc(item.token.Argument, 1);
                                     var arg: item.token.Argument = undefined;
                                     for (0..reader.attributeCount()) |i| {
