@@ -7,6 +7,7 @@ namespace Foo {
 template <typename T>
 class Test {
   public:
+    virtual ~Test();
     virtual void testingFunction(double delta);
 
     int testingItem;
@@ -14,7 +15,6 @@ class Test {
     char testingChar;
 
     void test() const;
-    virtual ~Test();
 
     Test();
     Test(int i); };

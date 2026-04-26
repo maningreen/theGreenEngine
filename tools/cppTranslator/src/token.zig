@@ -3,6 +3,36 @@ const debug = std.debug;
 const TokenContainer = @import("container.zig");
 const util = @import("util.zig");
 
+const typeMap = std.static_string_map.StaticStringMap(struct { []const u8, enum {
+    custom,
+    primitive,
+} }).initComptime(&.{
+    .{ "void", .{ "v", .primitive } },
+    .{ "wchar_t", .{ "w", .primitive } },
+    .{ "bool", .{ "b", .primitive } },
+    .{ "char", .{ "c", .primitive } },
+    .{ "signed char", .{ "a", .primitive } },
+    .{ "unsigned char", .{ "h", .primitive } },
+    .{ "short", .{ "s", .primitive } },
+    .{ "unsigned short", .{ "t", .primitive } },
+    .{ "int", .{ "i", .primitive } },
+    .{ "unsigned int", .{ "j", .primitive } },
+    .{ "long", .{ "l", .primitive } },
+    .{ "unsigned long", .{ "m", .primitive } },
+    .{ "long long", .{ "x", .primitive } },
+    .{ "unsigned long long", .{ "y", .primitive } },
+    .{ "__int128", .{ "n", .primitive } },
+    .{ "unsigned __int128", .{ "o", .primitive } },
+    .{ "float", .{ "f", .primitive } },
+    .{ "double", .{ "d", .primitive } },
+    .{ "long double", .{ "e", .primitive } },
+    .{ "__float128", .{ "g", .primitive } },
+    .{ "char32_t", .{ "Di", .primitive } },
+    .{ "char16_t", .{ "Ds", .primitive } },
+    .{ "auto", .{ "Da", .primitive } },
+    .{ "std::nullptr_t", .{ "Dn", .primitive } },
+});
+
 pub const Access = enum {
     public,
     private,
@@ -25,6 +55,7 @@ pub const @"type" = enum {
     CvQualifiedType,
     Function,
 };
+
 pub const Method = struct {
     name: []u8,
     mangled: []u8,
@@ -34,9 +65,11 @@ pub const Method = struct {
     arguments: ?[]Argument = null,
     access: Access,
     virtual: bool,
+    line: u64,
     @"inline": bool,
     @"const": bool,
 };
+
 pub const Class = struct {
     name: []u8,
     members: []u8,
@@ -49,198 +82,297 @@ pub const Class = struct {
 
     pub fn write(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
         if (self.incomplete) return;
-        var paddingIndex: u64 = 0;
+        // var paddingIndex: u64 = 0;
         try writer.print("pub const @\"{s}\" = extern struct {{\n", .{self.name});
-        var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-        var initIterator: u64 = 0;
+        // var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+        // var initIterator: u64 = 0;
 
         const vtableName = "_vtable";
+        const vtableType = "Vtable";
 
         var fields = std.ArrayList([]const u8).empty;
         defer fields.deinit(gpa);
-        var virtual: ?u64 = null;
+        var virtualItems: u64 = 0;
 
-        // second member of tuple is `pass`
-        const order = [_]@Tuple(&.{ @"type", u8 }){
-            .{ .Method, 0 },
-            .{ .Destructor, 0 },
-            .{ .Field, 0 },
-            .{ .Constructor, 0 },
-        };
+        // Since virtual functions are order dependant on the vtable, here's the method
+        // 1 -> loop over members, filter for virtuals, generate a vtable structure
+        // 2 -> print fields
+        // 3 -> print callables (and virtuals)
 
-        inline for (order) |orderIndex| {
+        // Stage 1 -> loop over members, generate a vtable.
+        // step 1 -> for some ungodly reason, the vtable's definition-order dependant
+        // so we've got to make it sorted based off of the line number :(
+
+        {
+            const VirtualUnion = union(enum) {
+                Destructor: Destructor,
+                Method: Method,
+            };
+            var arr = std.ArrayList(VirtualUnion).empty;
+            defer arr.deinit(gpa);
+
+            try writer.print(
+                \\const {s} = extern struct {{
+                \\
+            , .{vtableType});
+
+            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+            while (memberIterator.next()) |id| {
+                const member = data.find(id) orelse continue;
+                switch (member) {
+                    inline .Method, .Destructor => |v, t| try arr.append(gpa, @unionInit(VirtualUnion, @tagName(t), v)),
+                    else => continue,
+                }
+            }
+
+            const cmp = struct {
+                pub fn lt(_: void, aP: VirtualUnion, bP: VirtualUnion) bool {
+                    switch (aP) {
+                        inline else => |a| {
+                            switch (bP) {
+                                inline else => |b| {
+                                    return a.line >= b.line;
+                                },
+                            }
+                        },
+                    }
+                }
+            }.lt;
+            std.mem.sort(VirtualUnion, arr.items, void{}, cmp);
+
+            for (arr.items) |item| {
+                switch (item) {
+                    .Destructor => |d| {
+                        if (d.virtual)
+                            virtualItems = virtualItems + 2;
+                        try writer.print(
+                            \\destruct: *const fn (*const @"{s}") callconv(.c) void,
+                            \\delete: *const fn (*const @"{s}") callconv(.c) void,
+                            \\
+                        , .{ self.name, self.name });
+                    },
+                    .Method => |m| {
+                        const constStr = if (m.@"const") "const" else "";
+
+                        if (m.virtual)
+                            virtualItems = virtualItems + 1;
+                        try writer.print(
+                            \\@"{s}": *const fn (*{s} @"{s}",
+                            \\
+                        , .{
+                            m.name,
+                            constStr,
+                            self.name,
+                        });
+                        for (m.arguments orelse &.{}) |arg|
+                            try writer.print("{s}, ", .{arg.type});
+
+                        try writer.print(
+                            \\) callconv(.c) {s},
+                            \\
+                        , .{m.returns});
+                    },
+                }
+            }
+
+            try writer.print(
+                \\}};
+                \\
+            , .{});
+        }
+
+        // Phase 2 -> print fields
+        {
+            if (virtualItems != 0) {
+                try writer.print("{s}: *const {s},\n", .{
+                    vtableName,
+                    vtableType,
+                });
+            }
+            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
             while (memberIterator.next()) |member| {
-                const containerChild = data.find(member) orelse continue;
-                if (containerChild != orderIndex[0]) continue;
-                switch (containerChild) {
-                    .Method => |method| {
-                        // inline methods have no labels, so we can't link
-                        if (method.@"inline") continue;
-                        const prefix = if (method.@"const") "" else "*";
-                        switch (orderIndex.@"1") {
-                            0 => {
-                                switch (method.access) {
-                                    .public => {
-                                        if (method.virtual) {
-                                            virtual = (virtual orelse 0) + 1;
-                                            try writer.print(
-                                                \\pub fn {s}(self: @This(),
-                                            ,
-                                                .{
-                                                    method.name,
-                                                    // prefix,
-                                                },
-                                            );
-                                            for (method.arguments orelse &.{}, 0..) |arg, i|
-                                                try writer.print("@\"{d}\": {s},\n", .{ i, arg.type });
-                                            try writer.print(
-                                                \\) {s} {{
-                                                \\    const vtable = @as([*]*const fn (@This(), 
-                                            ,
-                                                .{method.returns},
-                                            );
-                                            for (method.arguments orelse &.{}) |arg|
-                                                try writer.print("{s}, ", .{arg.type});
-                                            try writer.print(
-                                                \\) {s}, @alignCast(@ptrCast(self._vtable)));
-                                                \\    const _{s} = vtable[{d}];
-                                                \\    return _{s}(self, 
-                                            , .{ method.returns, method.name, (virtual orelse unreachable) - 1, method.name });
-                                            for (method.arguments orelse &.{}, 0..) |_, i| {
-                                                try writer.print("@\"{d}\", ", .{i});
-                                            }
-                                            try writer.print(
-                                                \\);
-                                                \\}}
-                                            , .{});
-                                        } else {
-                                            try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
-                                            try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), \n", .{ method.mangled, prefix });
-                                            for (method.arguments orelse &.{}) |arg|
-                                                try writer.print("{s},\n", .{arg.type});
-                                            try writer.print(") callconv(.c) {s};\n", .{method.returns});
-                                        }
-                                    },
-                                    else => {
-                                        if (method.virtual) virtual = (virtual orelse 0) + 1;
-                                    },
-                                }
-                            },
-                            else => unreachable,
-                        }
-                    },
+                switch (data.find(member) orelse continue) {
                     .Field => |field| {
-                        try fields.append(gpa, field.id);
+                        try writer.print(
+                            \\@"{s}": {s},
+                            \\
+                        , .{ field.name, field.type });
                     },
+                    else => continue,
+                }
+            }
+        }
+
+        // Phase 3 -> print functions
+        //
+        // part 1: print constructors & destructors
+
+        {
+            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+            var initIterator: u64 = 0;
+            while (memberIterator.next()) |member| {
+                switch (data.find(member) orelse continue) {
                     .Constructor => |constructor| {
                         switch (constructor.access) {
                             .public => {
                                 if (!constructor.@"inline") {
+                                    defer initIterator += 1;
+
                                     const mangled = try constructor.writeMangled(initIterator, gpa, data);
                                     defer gpa.free(mangled);
-                                    initIterator += 1;
+
                                     try writer.print(
                                         \\pub fn init{d}(
                                     , .{initIterator});
+
                                     for (constructor.arguments orelse &.{}, 0..) |arg, i| {
                                         const name = try namespacedType(arg.type, data, gpa) orelse continue;
                                         defer gpa.free(name);
                                         try writer.print("_{d}: {s}, ", .{ i, name });
                                     }
+
                                     try writer.print(
                                         \\) @This() {{
                                         \\  var t: [{d}]u8 align({d}) = undefined;
                                         \\  {s}(@ptrCast(&t),
                                     , .{ self.size / 8, self.@"align", mangled });
+
                                     for (constructor.arguments orelse &.{}, 0..) |_, i|
                                         try writer.print("_{d}, ", .{i});
+
                                     try writer.print(
                                         \\);
                                         \\  return @as(*@This(), @ptrCast(&t)).*;
                                         \\}}
                                         \\
                                     , .{});
+
                                     try writer.print("extern \"c\" fn {s}(*@This(), ", .{mangled});
                                     for (constructor.arguments orelse &.{}) |arg|
                                         try writer.print("{s}, ", .{arg.type});
-                                    try writer.print(") void;\n", .{});
+                                    try writer.print(") callconv(.c) void;\n", .{});
                                 }
                             },
                             else => continue,
                         }
                     },
                     .Destructor => |destructor| {
-                        switch (orderIndex.@"1") {
-                            0 => {
-                                if (!(destructor.@"inline" or destructor.virtual)) {
-                                    try destructor.writeMangled(gpa, data, writer);
-                                } else if (destructor.virtual) {
-                                    // + 2 for the complete & partial destructors
-                                    virtual = (virtual orelse 0) + 2;
-                                    try writer.print(
-                                        \\pub fn deinit(self: *@This()) void {{
-                                        \\    const completeDestructor = 
-                                        \\        @as([*]*const fn (*@This()) void, @alignCast(@ptrCast(self._vtable)))[{d}];
-                                        \\    completeDestructor(self);
-                                        \\}}
-                                    , .{(virtual orelse unreachable) - 2});
-                                } else {
-                                    // write a dummy deinit
-                                    try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
-                                }
-                            },
-                            else => continue,
+                        if (!(destructor.@"inline" or destructor.virtual)) {
+                            try destructor.writeMangled(gpa, data, writer);
+                        } else if (destructor.virtual) {
+                            // + 2 for the complete & partial destructors
+                            try writer.print(
+                                \\pub fn deinit(self: *const @This()) void {{
+                                \\    const completeDestructor =
+                                \\        self.{s}.destruct;
+                                \\    completeDestructor(self);
+                                \\}}
+                            , .{vtableName});
+                        } else {
+                            // write a dummy deinit
+                            try writer.print("pub const deinit = (struct {{ pub fn f(_: anytype) void {{}}}}).f;", .{});
                         }
                     },
-                    .Typedef => |td| {
-                        const name = try namespacedType(td.type, data, gpa) orelse continue;
-                        defer gpa.free(name);
 
-                        try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, name });
-                    },
                     else => continue,
                 }
+                // inline for (order) |orderIndex| {
+                // while (memberIterator.next()) |member| {
+                // const containerChild = data.find(member) orelse continue;
+                // if (containerChild != orderIndex[0]) continue;
+                // switch (containerChild) {
+                // .Method => |method| {
+                // inline methods have no labels, so we can't link
+                // if (method.@"inline") continue;
+                // const prefix = if (method.@"const") "" else "*";
+                // switch (orderIndex.@"1") {
+                // 0 => {
+                // switch (method.access) {
+                // .public => {
+                // if (method.virtual) {
+                // virtual = (virtual orelse 0) + 1;
+                // try writer.print(
+                // \\pub fn {s}(self: @This(),
+                // ,
+                // .{
+                // method.name,
+                // prefix,
+                // },
+                // );
+                // for (method.arguments orelse &.{}, 0..) |arg, i|
+                // try writer.print("@\"{d}\": {s},\n", .{ i, arg.type });
+                // try writer.print(
+                // \\) {s} {{
+                // \\    const vtable = @as([*]*const fn (@This(),
+                // ,
+                // .{method.returns},
+                // );
+                // for (method.arguments orelse &.{}) |arg|
+                // try writer.print("{s}, ", .{arg.type});
+                // try writer.print(
+                // \\) {s}, @alignCast(@ptrCast(self._vtable)));
+                // \\    const _{s} = vtable[{d}];
+                // \\    return _{s}(self,
+                // , .{ method.returns, method.name, (virtual orelse unreachable) - 1, method.name });
+                // for (method.arguments orelse &.{}, 0..) |_, i| {
+                // try writer.print("@\"{d}\", ", .{i});
+                // }
+                // try writer.print(
+                // \\);
+                // \\}}
+                // , .{});
+                // } else {
+                // try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
+                // try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), \n", .{ method.mangled, prefix });
+                // for (method.arguments orelse &.{}) |arg|
+                // try writer.print("{s},\n", .{arg.type});
+                // try writer.print(") callconv(.c) {s};\n", .{method.returns});
+                // }
+                // },
+                // else => {
+                // if (method.virtual) virtual = (virtual orelse 0) + 1;
+                // },
+                // }
+                // },
+                // else => unreachable,
+                // }
+                // },
+                // .Field => |field| {
+                // try fields.append(gpa, field.id);
+                // },
+                // }
+                // },
+                // else => continue,
+                // }
+                // },
+                // .Typedef => |td| {
+                // const name = try namespacedType(td.type, data, gpa) orelse continue;
+                // defer gpa.free(name);
+                //
+                // try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, name });
+                // },
+                // else => continue,
+                // }
+                // }
             }
-            memberIterator = std.mem.splitScalar(u8, self.members, ' ');
         }
 
-        if (virtual) |_| {
-            try writer.print(vtableName ++ ": *anyopaque,\n", .{});
-        }
+        // Part 2 print destructors
+        {}
 
-        const cmp = (struct {
-            pub fn cmp(d: TokenContainer, idA: []const u8, idB: []const u8) bool {
-                const a = d.find(idA).?.Field.offset;
-                const b = d.find(idB).?.Field.offset;
-                return a < b;
-            }
-        }).cmp;
-        std.mem.sort([]const u8, fields.items, data, cmp);
+        // memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+        // }
 
-        for (fields.items) |fieldId| {
-            const field = data.find(fieldId).?.Field;
-            switch (field.access) {
-                .public => {
-                    try writer.print("@\"{s}\": {s},\n", .{ field.name, field.type });
-                },
-                else => {
-                    // Get size of type
-                    const tType = data.find(field.type) orelse @panic("Errror! type not found!");
-                    const size = switch (tType) {
-                        inline .Class, .Struct, .FundamentalType, .Enumeration, .PointerType, .ReferenceType => |j| j.size,
-                        .ArrayType => @bitSizeOf(usize),
-                        else => undefined,
-                    };
-                    try writer.print("_{d}: u{d},\n", .{ paddingIndex, size });
-                    paddingIndex += 1;
-                },
-            }
-        }
+        // if (virtual) |_| {
+        // try writer.print(vtableName ++ ": *anyopaque,\n", .{});
+        // }
 
         try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
     }
 };
+
 pub const Struct = Class;
+
 pub const FundamentalType = struct {
     id: []u8,
     name: []u8,
@@ -294,6 +426,7 @@ pub const FundamentalType = struct {
         }
     }
 };
+
 pub const Field = struct {
     id: []u8,
     name: []u8,
@@ -302,6 +435,7 @@ pub const Field = struct {
     access: Access,
     offset: u64,
 };
+
 pub const Constructor = struct {
     id: []u8,
     context: []u8,
@@ -346,36 +480,6 @@ pub const Constructor = struct {
 
         const ltEscape = "<";
         const gtEscape = ">";
-
-        const typeMap = std.static_string_map.StaticStringMap(struct { []const u8, enum {
-            custom,
-            primitive,
-        } }).initComptime(&.{
-            .{ "void", .{ "v", .primitive } },
-            .{ "wchar_t", .{ "w", .primitive } },
-            .{ "bool", .{ "b", .primitive } },
-            .{ "char", .{ "c", .primitive } },
-            .{ "signed char", .{ "a", .primitive } },
-            .{ "unsigned char", .{ "h", .primitive } },
-            .{ "short", .{ "s", .primitive } },
-            .{ "unsigned short", .{ "t", .primitive } },
-            .{ "int", .{ "i", .primitive } },
-            .{ "unsigned int", .{ "j", .primitive } },
-            .{ "long", .{ "l", .primitive } },
-            .{ "unsigned long", .{ "m", .primitive } },
-            .{ "long long", .{ "x", .primitive } },
-            .{ "unsigned long long", .{ "y", .primitive } },
-            .{ "__int128", .{ "n", .primitive } },
-            .{ "unsigned __int128", .{ "o", .primitive } },
-            .{ "float", .{ "f", .primitive } },
-            .{ "double", .{ "d", .primitive } },
-            .{ "long double", .{ "e", .primitive } },
-            .{ "__float128", .{ "g", .primitive } },
-            .{ "char32_t", .{ "Di", .primitive } },
-            .{ "char16_t", .{ "Ds", .primitive } },
-            .{ "auto", .{ "Da", .primitive } },
-            .{ "std::nullptr_t", .{ "Dn", .primitive } },
-        });
 
         for (0..parents.items.len) |i| {
             const parent = parents.items[parents.items.len - 1 - i];
@@ -429,6 +533,7 @@ pub const Constructor = struct {
         return mangledName.toOwnedSlice();
     }
 };
+
 pub const Enumeration = struct {
     id: []u8,
     name: []u8,
@@ -452,6 +557,7 @@ pub const Enumeration = struct {
         });
     }
 };
+
 pub const PointerType = struct {
     id: []u8,
     type: []u8,
@@ -463,6 +569,7 @@ pub const PointerType = struct {
         try writer.print("const {s} = ?*{s}; //ptr type\n", .{ self.id, self.type });
     }
 };
+
 pub const ReferenceType = struct {
     id: []u8,
     type: []u8,
@@ -474,10 +581,12 @@ pub const ReferenceType = struct {
         try writer.print("const {s} = *{s}; //ref type\n", .{ self.id, name });
     }
 };
+
 pub const Destructor = struct {
     id: []u8,
     context: []u8,
     access: Access,
+    line: u64,
     @"inline": bool = false,
     virtual: bool = false,
 
@@ -519,36 +628,6 @@ pub const Destructor = struct {
         const ltEscape = "<";
         const gtEscape = ">";
 
-        const typeMap = std.static_string_map.StaticStringMap(struct { []const u8, enum {
-            custom,
-            primitive,
-        } }).initComptime(&.{
-            .{ "void", .{ "v", .primitive } },
-            .{ "wchar_t", .{ "w", .primitive } },
-            .{ "bool", .{ "b", .primitive } },
-            .{ "char", .{ "c", .primitive } },
-            .{ "signed char", .{ "a", .primitive } },
-            .{ "unsigned char", .{ "h", .primitive } },
-            .{ "short", .{ "s", .primitive } },
-            .{ "unsigned short", .{ "t", .primitive } },
-            .{ "int", .{ "i", .primitive } },
-            .{ "unsigned int", .{ "j", .primitive } },
-            .{ "long", .{ "l", .primitive } },
-            .{ "unsigned long", .{ "m", .primitive } },
-            .{ "long long", .{ "x", .primitive } },
-            .{ "unsigned long long", .{ "y", .primitive } },
-            .{ "__int128", .{ "n", .primitive } },
-            .{ "unsigned __int128", .{ "o", .primitive } },
-            .{ "float", .{ "f", .primitive } },
-            .{ "double", .{ "d", .primitive } },
-            .{ "long double", .{ "e", .primitive } },
-            .{ "__float128", .{ "g", .primitive } },
-            .{ "char32_t", .{ "Di", .primitive } },
-            .{ "char16_t", .{ "Ds", .primitive } },
-            .{ "auto", .{ "Da", .primitive } },
-            .{ "std::nullptr_t", .{ "Dn", .primitive } },
-        });
-
         for (0..parents.items.len) |i| {
             const parent = parents.items[parents.items.len - 1 - i];
             if (std.mem.find(u8, parent, ltEscape)) |lt| lbl: {
@@ -570,6 +649,7 @@ pub const Destructor = struct {
         try writer.print("extern \"c\" fn {s}(*@This()) void;\n", .{mangledName.writer.buffered()});
     }
 };
+
 pub const Namespace = struct {
     id: []u8,
     name: []u8,
@@ -636,6 +716,7 @@ pub const Namespace = struct {
                 try writer.print("}};\n", .{});
     }
 };
+
 pub const Typedef = struct {
     id: []u8,
     name: []u8,
@@ -649,6 +730,7 @@ pub const Typedef = struct {
         try writer.print("const {s} = {s}; // typedef\n", .{ self.name, self.type });
     }
 };
+
 pub const ArrayType = struct {
     id: []u8,
     type: []u8,
@@ -660,6 +742,7 @@ pub const ArrayType = struct {
         try writer.print("const {s} = ?[*]{s}; // arr type\n", .{ self.id, self.type });
     }
 };
+
 pub const CvQualifiedType = struct {
     id: []u8,
     type: []u8,
@@ -670,6 +753,7 @@ pub const CvQualifiedType = struct {
         try writer.print("const {s} = {s}; // cv type\n", .{ self.id, name });
     }
 };
+
 pub const Function = struct {
     id: []u8,
     name: []u8,
@@ -697,6 +781,7 @@ pub const Function = struct {
         );
     }
 };
+
 pub const Argument = struct {
     // name: []u8,
     type: []u8,
