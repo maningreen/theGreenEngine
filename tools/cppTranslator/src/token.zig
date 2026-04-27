@@ -80,6 +80,9 @@ pub const Class = struct {
     bases: ?[]u8 = null,
     incomplete: bool = false,
 
+    const vtableName = "_vtable";
+    const vtableType = "Vtable";
+
     pub fn write(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
         if (self.incomplete) return;
         // var paddingIndex: u64 = 0;
@@ -87,12 +90,16 @@ pub const Class = struct {
         // var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
         // var initIterator: u64 = 0;
 
-        const vtableName = "_vtable";
-        const vtableType = "Vtable";
-
         var fields = std.ArrayList([]const u8).empty;
         defer fields.deinit(gpa);
-        var virtualItems: u64 = 0;
+
+        try writer.print(
+            \\const {s} = extern struct {{
+        , .{vtableType});
+        const virtualItems: bool = try writeVtableFields(self, gpa, data, writer);
+        try writer.print(
+            \\}};
+        , .{});
 
         // Since virtual functions are order dependant on the vtable, here's the method
         // 1 -> loop over members, filter for virtuals, generate a vtable structure
@@ -103,87 +110,9 @@ pub const Class = struct {
         // step 1 -> for some ungodly reason, the vtable's definition-order dependant
         // so we've got to make it sorted based off of the line number :(
 
-        {
-            const VirtualUnion = union(enum) {
-                Destructor: Destructor,
-                Method: Method,
-            };
-            var arr = std.ArrayList(VirtualUnion).empty;
-            defer arr.deinit(gpa);
-
-            try writer.print(
-                \\const {s} = extern struct {{
-                \\
-            , .{vtableType});
-
-            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-            while (memberIterator.next()) |id| {
-                const member = data.find(id) orelse continue;
-                switch (member) {
-                    inline .Method, .Destructor => |v, t| try arr.append(gpa, @unionInit(VirtualUnion, @tagName(t), v)),
-                    else => continue,
-                }
-            }
-
-            const cmp = struct {
-                pub fn lt(_: void, aP: VirtualUnion, bP: VirtualUnion) bool {
-                    switch (aP) {
-                        inline else => |a| {
-                            switch (bP) {
-                                inline else => |b| {
-                                    return a.line >= b.line;
-                                },
-                            }
-                        },
-                    }
-                }
-            }.lt;
-            std.mem.sort(VirtualUnion, arr.items, void{}, cmp);
-
-            for (arr.items) |item| {
-                switch (item) {
-                    .Destructor => |d| {
-                        if (d.virtual)
-                            virtualItems = virtualItems + 2;
-                        try writer.print(
-                            \\destruct: *const fn (*const @"{s}") callconv(.c) void,
-                            \\delete: *const fn (*const @"{s}") callconv(.c) void,
-                            \\
-                        , .{ self.name, self.name });
-                    },
-                    .Method => |m| {
-                        const constStr = if (m.@"const") "const" else "";
-
-                        if (m.virtual)
-                            virtualItems = virtualItems + 1;
-                        try writer.print(
-                            \\@"{s}": *const fn (*{s} @"{s}",
-                            \\
-                        , .{
-                            m.name,
-                            constStr,
-                            self.name,
-                        });
-                        for (m.arguments orelse &.{}) |arg|
-                            try writer.print("{s}, ", .{arg.type});
-
-                        try writer.print(
-                            \\) callconv(.c) {s},
-                            \\
-                        , .{m.returns});
-                    },
-                }
-            }
-
-            try writer.print(
-                \\}};
-                \\
-            , .{});
-        }
-
         // Phase 2 -> print fields
         {
-            if (virtualItems != 0) {
+            if (virtualItems) {
                 try writer.print("{s}: *const {s},\n", .{
                     vtableName,
                     vtableType,
@@ -357,9 +286,6 @@ pub const Class = struct {
             }
         }
 
-        // Part 2 print destructors
-        {}
-
         // memberIterator = std.mem.splitScalar(u8, self.members, ' ');
         // }
 
@@ -368,6 +294,96 @@ pub const Class = struct {
         // }
 
         try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
+    }
+
+    /// Example:
+    /// A `Class` representing the following
+    /// ```cpp
+    /// class Foo {
+    ///     int item;
+    ///     virtual void function(void);
+    /// };
+    /// ```
+    /// and an ample `data`, will lead to the following being written
+    /// ```
+    /// function: *const fn (void) void,
+    /// ```
+    /// returns whether or not it wrote anything, for a class without virtual members,
+    /// simply returns false,
+    pub fn writeVtableFields(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !bool {
+        const items = try compileVirtual(self, gpa, data);
+        defer gpa.free(items);
+
+        if (items.len == 0)
+            return false;
+
+        for (items) |item| {
+            switch (item) {
+                .Destructor => {
+                    try writer.print(
+                        \\destruct: *const fn (*const @"{s}") callconv(.c) void,
+                        \\delete: *const fn (*const @"{s}") callconv(.c) void,
+                        \\
+                    , .{ self.name, self.name });
+                },
+                .Method => |m| {
+                    const constStr = if (m.@"const") "const" else "";
+
+                    try writer.print(
+                        \\@"{s}": *const fn (*{s} @"{s}",
+                        \\
+                    , .{
+                        m.name,
+                        constStr,
+                        self.name,
+                    });
+                    for (m.arguments orelse &.{}) |arg|
+                        try writer.print("{s}, ", .{arg.type});
+
+                    try writer.print(
+                        \\) callconv(.c) {s},
+                        \\
+                    , .{m.returns});
+                },
+            }
+        }
+        return true;
+    }
+
+    const VirtualUnion = union(enum) {
+        Destructor: Destructor,
+        Method: Method,
+    };
+
+    /// returns a slice of all the virtual items, sorted
+    pub fn compileVirtual(self: Class, gpa: std.mem.Allocator, data: TokenContainer) ![]VirtualUnion {
+        var arrList = std.ArrayList(VirtualUnion).empty;
+        var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+        while (memberIterator.next()) |member| {
+            switch (data.find(member) orelse continue) {
+                inline .Destructor, .Method => |v, t| if (v.virtual) try arrList.append(gpa, @unionInit(VirtualUnion, @tagName(t), v)),
+                else => continue,
+            }
+        }
+
+        if (arrList.items.len == 0) return try arrList.toOwnedSlice(gpa);
+
+        const cmp = struct {
+            pub fn lt(_: void, aP: VirtualUnion, bP: VirtualUnion) bool {
+                switch (aP) {
+                    inline else => |a| {
+                        switch (bP) {
+                            inline else => |b| {
+                                return a.line >= b.line;
+                            },
+                        }
+                    },
+                }
+            }
+        }.lt;
+        std.mem.sort(VirtualUnion, arrList.items, void{}, cmp);
+
+        return arrList.toOwnedSlice(gpa);
     }
 };
 
