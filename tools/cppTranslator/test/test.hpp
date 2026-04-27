@@ -6,6 +6,8 @@ namespace Foo {
 
 template <typename T>
 class Test {
+    private:
+        int privateTest;
   public:
     virtual ~Test();
     virtual void testingFunction(double delta);
@@ -24,6 +26,8 @@ class Test2 : public Test<Bar> {
     void testingFunction(double delta) override;
     Test2();
     ~Test2();
+
+    static const int bar;
 };
 
 float sum(float a, float b);

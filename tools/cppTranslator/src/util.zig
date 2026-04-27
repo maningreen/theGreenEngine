@@ -1,7 +1,7 @@
 const std = @import("std");
 
 pub fn isFundamental(comptime T: type) bool {
-    return switch (@typeInfo(T)) {
+    return comptime switch (@typeInfo(T)) {
         .@"opaque",
         .null,
         .comptime_int,
@@ -30,10 +30,24 @@ pub fn ensure(x: bool) error{False}!void {
 }
 
 pub fn getBaseName(comptime T: type) []const u8 {
-    const full_name = @typeName(T);
-    // Find the last index of '.'
-    if (std.mem.lastIndexOfScalar(u8, full_name, '.')) |index| {
-        return full_name[index + 1 ..];
+    comptime {
+        const full_name = @typeName(T);
+        // Find the last index of '.'
+        if (std.mem.lastIndexOfScalar(u8, full_name, '.')) |index| {
+            return full_name[index + 1 ..];
+        }
+        return full_name;
     }
-    return comptime full_name;
+}
+
+pub fn tagToFieldName(comptime T: type) [:0]const u8 {
+    comptime {
+        const basename = getBaseName(T);
+        const suffix = "s";
+
+        // types have to have at least one character
+        const lowercaseFirst = std.ascii.toLower(basename[0]);
+        const final = lowercaseFirst ++ basename[1..] ++ suffix;
+        return final;
+    }
 }

@@ -41,7 +41,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
     var container = TokenContainer.init();
     errdefer container.deinit(gpa);
 
-    var state: ?TokenContainer.TokenUnion = null;
+    var state: ?token.TokenUnion = null;
     while (true) {
         const node = reader.read() catch |err| switch (err) {
             error.MalformedXml => {
@@ -58,6 +58,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = token.getItem(element_name.local);
+
                 if (std.mem.eql(u8, element_name.local, util.getBaseName(token.Argument))) {
                     if (state != null) switch (state.?) {
                         inline else => |*s| {
@@ -99,7 +100,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
                             const value = try reader.attributeValue(i);
                             try token.setValue(token.structType(v), &m, gpa, attribute_name.local, value);
                         }
-                        state = @unionInit(TokenContainer.TokenUnion, util.getBaseName(T), m);
+                        state = @unionInit(token.TokenUnion, util.getBaseName(T), m);
                     },
                 }
             },

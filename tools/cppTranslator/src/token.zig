@@ -54,6 +54,7 @@ pub const @"type" = enum {
     ArrayType,
     CvQualifiedType,
     Function,
+    Variable,
 };
 
 pub const Method = struct {
@@ -93,6 +94,11 @@ pub const Class = struct {
         var fields = std.ArrayList([]const u8).empty;
         defer fields.deinit(gpa);
 
+        // 1 -> generate a vtable structure
+        // 2 -> print fields
+        // 3 -> print callables (and virtuals)
+
+        // Stage 1 -> generate a vtable.
         try writer.print(
             \\const {s} = extern struct {{
         , .{vtableType});
@@ -100,15 +106,6 @@ pub const Class = struct {
         try writer.print(
             \\}};
         , .{});
-
-        // Since virtual functions are order dependant on the vtable, here's the method
-        // 1 -> loop over members, filter for virtuals, generate a vtable structure
-        // 2 -> print fields
-        // 3 -> print callables (and virtuals)
-
-        // Stage 1 -> loop over members, generate a vtable.
-        // step 1 -> for some ungodly reason, the vtable's definition-order dependant
-        // so we've got to make it sorted based off of the line number :(
 
         // Phase 2 -> print fields
         {
@@ -118,18 +115,7 @@ pub const Class = struct {
                     vtableType,
                 });
             }
-            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-            while (memberIterator.next()) |member| {
-                switch (data.find(member) orelse continue) {
-                    .Field => |field| {
-                        try writer.print(
-                            \\@"{s}": {s},
-                            \\
-                        , .{ field.name, field.type });
-                    },
-                    else => continue,
-                }
-            }
+            try self.writeFields(data, writer);
         }
 
         // Phase 3 -> print functions
@@ -164,7 +150,7 @@ pub const Class = struct {
                                         \\) @This() {{
                                         \\  var t: [{d}]u8 align({d}) = undefined;
                                         \\  {s}(@ptrCast(&t),
-                                    , .{ self.size / 8, self.@"align", mangled });
+                                    , .{ @divExact(self.size, 8), self.@"align", mangled });
 
                                     for (constructor.arguments orelse &.{}, 0..) |_, i|
                                         try writer.print("_{d}, ", .{i});
@@ -205,95 +191,96 @@ pub const Class = struct {
 
                     else => continue,
                 }
-                // inline for (order) |orderIndex| {
-                // while (memberIterator.next()) |member| {
-                // const containerChild = data.find(member) orelse continue;
-                // if (containerChild != orderIndex[0]) continue;
-                // switch (containerChild) {
-                // .Method => |method| {
-                // inline methods have no labels, so we can't link
-                // if (method.@"inline") continue;
-                // const prefix = if (method.@"const") "" else "*";
-                // switch (orderIndex.@"1") {
-                // 0 => {
-                // switch (method.access) {
-                // .public => {
-                // if (method.virtual) {
-                // virtual = (virtual orelse 0) + 1;
-                // try writer.print(
-                // \\pub fn {s}(self: @This(),
-                // ,
-                // .{
-                // method.name,
-                // prefix,
-                // },
-                // );
-                // for (method.arguments orelse &.{}, 0..) |arg, i|
-                // try writer.print("@\"{d}\": {s},\n", .{ i, arg.type });
-                // try writer.print(
-                // \\) {s} {{
-                // \\    const vtable = @as([*]*const fn (@This(),
-                // ,
-                // .{method.returns},
-                // );
-                // for (method.arguments orelse &.{}) |arg|
-                // try writer.print("{s}, ", .{arg.type});
-                // try writer.print(
-                // \\) {s}, @alignCast(@ptrCast(self._vtable)));
-                // \\    const _{s} = vtable[{d}];
-                // \\    return _{s}(self,
-                // , .{ method.returns, method.name, (virtual orelse unreachable) - 1, method.name });
-                // for (method.arguments orelse &.{}, 0..) |_, i| {
-                // try writer.print("@\"{d}\", ", .{i});
-                // }
-                // try writer.print(
-                // \\);
-                // \\}}
-                // , .{});
-                // } else {
-                // try writer.print("pub const @\"{s}\" = @\"{s}\";\n", .{ method.name, method.mangled });
-                // try writer.print("extern \"c\" fn @\"{s}\"({s}@This(), \n", .{ method.mangled, prefix });
-                // for (method.arguments orelse &.{}) |arg|
-                // try writer.print("{s},\n", .{arg.type});
-                // try writer.print(") callconv(.c) {s};\n", .{method.returns});
-                // }
-                // },
-                // else => {
-                // if (method.virtual) virtual = (virtual orelse 0) + 1;
-                // },
-                // }
-                // },
-                // else => unreachable,
-                // }
-                // },
-                // .Field => |field| {
-                // try fields.append(gpa, field.id);
-                // },
-                // }
-                // },
-                // else => continue,
-                // }
-                // },
-                // .Typedef => |td| {
-                // const name = try namespacedType(td.type, data, gpa) orelse continue;
-                // defer gpa.free(name);
-                //
-                // try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, name });
-                // },
-                // else => continue,
-                // }
-                // }
             }
         }
 
-        // memberIterator = std.mem.splitScalar(u8, self.members, ' ');
-        // }
+        {
+            var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+            while (memberIterator.next()) |memberID| {
+                switch (data.find(memberID) orelse continue) {
+                    .Method => |method| {
+                        // inline methods have no labels, so we can't link
+                        if (method.@"inline") continue;
+                        if (method.access != .public) continue;
+                        const prefix = if (method.@"const") "const " else "";
+                        if (method.virtual) {
+                            try writer.print(
+                                \\pub fn {s}(self: *{s}@This(),
+                            , .{ method.name, prefix });
+                            for (method.arguments orelse &.{}, 0..) |arg, i| {
+                                try writer.print(
+                                    \\arg{d}: {s}, 
+                                , .{ i, arg.type });
+                            }
+                            try writer.print(
+                                \\) {s} {{
+                                \\    return self.{s}.{s}(self, 
+                            , .{ method.returns, vtableName, method.name });
+                            for (method.arguments orelse &.{}, 0..) |_, i| {
+                                try writer.print(
+                                    \\arg{d},
+                                , .{i});
+                            }
+                            try writer.print(
+                                \\);
+                                \\}}
+                                \\
+                            , .{});
+                        } else {
+                            try writer.print(
+                                \\extern "c" fn @"{s}" (*{s}@This(), 
+                            , .{ method.mangled, prefix });
+                            for (method.arguments orelse &.{}) |arg| {
+                                try writer.print("{s}, ", .{arg.type});
+                            }
+                            try writer.print(
+                                \\) {s};
+                                \\pub const @"{s}" = {s};
+                                \\
+                            , .{ method.returns, method.name, method.mangled });
+                        }
+                    },
+                    .Typedef => |td| {
+                        const name = try namespacedType(td.type, data, gpa) orelse continue;
+                        defer gpa.free(name);
+
+                        try writer.print("pub const @\"{s}\" = @\"{s}\"\n", .{ td.name, name });
+                    },
+                    else => continue,
+                }
+            }
+        }
 
         // if (virtual) |_| {
         // try writer.print(vtableName ++ ": *anyopaque,\n", .{});
         // }
 
         try writer.print("}};\nconst {s} = @\"{s}\";\n", .{ self.id, self.name });
+    }
+
+    /// prints out all of the fields of the class,
+    /// and the inherited members
+    pub fn writeFields(self: Class, data: TokenContainer, writer: *std.Io.Writer) !void {
+        var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
+        var privateIterator: u64 = 0;
+        while (memberIterator.next()) |memberId| {
+            switch (data.find(memberId) orelse continue) {
+                .Field => |f| {
+                    switch (f.access) {
+                        .public => {
+                            try writer.print("{s}: {s},\n", .{ f.name, f.type });
+                        },
+                        .protected, .private => {
+                            const size, const alignment =
+                                getTypeSize(f, data);
+                            try writer.print("_{d}: [{d}]u8 align({d}),\n", .{ privateIterator, size, alignment });
+                            privateIterator += 1;
+                        },
+                    }
+                },
+                else => continue,
+            }
+        }
     }
 
     /// Example:
@@ -303,8 +290,7 @@ pub const Class = struct {
     ///     int item;
     ///     virtual void function(void);
     /// };
-    /// ```
-    /// and an ample `data`, will lead to the following being written
+    /// ``` and an ample `data`, will lead to the following being written
     /// ```
     /// function: *const fn (void) void,
     /// ```
@@ -755,7 +741,12 @@ pub const ArrayType = struct {
     pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
         _ = gpa;
         _ = data;
-        try writer.print("const {s} = ?[*]{s}; // arr type\n", .{ self.id, self.type });
+        const size = self.max - self.min + 1;
+        try writer.print("const {s} = ?[{d}]{s}; // arr type\n", .{
+            self.id,
+            size,
+            self.type,
+        });
     }
 };
 
@@ -796,6 +787,15 @@ pub const Function = struct {
             .{ self.returns, self.name, self.mangled },
         );
     }
+};
+
+pub const Variable = struct {
+    id: []u8,
+    name: []u8,
+    type: []u8,
+    access: Access,
+    static: bool,
+    mangled: []u8,
 };
 
 pub const Argument = struct {
@@ -957,4 +957,90 @@ pub fn deinitToken(comptime T: type) fn (*T, std.mem.Allocator) void {
         }
     }).function;
     return fun;
+}
+
+pub const TokenUnion: type = blk: {
+    const types = std.enums.values(@"type");
+    var typeNames: [types.len][]const u8 = undefined;
+    var fieldTypes: [types.len]type = undefined;
+    var fieldAttrs = [1]std.builtin.Type.UnionField.Attributes{.{ .@"align" = null }} ** types.len;
+    for (types, 0..) |t, i| {
+        typeNames[i] = @tagName(t);
+        fieldTypes[i] = structType(t);
+    }
+    break :blk @Union(.auto, @"type", &typeNames, &fieldTypes, &fieldAttrs);
+};
+
+/// Will only return union members
+///     - .Class,
+///     - .Struct,
+///     - .ArrayType,
+///     - .CvQualifiedType,
+///     - .FundamentalType,
+///     - .PointerType,
+///     - .ReferenceType,
+fn getUnderlyingType(token: anytype, data: TokenContainer) TokenUnion {
+    const T = @TypeOf(token);
+    const basename = comptime util.getBaseName(T);
+
+    inline for (comptime std.enums.values(@"type")) |t| {
+        if (comptime std.mem.eql(u8, @tagName(t), basename)) {
+            switch (t) {
+                inline .Class,
+                .Struct,
+                .FundamentalType,
+                .ArrayType,
+                .PointerType,
+                .ReferenceType,
+                => return @unionInit(TokenUnion, @tagName(t), token),
+
+                inline .CvQualifiedType,
+                .Variable,
+                .Typedef,
+                .Field,
+                .Enumeration,
+                => {
+                    return switch (data.find(token.type) orelse unreachable) {
+                        inline else => |v| getUnderlyingType(v, data),
+                    };
+                },
+
+                else => @panic("Invalid type! " ++ @tagName(t) ++ " has no underlying type!")
+            }
+        }
+    } else @compileError("Token " ++ @typeName(T) ++ " is invalid type!");
+
+    if (@hasField(T, "type")) {}
+}
+
+/// returns size in bytes, and alignment in bytes
+fn getTypeSize(token: anytype, data: TokenContainer) @Tuple(&.{ u64, u64 }) {
+    const underlying = getUnderlyingType(token, data);
+    if (@TypeOf(token) == ArrayType) {
+        const underlyingInfo = getTypeSize(token.type, data);
+        return .{
+            underlyingInfo[0] * (token.max - token.min + 1),
+            underlyingInfo[1],
+        };
+    }
+
+    const @"align" = switch (underlying) {
+        inline .PointerType,
+        .ReferenceType,
+        .Class,
+        .Struct,
+        .FundamentalType,
+        => |v| v.@"align",
+        else => unreachable,
+    };
+    const size = switch (underlying) {
+        inline .PointerType,
+        .ReferenceType,
+        .Class,
+        .Struct,
+        .FundamentalType,
+        => |v| v.size / 8,
+        else => unreachable,
+    };
+    return .{ size, @"align" };
 }

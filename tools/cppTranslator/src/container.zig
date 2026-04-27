@@ -2,6 +2,7 @@ const std = @import("std");
 const token = @import("token.zig");
 const util = @import("util.zig");
 const TokenContainer = @This();
+const TokenUnion = token.TokenUnion;
 
 data: Data,
 
@@ -27,23 +28,10 @@ pub const Data: type = blk: {
     );
 };
 
-pub const TokenUnion: type = blk: {
-    const types = std.enums.values(token.type);
-    var typeNames: [types.len][]const u8 = undefined;
-    var fieldTypes: [types.len]type = undefined;
-    var fieldAttrs = [1]std.builtin.Type.UnionField.Attributes{.{ .@"align" = null }} ** types.len;
-    for (types, 0..) |t, i| {
-        typeNames[i] = @tagName(t);
-        fieldTypes[i] = token.structType(t);
-    }
-    break :blk @Union(.auto, token.type, &typeNames, &fieldTypes, &fieldAttrs);
-};
-
 pub fn init() TokenContainer {
     var self: TokenContainer = undefined;
-    inline for (@typeInfo(Data).@"struct".fields) |value| {
+    inline for (@typeInfo(Data).@"struct".fields) |value|
         @field(self.data, value.name) = .empty;
-    }
     return self;
 }
 
