@@ -13,7 +13,7 @@ pub const Data: type = blk: {
     var typeTypes: [count]type = undefined;
     for (std.enums.values(token.type), 0..) |value, i| {
         typeNames[i] = @tagName(value);
-        typeTypes[i] = std.array_hash_map.String(token.structType(value));
+        typeTypes[i] = std.array_hash_map.String(token.StructType(value));
         typeAttrs[i] = std.builtin.Type.StructField.Attributes{
             .@"align" = null,
             .@"comptime" = false,
@@ -35,10 +35,10 @@ pub fn init() TokenContainer {
     return self;
 }
 
-pub fn get(self: @This(), comptime t: token.type) std.array_hash_map.String(token.structType(t)) {
+pub fn get(self: @This(), comptime t: token.type) std.array_hash_map.String(token.StructType(t)) {
     return @field(self.data, @tagName(t));
 }
-pub fn appendExplicit(self: *@This(), gpa: std.mem.Allocator, comptime t: type, value: token.structType(t)) !void {
+pub fn appendExplicit(self: *@This(), gpa: std.mem.Allocator, comptime t: type, value: token.StructType(t)) !void {
     return @field(self.data, @tagName(t)).append(gpa, value);
 }
 

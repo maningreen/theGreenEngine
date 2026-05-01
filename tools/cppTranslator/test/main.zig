@@ -7,6 +7,9 @@ export fn callstack() callconv(.c) void {
 
 pub fn main() !void {
     var t = Testing.Foo.@"Test2".init0();
+    const sum = Testing.Foo.sum(30);
     defer t.deinit();
-    _ = t._vtable.@"testingFunction"(&t, 30);
+    t.testingFunction(30);
+    
+    std.log.debug("sum: {d}", .{ sum });
 }

@@ -63,7 +63,7 @@ pub const Method = struct {
     id: []u8,
     returns: []u8,
     // context: []u8,
-    arguments: ?[]Argument = null,
+    arguments: []Argument = &.{},
     access: Access,
     virtual: bool,
     line: u64,
@@ -78,11 +78,18 @@ pub const Class = struct {
     context: []u8,
     size: u64,
     @"align": u64,
-    bases: ?[]u8 = null,
+    bases: []Base = &.{},
     incomplete: bool = false,
 
     const vtableName = "_vtable";
     const vtableType = "Vtable";
+
+    const Base = struct {
+        type: []u8,
+        access: Access,
+        virtual: bool,
+        offset: u64,
+    };
 
     pub fn write(self: Class, gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
         if (self.incomplete) return;
@@ -101,10 +108,12 @@ pub const Class = struct {
         // Stage 1 -> generate a vtable.
         try writer.print(
             \\const {s} = extern struct {{
+            \\
         , .{vtableType});
         const virtualItems: bool = try writeVtableFields(self, gpa, data, writer);
         try writer.print(
             \\}};
+            \\
         , .{});
 
         // Phase 2 -> print fields
@@ -140,7 +149,7 @@ pub const Class = struct {
                                         \\pub fn init{d}(
                                     , .{initIterator});
 
-                                    for (constructor.arguments orelse &.{}, 0..) |arg, i| {
+                                    for (constructor.arguments, 0..) |arg, i| {
                                         const name = try namespacedType(arg.type, data, gpa) orelse continue;
                                         defer gpa.free(name);
                                         try writer.print("_{d}: {s}, ", .{ i, name });
@@ -152,7 +161,7 @@ pub const Class = struct {
                                         \\  {s}(@ptrCast(&t),
                                     , .{ @divExact(self.size, 8), self.@"align", mangled });
 
-                                    for (constructor.arguments orelse &.{}, 0..) |_, i|
+                                    for (constructor.arguments, 0..) |_, i|
                                         try writer.print("_{d}, ", .{i});
 
                                     try writer.print(
@@ -163,7 +172,7 @@ pub const Class = struct {
                                     , .{});
 
                                     try writer.print("extern \"c\" fn {s}(*@This(), ", .{mangled});
-                                    for (constructor.arguments orelse &.{}) |arg|
+                                    for (constructor.arguments) |arg|
                                         try writer.print("{s}, ", .{arg.type});
                                     try writer.print(") callconv(.c) void;\n", .{});
                                 }
@@ -182,6 +191,7 @@ pub const Class = struct {
                                 \\        self.{s}.destruct;
                                 \\    completeDestructor(self);
                                 \\}}
+                                \\
                             , .{vtableName});
                         } else {
                             // write a dummy deinit
@@ -207,7 +217,7 @@ pub const Class = struct {
                             try writer.print(
                                 \\pub fn {s}(self: *{s}@This(),
                             , .{ method.name, prefix });
-                            for (method.arguments orelse &.{}, 0..) |arg, i| {
+                            for (method.arguments, 0..) |arg, i| {
                                 try writer.print(
                                     \\arg{d}: {s}, 
                                 , .{ i, arg.type });
@@ -216,7 +226,7 @@ pub const Class = struct {
                                 \\) {s} {{
                                 \\    return self.{s}.{s}(self, 
                             , .{ method.returns, vtableName, method.name });
-                            for (method.arguments orelse &.{}, 0..) |_, i| {
+                            for (method.arguments, 0..) |_, i| {
                                 try writer.print(
                                     \\arg{d},
                                 , .{i});
@@ -230,7 +240,7 @@ pub const Class = struct {
                             try writer.print(
                                 \\extern "c" fn @"{s}" (*{s}@This(), 
                             , .{ method.mangled, prefix });
-                            for (method.arguments orelse &.{}) |arg| {
+                            for (method.arguments) |arg| {
                                 try writer.print("{s}, ", .{arg.type});
                             }
                             try writer.print(
@@ -323,7 +333,7 @@ pub const Class = struct {
                         constStr,
                         self.name,
                     });
-                    for (m.arguments orelse &.{}) |arg|
+                    for (m.arguments) |arg|
                         try writer.print("{s}, ", .{arg.type});
 
                     try writer.print(
@@ -442,7 +452,7 @@ pub const Constructor = struct {
     id: []u8,
     context: []u8,
     access: Access,
-    arguments: ?[]Argument = null,
+    arguments: []Argument = &.{},
     @"inline": bool = false,
 
     /// user owns returned memory
@@ -499,7 +509,7 @@ pub const Constructor = struct {
             try mangledName.writer.print("{d}{s}", .{ parent.len, parent });
         }
         try mangledName.writer.print("C{d}E", .{constructorIndex + 1});
-        for (self.arguments orelse &.{}) |arg| {
+        for (self.arguments) |arg| {
             var t: []const u8 = arg.type;
             while (true) {
                 switch ((data.find(t) orelse unreachable)) {
@@ -623,9 +633,8 @@ pub const Destructor = struct {
         }
 
         try mangledName.writer.print(manglePrefix, .{});
-        if (parents.items.len >= 1) {
+        if (parents.items.len >= 1)
             try mangledName.writer.print("N", .{});
-        }
 
         const ltEscape = "<";
         const gtEscape = ">";
@@ -688,7 +697,7 @@ pub const Namespace = struct {
         inline for (members) |member| {
             const values = data.get(member);
             for (values.values()) |value| {
-                if (!@hasField(structType(member), "context")) {
+                if (!@hasField(StructType(member), "context")) {
                     if (selfM == null) {
                         try value.write(gpa, data, writer);
                     }
@@ -767,7 +776,7 @@ pub const Function = struct {
     returns: []u8,
     context: []u8,
     mangled: []u8,
-    arguments: ?[]Argument = null,
+    arguments: []Argument = &.{},
     pub fn write(self: @This(), gpa: std.mem.Allocator, data: TokenContainer, writer: *std.Io.Writer) !void {
         _ = gpa;
         _ = data;
@@ -776,7 +785,7 @@ pub const Function = struct {
         ,
             .{self.mangled},
         );
-        for (self.arguments orelse &.{}) |arg| {
+        for (self.arguments) |arg| {
             try writer.print("{s}, ", .{arg.type});
         }
         try writer.print(
@@ -846,13 +855,13 @@ pub fn setValue(
                         @field(m, field.name) = t.x;
                     } else @field(m, field.name) = null;
                 },
-                else => @panic("Reached " ++ @typeName(field.type) ++ " (Not implimented)"),
+                else => return,
             }
         }
     }
 }
 
-pub fn structType(comptime t: @"type") type {
+pub fn StructType(comptime t: @"type") type {
     return @field(@This(), @tagName(t));
 }
 
@@ -966,7 +975,7 @@ pub const TokenUnion: type = blk: {
     var fieldAttrs = [1]std.builtin.Type.UnionField.Attributes{.{ .@"align" = null }} ** types.len;
     for (types, 0..) |t, i| {
         typeNames[i] = @tagName(t);
-        fieldTypes[i] = structType(t);
+        fieldTypes[i] = StructType(t);
     }
     break :blk @Union(.auto, @"type", &typeNames, &fieldTypes, &fieldAttrs);
 };
@@ -1005,7 +1014,7 @@ fn getUnderlyingType(token: anytype, data: TokenContainer) TokenUnion {
                     };
                 },
 
-                else => @panic("Invalid type! " ++ @tagName(t) ++ " has no underlying type!")
+                else => @panic("Invalid type! " ++ @tagName(t) ++ " has no underlying type!"),
             }
         }
     } else @compileError("Token " ++ @typeName(T) ++ " is invalid type!");

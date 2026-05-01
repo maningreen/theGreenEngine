@@ -19,7 +19,6 @@ pub fn isFundamental(comptime T: type) bool {
         .noreturn,
         .frame,
         .@"anyframe",
-        .undefined,
         => true,
         else => false,
     };
@@ -29,25 +28,25 @@ pub fn ensure(x: bool) error{False}!void {
     if (!x) return error.False;
 }
 
-pub fn getBaseName(comptime T: type) []const u8 {
-    comptime {
+pub fn getBaseName(comptime T: type) [:0]const u8 {
+    const returnval = comptime blk: {
         const full_name = @typeName(T);
         // Find the last index of '.'
         if (std.mem.lastIndexOfScalar(u8, full_name, '.')) |index| {
-            return full_name[index + 1 ..];
+            break :blk full_name[index + 1 ..];
         }
-        return full_name;
-    }
+        break :blk full_name;
+    };
+    return returnval;
 }
 
 pub fn tagToFieldName(comptime T: type) [:0]const u8 {
-    comptime {
+    return comptime blk: {
         const basename = getBaseName(T);
         const suffix = "s";
 
         // types have to have at least one character
         const lowercaseFirst = std.ascii.toLower(basename[0]);
-        const final = lowercaseFirst ++ basename[1..] ++ suffix;
-        return final;
-    }
+        break :blk lowercaseFirst ++ basename[1..] ++ suffix;
+    };
 }

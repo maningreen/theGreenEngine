@@ -29,27 +29,61 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
     return contents;
 }
 
+fn isInFieldArray(comptime T: type, itemType: []const u8) ?std.meta.FieldEnum(T) {
+    comptime std.debug.assert(@typeInfo(T) == .@"struct");
+    inline for (@typeInfo(T).@"struct".fields) |field| {
+        std.log.info(std.fmt.comptimePrint("{s}, {s}", .{ field.name, @typeName(field.type) }), .{});
+        if (@typeInfo(field.type) != .pointer) continue;
+
+        // our case
+        const name: [:0]const u8 = comptime util.getBaseName(@typeInfo(field.type).pointer.child);
+        const cmp = std.mem.eql(u8, name, itemType);
+        std.log.debug("is {s} in field array: {s}, {} ", .{
+            itemType,
+            name,
+            cmp,
+        });
+        if (cmp) return comptime (std.meta.stringToEnum(std.meta.FieldEnum(T), field.name) orelse unreachable);
+    }
+    return null;
+}
+
+fn fieldInfo(comptime T: type, comptime fieldTag: std.meta.FieldEnum(T)) std.builtin.Type.StructField {
+    if (@typeInfo(T) != .@"struct") @compileError(@typeName(T) ++ " is not of type struct!");
+
+    const tagname = comptime @tagName(fieldTag);
+
+    for (@typeInfo(T).@"struct".fields) |field| {
+        @setEvalBranchQuota(5000);
+        if (comptime std.mem.eql(u8, field.name, tagname)) {
+            return field;
+        }
+    }
+    @compileError("fieldTag of type " ++ @tagName(T) ++ " does not exist in the struct!");
+}
+
 /// returned memory is owned by caller.
 fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
     var xmlReader = std.Io.Reader.fixed(input);
 
-    var streaming_reader: xml.Reader.Streaming = .init(gpa, &xmlReader, .{});
-    defer streaming_reader.deinit();
+    var streamingReader: xml.Reader.Streaming = .init(gpa, &xmlReader, .{});
+    defer streamingReader.deinit();
 
-    const reader = &streaming_reader.interface;
+    const reader = &streamingReader.interface;
 
     var container = TokenContainer.init();
     errdefer container.deinit(gpa);
 
     var state: ?token.TokenUnion = null;
     while (true) {
+        std.debug.print("state: {s}\n", .{if (state) |s| @tagName(s) else "null"});
         const node = reader.read() catch |err| switch (err) {
             error.MalformedXml => {
                 const loc = reader.errorLocation();
                 std.log.err("{}:{}: {}", .{ loc.line, loc.column, reader.errorCode() });
                 return error.MalformedXml;
             },
-            else => |other| return other,
+            else => return err,
         };
         switch (node) {
             .eof => {
@@ -58,39 +92,48 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
             .element_start => {
                 const element_name = reader.elementNameNs();
                 const t = token.getItem(element_name.local);
+                std.log.debug("Element started \"{s}\"", .{element_name.local});
 
-                if (std.mem.eql(u8, element_name.local, util.getBaseName(token.Argument))) {
-                    if (state != null) switch (state.?) {
+                if (state != null) {
+                    switch (state.?) {
                         inline else => |*s| {
-                            if (@hasField(@TypeOf(s.*), "arguments")) {
-                                if (s.arguments) |*args| {
-                                    args.* = try gpa.realloc(args.*, args.len + 1);
-                                    var arg: token.Argument = undefined;
-                                    for (0..reader.attributeCount()) |i| {
-                                        const attribute_name = reader.attributeNameNs(i);
-                                        const value = try reader.attributeValue(i);
-                                        try token.setValue(token.Argument, &arg, gpa, attribute_name.local, value);
-                                    }
-                                    args.*[args.len - 1] = arg;
-                                } else {
-                                    s.arguments = try gpa.alloc(token.Argument, 1);
-                                    var arg: token.Argument = undefined;
-                                    for (0..reader.attributeCount()) |i| {
-                                        const attribute_name = reader.attributeNameNs(i);
-                                        const value = try reader.attributeValue(i);
-                                        try token.setValue(token.Argument, &arg, gpa, attribute_name.local, value);
-                                    }
-                                    s.arguments.?[s.arguments.?.len - 1] = arg;
+                            const T = @TypeOf(s.*);
+                            std.log.debug("State is valid, and {s}", .{@typeName(T)});
+                            if (isInFieldArray(T, element_name.local)) |v| {
+                                switch (v) {
+                                    inline else => |tag| {
+                                        const info = comptime fieldInfo(T, tag);
+                                        switch (@typeInfo(info.type)) {
+                                            .pointer => |p| {
+                                                if (@typeInfo(p.child) != .@"struct") {
+                                                    std.log.info("{} is not a struct!", .{p.child});
+                                                    continue;
+                                                }
+                                                const args = &@field(s.*, info.name);
+                                                std.log.debug("Appending {}!\n", .{tag});
+                                                args.* = try gpa.realloc(args.*, args.len + 1);
+                                                const TPrime = p.child;
+                                                var arg: TPrime = undefined;
+                                                for (0..reader.attributeCount()) |i| {
+                                                    const attribute_name = reader.attributeNameNs(i);
+                                                    const value = try reader.attributeValue(i);
+                                                    try token.setValue(TPrime, &arg, gpa, attribute_name.local, value);
+                                                }
+                                                args.*[args.len - 1] = arg;
+                                            },
+                                            else => continue,
+                                        }
+                                    },
                                 }
+                                continue;
                             }
-                            continue;
                         },
-                    };
+                    }
+                    continue;
                 }
-                if (state != null) continue;
                 switch (t orelse continue) {
                     inline else => |v| {
-                        const T = token.structType(v);
+                        const T = token.StructType(v);
                         var m: T = undefined;
                         inline for (@typeInfo(T).@"struct".fields) |field| {
                             if (field.defaultValue()) |d| @field(m, field.name) = d;
@@ -98,15 +141,19 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
                         for (0..reader.attributeCount()) |i| {
                             const attribute_name = reader.attributeNameNs(i);
                             const value = try reader.attributeValue(i);
-                            try token.setValue(token.structType(v), &m, gpa, attribute_name.local, value);
+                            try token.setValue(comptime token.StructType(v), &m, gpa, attribute_name.local, value);
                         }
                         state = @unionInit(token.TokenUnion, util.getBaseName(T), m);
                     },
                 }
             },
             .element_end => {
-                if (std.mem.eql(u8, reader.elementName(), util.getBaseName(token.Argument)))
-                    continue;
+                // if (state) |s| switch (s) {
+                    // inline else => |v| {
+                        // if (isInFieldArray(@TypeOf(v), reader.elementName())) |_|
+                            // continue;
+                    // },
+                // };
 
                 switch (state orelse continue) {
                     inline else => |v| try container.append(gpa, v),
