@@ -31,19 +31,18 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
 
 fn isInFieldArray(comptime T: type, itemType: []const u8) ?std.meta.FieldEnum(T) {
     comptime std.debug.assert(@typeInfo(T) == .@"struct");
-    inline for (@typeInfo(T).@"struct".fields) |field| {
-        std.log.info(std.fmt.comptimePrint("{s}, {s}", .{ field.name, @typeName(field.type) }), .{});
-        if (@typeInfo(field.type) != .pointer) continue;
 
-        // our case
-        const name: [:0]const u8 = comptime util.getBaseName(@typeInfo(field.type).pointer.child);
-        const cmp = std.mem.eql(u8, name, itemType);
-        std.log.debug("is {s} in field array: {s}, {} ", .{
-            itemType,
-            name,
-            cmp,
-        });
-        if (cmp) return comptime (std.meta.stringToEnum(std.meta.FieldEnum(T), field.name) orelse unreachable);
+    inline for (@typeInfo(T).@"struct".fields, std.enums.values(std.meta.FieldEnum(T))) |field, e| {
+        const info = @typeInfo(field.type);
+        switch (info) {
+            .pointer => |ptr| {
+                if (ptr.size != .slice) continue;
+                const childName = comptime util.getBaseName(ptr.child);
+                if (std.mem.eql(u8, childName, itemType))
+                    return e;
+            },
+            else => continue,
+        }
     }
     return null;
 }
