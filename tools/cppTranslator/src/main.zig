@@ -99,6 +99,7 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
                             const T = @TypeOf(s.*);
                             std.log.debug("State is valid, and {s}", .{@typeName(T)});
                             if (isInFieldArray(T, element_name.local)) |v| {
+                                std.log.debug("Appending {}!", .{v});
                                 switch (v) {
                                     inline else => |tag| {
                                         const info = comptime fieldInfo(T, tag);
@@ -148,10 +149,10 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
             },
             .element_end => {
                 // if (state) |s| switch (s) {
-                    // inline else => |v| {
-                        // if (isInFieldArray(@TypeOf(v), reader.elementName())) |_|
-                            // continue;
-                    // },
+                // inline else => |v| {
+                // if (isInFieldArray(@TypeOf(v), reader.elementName())) |_|
+                // continue;
+                // },
                 // };
 
                 switch (state orelse continue) {
