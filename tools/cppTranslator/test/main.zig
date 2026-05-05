@@ -12,4 +12,8 @@ pub fn main() !void {
     t.testingFunction(30);
     
     std.log.debug("sum: {d}", .{ sum });
+    inline for (@typeInfo(@TypeOf(t)).@"struct".fields) |field| {
+        const fieldValue = @field(t, field.name);
+        std.log.debug("t.{s}: {any}", .{ field.name, fieldValue });
+    }
 }

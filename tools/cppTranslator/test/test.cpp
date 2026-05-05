@@ -15,7 +15,7 @@ Test<T>::Test() {}
 template <typename T>
 Test<T>::Test(int i) {
     std::cout << "SDLF:KSF:L\n";
-    std::cout << "test alt\n";
+    std::cout << "test alt\n" << i << '\n';
 }
 
 template <typename T>

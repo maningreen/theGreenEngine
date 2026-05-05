@@ -124,7 +124,7 @@ pub const Class = struct {
                     vtableType,
                 });
             }
-            try self.writeFields(data, writer);
+            try self.writeFields(data, gpa, writer);
         }
 
         // Phase 3 -> print functions
@@ -159,7 +159,7 @@ pub const Class = struct {
                                         \\) @This() {{
                                         \\  var t: [{d}]u8 align({d}) = undefined;
                                         \\  {s}(@ptrCast(&t),
-                                    , .{ @divExact(self.size, 8), self.@"align", mangled });
+                                    , .{ @divExact(self.size, 8), self.@"align" / 8, mangled });
 
                                     for (constructor.arguments, 0..) |_, i|
                                         try writer.print("_{d}, ", .{i});
@@ -270,25 +270,58 @@ pub const Class = struct {
 
     /// prints out all of the fields of the class,
     /// and the inherited members
-    pub fn writeFields(self: Class, data: TokenContainer, writer: *std.Io.Writer) !void {
+    /// does *not* print _vtable
+    pub fn writeFields(self: Class, data: TokenContainer, gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
         var memberIterator = std.mem.splitScalar(u8, self.members, ' ');
         var privateIterator: u64 = 0;
-        while (memberIterator.next()) |memberId| {
-            switch (data.find(memberId) orelse continue) {
-                .Field => |f| {
-                    switch (f.access) {
-                        .public => {
-                            try writer.print("{s}: {s},\n", .{ f.name, f.type });
-                        },
-                        .protected, .private => {
-                            const size, const alignment =
-                                getTypeSize(f, data);
-                            try writer.print("_{d}: [{d}]u8 align({d}),\n", .{ privateIterator, size, alignment });
+        for (self.bases) |baseID| {
+            const base = data.find(baseID.type) orelse continue;
+            switch (base) {
+                .Class, .Struct => |baseClass| {
+                    switch (baseID.access) {
+                        .private, .protected => {
+                            try writer.print("_{d}: [{d}]u8 align({d}),\n", .{ privateIterator, baseClass.size, baseClass.@"align" / 8 });
                             privateIterator += 1;
+                        },
+                        .public => {
+                            try baseClass.writeFields(data, gpa, writer);
                         },
                     }
                 },
+                else => unreachable,
+            }
+        }
+
+        var fieldList = std.ArrayList(Field).empty;
+        defer fieldList.deinit(gpa);
+        while (memberIterator.next()) |memberid| {
+            switch (data.find(memberid) orelse continue) {
+                .Field => |f| {
+                    try fieldList.append(gpa, f);
+                },
                 else => continue,
+            }
+        }
+
+        const cmp = struct {
+            pub fn lt(_: void, a: Field, b: Field) bool {
+                return a.offset < b.offset;
+            }
+        }.lt;
+
+        std.mem.sort(Field, fieldList.items, void{}, cmp);
+
+        for (fieldList.items) |field| {
+            switch (field.access) {
+                .public => {
+                    try writer.print("{s}: {s},\n", .{ field.name, field.type });
+                },
+                .protected, .private => {
+                    const size, const alignment =
+                        getTypeSize(field, data);
+                    try writer.print("_{d}: [{d}]u8 align({d}),\n", .{ privateIterator, size, alignment });
+                    privateIterator += 1;
+                },
             }
         }
     }

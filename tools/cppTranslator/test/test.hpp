@@ -6,8 +6,6 @@ namespace Foo {
 
 template <typename T>
 class Test {
-    private:
-        int privateTest;
   public:
     virtual ~Test();
     virtual void testingFunction(double delta);
