@@ -33,3 +33,5 @@ float sum(float a, float b);
 };  // namespace Foo
 
 float sum(float a, float b);
+
+float bum();

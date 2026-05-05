@@ -19,13 +19,27 @@ fn getAST(io: std.Io, gpa: std.mem.Allocator, path: []const u8) ![]u8 {
     var readBuf: [1028]u8 = undefined;
     var stdin = file.reader(io, &readBuf);
     var contents: []u8 = try gpa.alloc(u8, try file.length(io));
+    errdefer gpa.free(contents);
     while (true) {
         const line = try stdin.interface.takeDelimiter('\n') orelse break;
         contents = try gpa.realloc(contents, contents.len + line.len + 1);
         std.mem.copyForwards(u8, contents[contents.len - (line.len + 1) ..], line);
         contents[contents.len - 1] = '\n';
     }
-    _ = try child.wait(io);
+    const c = try child.wait(io);
+    switch (c) {
+        .stopped, .signal => |v| {
+            std.log.info("return code: {any}", .{v});
+            return error.Signal;
+        },
+        .exited => |e| {
+            if (e != 0) {
+                std.log.info("Return code: {d}", .{e});
+                return error.ExitCode;
+            }
+        },
+        .unknown => return error.Unknown,
+    }
     return contents;
 }
 
@@ -148,12 +162,12 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
                 }
             },
             .element_end => {
-                // if (state) |s| switch (s) {
-                // inline else => |v| {
-                // if (isInFieldArray(@TypeOf(v), reader.elementName())) |_|
-                // continue;
-                // },
-                // };
+                if (state) |s| switch (s) {
+                    inline else => |v| {
+                        if (isInFieldArray(@TypeOf(v), reader.elementName())) |_|
+                            continue;
+                    },
+                };
 
                 switch (state orelse continue) {
                     inline else => |v| try container.append(gpa, v),
@@ -170,6 +184,10 @@ fn parseTokens(gpa: std.mem.Allocator, input: []const u8) !TokenContainer {
 fn printFile(io: std.Io, gpa: std.mem.Allocator, out: *std.Io.Writer, file: []const u8) !void {
     const ret = try getAST(io, gpa, file);
     defer gpa.free(ret);
+    if (ret.len <= 2) {
+        try out.print("", .{});
+        return;
+    }
     var container = try parseTokens(gpa, ret);
     defer container.deinit(gpa);
     try token.Namespace.write(null, gpa, container, out);

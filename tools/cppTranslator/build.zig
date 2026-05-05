@@ -50,13 +50,13 @@ pub fn build(b: *std.Build) void {
 
     const runTool = b.addRunArtifact(exe);
 
-    runTool.addArgs(&.{"test/test.hpp"});
+    runTool.addFileArg(b.path("test/test.hpp"));
 
     runTestMod.addImport("testing", b.createModule(.{
         .link_libcpp = true,
         .optimize = optimize,
         .target = target,
-        .root_source_file = runTool.captureStdOut(.{ .basename = "testing.zig" }),
+        .root_source_file = runTool.captureStdOut(.{.basename = "testing.zig"}),
     }));
 
     const testExe = b.addExecutable(.{

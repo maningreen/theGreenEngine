@@ -925,7 +925,7 @@ pub fn namespacedType(id: []const u8, data: TokenContainer, gpa: std.mem.Allocat
 
     while (data.find(parent)) |grandparent| {
         switch (grandparent) {
-            inline .Class, .Struct => |parentVal| {
+            .Class, .Struct => |parentVal| {
                 parent = parentVal.context;
                 try parents.append(gpa, try std.fmt.allocPrint(gpa, fmt, .{parentVal.name}));
             },
@@ -946,6 +946,10 @@ pub fn namespacedType(id: []const u8, data: TokenContainer, gpa: std.mem.Allocat
 }
 
 /// Given a type, creates a `deinit` function for the type.
+/// which can be called like such
+/// ```zig
+/// deinitToken(token.Class)(&myClass, gpa);
+/// ```
 pub fn deinitToken(comptime T: type) fn (*T, std.mem.Allocator) void {
     const fun = (struct {
         fn function(self: *T, gpa: std.mem.Allocator) void {
@@ -1014,13 +1018,13 @@ pub const TokenUnion: type = blk: {
 };
 
 /// Will only return union members
-///     - .Class,
-///     - .Struct,
-///     - .ArrayType,
-///     - .CvQualifiedType,
-///     - .FundamentalType,
-///     - .PointerType,
-///     - .ReferenceType,
+///     - `.Class`,
+///     - `.Struct`,
+///     - `.ArrayType`,
+///     - `.CvQualifiedType`,
+///     - `.FundamentalType`,
+///     - `.PointerType`,
+///     - `.ReferenceType`,
 fn getUnderlyingType(token: anytype, data: TokenContainer) TokenUnion {
     const T = @TypeOf(token);
     const basename = comptime util.getBaseName(T);
